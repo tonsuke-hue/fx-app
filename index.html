@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- スマホのホーム画面追加（PWA風フルスクリーン起動）用メタタグ -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FXカレンダー">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#ffffff">
+  <title>FX Calendar - 損益カレンダー＆推移グラフ・タグ分析</title>
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Google Fonts: Inter & Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans JP"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(18px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.18s ease-out forwards;
+    }
+    .animate-slide-up {
+      animation: slideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen pb-24 sm:pb-12">
+
+  <!-- ==================== ヘッダー ==================== -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
+      <!-- ロゴ -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-sm shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+        </div>
+        <div class="truncate">
+          <h1 class="text-base font-extrabold tracking-tight text-slate-900 leading-tight">FX Calendar</h1>
+          <p class="text-[10px] font-medium text-slate-400 leading-none">損益管理・推移・タグ分析</p>
+        </div>
+      </div>
+
+      <!-- PC向け上部ナビゲーション -->
+      <nav class="hidden sm:flex items-center bg-slate-100 p-1 rounded-xl">
+        <button onclick="switchTab('calendar')" id="nav-pc-calendar" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">カレンダー</button>
+        <button onclick="switchTab('chart')" id="nav-pc-chart" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">推移グラフ</button>
+        <button onclick="switchTab('analytics')" id="nav-pc-analytics" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">タグ分析</button>
+        <button onclick="switchTab('settings')" id="nav-pc-settings" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">設定・データ</button>
+      </nav>
+
+      <!-- ＋記録ボタン -->
+      <button onclick="openTradeModal(null, state.selectedDateStr)" class="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-all shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span>記録</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== メインコンテンツ ==================== -->
+  <main class="max-w-3xl mx-auto px-3 sm:px-4 pt-4 space-y-4">
+
+    <!-- ########## タブ1: カレンダー画面 ########## -->
+    <section id="view-calendar" class="space-y-4">
+
+      <!-- 月切り替えバー -->
+      <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-2xl shadow-xs border border-slate-200/80">
+        <button onclick="changeMonth(-1)" class="p-2 -ml-2 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-600 transition-colors" aria-label="前月">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-2.5">
+          <h2 id="calendar-month-label" class="text-lg font-extrabold text-slate-900 tracking-tight">2026年 11月</h2>
+          <button onclick="goToCurrentMonth()" id="btn-this-month" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors">
+            今月
+          </button>
+        </div>
+
+        <button onclick="changeMonth(1)" class="p-2 -mr-2 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-600 transition-colors" aria-label="翌月">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- 月間サマリーカード -->
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3.5 border-b border-slate-100">
+          <div>
+            <p class="text-[11px] font-bold text-slate-400 tracking-wider mb-1">月間合計損益</p>
+            <div class="flex items-baseline gap-2.5 flex-wrap">
+              <span id="summary-total-pnl" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">¥0</span>
+              <span id="summary-total-pips" class="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 hidden">0 pips</span>
+            </div>
+          </div>
+          <div class="text-left sm:text-right">
+            <span id="summary-record-badge" class="inline-flex items-center gap-1.5 text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl">
+              0勝 0敗（計0回）
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 pt-3.5 text-center">
+          <div class="bg-slate-50 rounded-xl p-2.5">
+            <p class="text-[11px] font-semibold text-slate-400 mb-0.5">月間勝率</p>
+            <p id="summary-win-rate" class="text-base sm:text-lg font-extrabold text-slate-800">0.0%</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-2.5">
+            <p class="text-[11px] font-semibold text-slate-400 mb-0.5">平均損益</p>
+            <p id="summary-avg-pnl" class="text-base sm:text-lg font-extrabold text-slate-800">¥0</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-2.5">
+            <p class="text-[11px] font-semibold text-slate-400 mb-0.5">取引日数</p>
+            <p id="summary-active-days" class="text-base sm:text-lg font-extrabold text-slate-800">0日</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- カレンダーグリッド -->
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+        <!-- 曜日ヘッダー -->
+        <div class="grid grid-cols-7 border-b border-slate-100 bg-slate-50/80 text-center py-2 text-[11px] font-bold">
+          <div class="text-rose-500">日</div>
+          <div class="text-slate-500">月</div>
+          <div class="text-slate-500">火</div>
+          <div class="text-slate-500">水</div>
+          <div class="text-slate-500">木</div>
+          <div class="text-slate-500">金</div>
+          <div class="text-blue-500">土</div>
+        </div>
+        <!-- 日付マス -->
+        <div id="calendar-grid" class="grid grid-cols-7 divide-x divide-y divide-slate-100">
+          <!-- JSで動的生成 -->
+        </div>
+      </div>
+
+      <!-- 選択中の日のトレード一覧（カレンダー下部に常時表示） -->
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+        <div class="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/50">
+          <div>
+            <h3 id="selected-day-title" class="text-sm font-extrabold text-slate-900">2026年11月26日 (木)</h3>
+            <p id="selected-day-summary" class="text-xs font-semibold text-slate-500 mt-0.5">合計: ¥0（0件）</p>
+          </div>
+          <button onclick="openTradeModal(null, state.selectedDateStr)" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>この日に追加</span>
+          </button>
+        </div>
+        <div id="selected-day-list" class="p-3.5 space-y-2.5">
+          <!-- JSで描画 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ########## タブ2: 推移グラフ画面（Chart.js） ########## -->
+    <section id="view-chart" class="hidden space-y-4">
+
+      <!-- フィルター＆グラフモード切り替えカード -->
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 space-y-3.5">
+        <!-- 期間フィルター -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-500">表示期間</span>
+          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
+            <button onclick="setChartPeriod('month')" id="chart-period-month" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">表示中の月</button>
+            <button onclick="setChartPeriod('30d')" id="chart-period-30d" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">直近30日</button>
+            <button onclick="setChartPeriod('all')" id="chart-period-all" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">全期間</button>
+          </div>
+        </div>
+
+        <!-- グラフモード切替 -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-500">表示モード</span>
+          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
+            <button onclick="setChartMode('cumulative')" id="chart-mode-cumulative" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">累計損益</button>
+            <button onclick="setChartMode('daily')" id="chart-mode-daily" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">日別損益</button>
+            <button onclick="setChartMode('both')" id="chart-mode-both" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">2段表示</button>
+          </div>
+        </div>
+
+        <!-- タグフィルター（横スクロールチップ） -->
+        <div class="pt-1 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500">タグ絞り込み</span>
+            <span id="chart-filter-count" class="text-[11px] font-semibold text-slate-400">0件</span>
+          </div>
+          <div id="chart-tag-chips" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            <!-- JSで生成 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 累計損益グラフカード -->
+      <div id="cumulative-chart-card" class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 space-y-2">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-900">累計損益（資産曲線）</h3>
+            <p id="cumulative-chart-subtitle" class="text-[11px] text-slate-400">選択期間内の累積収支推移</p>
+          </div>
+          <span id="cumulative-chart-badge" class="text-sm font-extrabold text-emerald-600">+¥0</span>
+        </div>
+        <div class="relative w-full h-60 sm:h-72">
+          <canvas id="cumulative-chart-canvas"></canvas>
+          <div id="cumulative-empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center bg-white/90">
+            <p class="text-sm font-bold text-slate-500">表示できるデータがありません</p>
+            <p class="text-xs text-slate-400 mt-1">期間やタグの絞り込みを変更してください</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 日別損益グラフカード -->
+      <div id="daily-chart-card" class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 space-y-2">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-900">日別損益（棒グラフ）</h3>
+            <p class="text-[11px] text-slate-400">取引日ごとの損益バランス</p>
+          </div>
+        </div>
+        <div class="relative w-full h-56 sm:h-64">
+          <canvas id="daily-chart-canvas"></canvas>
+          <div id="daily-empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center bg-white/90">
+            <p class="text-sm font-bold text-slate-500">表示できるデータがありません</p>
+            <p class="text-xs text-slate-400 mt-1">期間やタグの絞り込みを変更してください</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- パフォーマンス指標カード（4項目） -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4">
+          <p class="text-[11px] font-bold text-slate-400 mb-1">累計損益</p>
+          <p id="kpi-total-pnl" class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">¥0</p>
+          <p id="kpi-win-rate" class="text-[11px] font-semibold text-slate-400 mt-1">勝率 0.0%</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4">
+          <p class="text-[11px] font-bold text-slate-400 mb-1">プロフィットファクター (PF)</p>
+          <p id="kpi-pf" class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">-</p>
+          <p class="text-[11px] font-medium text-slate-400 mt-1">総利益 ÷ 総損失</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4">
+          <p class="text-[11px] font-bold text-slate-400 mb-1">最大ドローダウン</p>
+          <p id="kpi-max-dd" class="text-xl sm:text-2xl font-extrabold tracking-tight text-rose-600">¥0</p>
+          <p class="text-[11px] font-medium text-slate-400 mt-1">ピークからの最大下落幅</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4">
+          <p class="text-[11px] font-bold text-slate-400 mb-1">最大連勝数</p>
+          <p id="kpi-max-streak" class="text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-600">0連勝</p>
+          <p id="kpi-max-loss-streak" class="text-[11px] font-medium text-slate-400 mt-1">最大連敗: 0連敗</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ########## タブ3: タグ別勝率分析画面 ########## -->
+    <section id="view-analytics" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-3.5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <!-- 期間切り替え -->
+          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
+            <button onclick="setAnalyticsPeriod('month')" id="period-btn-month" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all">
+              表示月 (<span id="analytics-month-text">今月</span>)
+            </button>
+            <button onclick="setAnalyticsPeriod('all')" id="period-btn-all" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all">
+              全期間
+            </button>
+          </div>
+
+          <!-- 並び替え -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-semibold text-slate-400">並び替え:</span>
+            <select id="analytics-sort" onchange="renderAnalytics()" class="bg-slate-100 border-none text-slate-700 text-xs font-bold rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer">
+              <option value="winRate">勝率が高い順</option>
+              <option value="pnl">合計損益が高い順</option>
+              <option value="count">トレード回数が多い順</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="analytics-overview" class="flex items-center justify-between text-xs bg-slate-50 rounded-xl px-3.5 py-2.5 text-slate-600">
+          <!-- JSで描画 -->
+        </div>
+      </div>
+
+      <!-- タグ別分析リスト -->
+      <div id="analytics-list" class="space-y-3">
+        <!-- JSで描画 -->
+      </div>
+    </section>
+
+    <!-- ########## タブ4: 設定・データ管理画面 ########## -->
+    <section id="view-settings" class="hidden space-y-4">
+
+      <!-- スマホのホーム画面追加ガイドカード -->
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 sm:p-5 space-y-3.5">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">スマホのホーム画面に追加する手順</h2>
+            <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+              ホーム画面にアイコンを置くと、通常のアプリのようにワンタップ・全画面ですぐにカレンダーを開けます。
+            </p>
+          </div>
+        </div>
+
+        <!-- iPhone / Android ガイド切り替え -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- iPhone (Safari) -->
+          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/60 space-y-2">
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-extrabold">iPhone</span>
+              <span class="text-xs font-bold text-slate-800">Safari からの手順</span>
+            </div>
+            <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside leading-relaxed">
+              <li>このページを <strong>Safari</strong> で開く</li>
+              <li>画面下部の <strong>共有ボタン（□↑）</strong> をタップ</li>
+              <li>下にスクロールし <strong>「ホーム画面に追加」</strong> を選択</li>
+              <li>右上の <strong>「追加」</strong> をタップして完了</li>
+            </ol>
+          </div>
+
+          <!-- Android (Chrome) -->
+          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/60 space-y-2">
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-extrabold">Android</span>
+              <span class="text-xs font-bold text-slate-800">Chrome からの手順</span>
+            </div>
+            <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside leading-relaxed">
+              <li>このページを <strong>Chrome</strong> で開く</li>
+              <li>画面右上の <strong>メニュー（︙）</strong> をタップ</li>
+              <li><strong>「ホーム画面に追加」</strong> または <strong>「アプリをインストール」</strong> を選択</li>
+              <li><strong>「追加」</strong> をタップして完了</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="bg-amber-50/80 border border-amber-200/70 rounded-xl p-3 text-[11px] text-amber-800 leading-relaxed">
+          <strong>ヒント：</strong>Webアプリの仕様上、ホーム画面に直接カレンダーを描画する「OS標準ウィジェット」には対応していませんが、アイコンをホーム画面の目立つ位置に置くことで1タップで即確認できます。
+        </div>
+      </div>
+
+      <!-- タグ管理カード -->
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 sm:p-5 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">タグの管理</h2>
+          <p class="text-xs text-slate-500 mt-0.5">通貨ペアやトレード手法など、自由にタグを追加・削除できます。</p>
+        </div>
+
+        <div class="flex gap-2">
+          <input type="text" id="settings-new-tag-input" placeholder="新しいタグ名（例: 押し目買い, 欧州時間）" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+          <button onclick="addTagFromSettings()" class="bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shrink-0">
+            追加
+          </button>
+        </div>
+
+        <div id="settings-tag-list" class="flex flex-wrap gap-2 pt-1">
+          <!-- JSで描画 -->
+        </div>
+      </div>
+
+      <!-- データ管理カード -->
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 sm:p-5 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">データのバックアップ・初期化</h2>
+          <p class="text-xs text-slate-500 mt-0.5">入力データはお使いのブラウザ（localStorage）に自動保存されています。</p>
+        </div>
+
+        <div class="space-y-2.5">
+          <!-- CSV出力 -->
+          <button onclick="exportCSV()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 transition-colors text-left">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-slate-800">CSV形式でエクスポート</p>
+                <p class="text-xs text-slate-500">Excelやスプレッドシートで開ける形式で保存します</p>
+              </div>
+            </div>
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+
+          <!-- サンプルデータ再読み込み -->
+          <button onclick="confirmLoadSample()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 transition-colors text-left">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-slate-800">サンプルデータを再読み込み</p>
+                <p class="text-xs text-slate-500">今月・先月のデモ用トレード12件を復元します</p>
+              </div>
+            </div>
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+
+          <!-- 全データリセット -->
+          <button onclick="confirmClearAll()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/70 transition-colors text-left">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-rose-700">全データリセット</p>
+                <p class="text-xs text-rose-500">すべてのトレード記録を削除して最初から始めます</p>
+              </div>
+            </div>
+            <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== スマホ向け固定ボトムナビ（4タブ） ==================== -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 pb-safe">
+    <div class="grid grid-cols-4 h-16">
+      <button onclick="switchTab('calendar')" id="nav-sp-calendar" class="flex flex-col items-center justify-center gap-1 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+        </svg>
+        <span class="text-[10px] font-bold">カレンダー</span>
+      </button>
+
+      <button onclick="switchTab('chart')" id="nav-sp-chart" class="flex flex-col items-center justify-center gap-1 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+        </svg>
+        <span class="text-[10px] font-bold">推移グラフ</span>
+      </button>
+
+      <button onclick="switchTab('analytics')" id="nav-sp-analytics" class="flex flex-col items-center justify-center gap-1 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+        </svg>
+        <span class="text-[10px] font-bold">タグ分析</span>
+      </button>
+
+      <button onclick="switchTab('settings')" id="nav-sp-settings" class="flex flex-col items-center justify-center gap-1 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span class="text-[10px] font-bold">設定</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== モーダル: トレード入力・編集 ==================== -->
+  <div id="trade-modal" class="fixed inset-0 z-50 hidden">
+    <div onclick="closeTradeModal()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-xs animate-fade-in"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none p-0 sm:p-4">
+      <div class="pointer-events-auto w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] flex flex-col animate-slide-up overflow-hidden">
+        <!-- ヘッダー -->
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+          <h3 id="trade-modal-title" class="text-base font-extrabold text-slate-900">トレードを記録</h3>
+          <button onclick="closeTradeModal()" class="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 入力フォーム -->
+        <form id="trade-form" onsubmit="saveTrade(event)" class="p-5 overflow-y-auto space-y-5 flex-1">
+          <input type="hidden" id="trade-id">
+
+          <!-- 損益入力（勝ち・負け 大きな切替ボタン） -->
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">結果・損益金額（円）</label>
+            <div class="grid grid-cols-2 gap-2.5 mb-3">
+              <button type="button" id="sign-btn-plus" onclick="setTradeSign(1)" class="py-3 rounded-xl text-sm font-extrabold border-2 transition-all flex items-center justify-center gap-1.5">
+                <span>＋ 勝ち（利益）</span>
+              </button>
+              <button type="button" id="sign-btn-minus" onclick="setTradeSign(-1)" class="py-3 rounded-xl text-sm font-extrabold border-2 transition-all flex items-center justify-center gap-1.5">
+                <span>− 負け（損失）</span>
+              </button>
+            </div>
+            <div class="relative">
+              <span id="amount-prefix" class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-emerald-600">+¥</span>
+              <input type="number" id="trade-amount" inputmode="numeric" min="0" step="1" placeholder="10000" required class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-xl font-extrabold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">※ 0を入力すると「引き分け（同値撤退）」になります</p>
+          </div>
+
+          <!-- 日付 & 獲得pips（横並び） -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="trade-date" class="block text-xs font-bold text-slate-500 mb-1.5">日付</label>
+              <input type="date" id="trade-date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <div>
+              <label for="trade-pips" class="block text-xs font-bold text-slate-500 mb-1.5">獲得 pips <span class="font-normal text-slate-400">(任意)</span></label>
+              <div class="relative">
+                <input type="number" id="trade-pips" inputmode="decimal" step="0.1" placeholder="例: 25.5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 pr-12 text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">pips</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- タグ選択 -->
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">タグ <span class="font-normal text-slate-400">（複数選択可）</span></label>
+            <div id="modal-tag-selector" class="flex flex-wrap gap-2 mb-2.5">
+              <!-- JSで生成 -->
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="modal-new-tag-input" placeholder="新しいタグを追加..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+              <button type="button" onclick="addTagFromModal()" class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition-colors shrink-0">
+                ＋追加
+              </button>
+            </div>
+          </div>
+
+          <!-- メモ -->
+          <div>
+            <label for="trade-memo" class="block text-xs font-bold text-slate-500 mb-1.5">メモ・振り返り <span class="font-normal text-slate-400">(任意)</span></label>
+            <textarea id="trade-memo" rows="2" placeholder="エントリー根拠や反省点など..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
+          </div>
+        </form>
+
+        <!-- フッター -->
+        <div class="p-4 bg-white border-t border-slate-100 flex items-center gap-2.5 shrink-0">
+          <button type="button" id="btn-delete-trade" onclick="confirmDeleteCurrentTrade()" class="hidden px-4 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-sm transition-colors">
+            削除
+          </button>
+          <button type="button" onclick="closeTradeModal()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors">
+            キャンセル
+          </button>
+          <button type="submit" form="trade-form" class="flex-[2] py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-sm transition-all">
+            保存する
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 汎用確認ダイアログ（alert/confirm代替） ==================== -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div onclick="closeConfirmModal()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-xs animate-fade-in"></div>
+    <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl p-5 space-y-4 animate-slide-up">
+      <div class="space-y-1.5">
+        <h3 id="confirm-title" class="text-base font-extrabold text-slate-900">確認</h3>
+        <p id="confirm-message" class="text-sm text-slate-600 leading-relaxed">本当に実行しますか？</p>
+      </div>
+      <div class="flex gap-2.5 pt-1">
+        <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition-colors">
+          キャンセル
+        </button>
+        <button id="confirm-ok-btn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold transition-colors">
+          実行する
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== トースト通知 ==================== -->
+  <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col gap-2 w-[90%] max-w-sm"></div>
+
+  <!-- ==================== JavaScript ロジック ==================== -->
+  <script>
+    // ==========================================
+    // 1. 定数・アプリ状態
+    // ==========================================
+    const STORAGE_KEYS = {
+      TRADES: 'fx_calendar_trades_v2',
+      TAGS: 'fx_calendar_tags_v2',
+      INIT: 'fx_calendar_initialized_v2'
+    };
+
+    const DEFAULT_TAGS = [
+      'USD/JPY', 'EUR/USD', 'GOLD',
+      '順張り', '逆張り', 'ブレイクアウト', '指標トレード'
+    ];
+
+    const today = new Date();
+    const todayStr = formatDateStr(today.getFullYear(), today.getMonth(), today.getDate());
+
+    let state = {
+      currentYear: today.getFullYear(),
+      currentMonth: today.getMonth(), // 0-11
+      selectedDateStr: todayStr,      // カレンダーで選択中の日付
+      activeTab: 'calendar',          // 'calendar' | 'chart' | 'analytics' | 'settings'
+
+      // グラフタブの状態
+      chartPeriod: 'all',             // 'month' | '30d' | 'all'
+      chartMode: 'both',              // 'cumulative' | 'daily' | 'both'
+      chartTagFilter: 'ALL',          // 'ALL' または特定タグ名
+
+      // タグ分析タブの状態
+      analyticsPeriod: 'month',       // 'month' | 'all'
+
+      // データ本体
+      trades: [],
+      tags: [],
+
+      // モーダル用一時状態
+      modalSign: 1,
+      modalSelectedTags: new Set(),
+      confirmCallback: null
+    };
+
+    // Chart.js インスタンス保持用
+    let cumulativeChartInstance = null;
+    let dailyChartInstance = null;
+
+    // ==========================================
+    // 2. 初期化・データ永続化
+    // ==========================================
+    function initApp() {
+      try {
+        const savedTags = localStorage.getItem(STORAGE_KEYS.TAGS);
+        state.tags = savedTags ? JSON.parse(savedTags) : [...DEFAULT_TAGS];
+
+        const isInitialized = localStorage.getItem(STORAGE_KEYS.INIT);
+        const savedTrades = localStorage.getItem(STORAGE_KEYS.TRADES);
+
+        if (!isInitialized) {
+          state.trades = generateSampleTrades();
+          saveData();
+          localStorage.setItem(STORAGE_KEYS.INIT, 'true');
+        } else {
+          state.trades = savedTrades ? JSON.parse(savedTrades) : [];
+        }
+      } catch (e) {
+        console.error('データ読み込みエラー:', e);
+        state.tags = [...DEFAULT_TAGS];
+        state.trades = [];
+      }
+
+      switchTab('calendar');
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.TRADES, JSON.stringify(state.trades));
+        localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(state.tags));
+      } catch (e) {
+        console.error('データ保存エラー:', e);
+        showToast('データの保存に失敗しました', 'error');
+      }
+    }
+
+    /**
+     * 先月〜今月のリアルなFXサンプルデータ（12件）を生成
+     * 全期間グラフ・直近30日グラフ・月間カレンダーすべてが映える構成
+     */
+    function generateSampleTrades() {
+      const daysAgoStr = (daysAgo) => {
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - daysAgo);
+        return formatDateStr(d.getFullYear(), d.getMonth(), d.getDate());
+      };
+
+      const base = Date.now();
+      return [
+        {
+          id: 'sample-' + (base + 1),
+          date: daysAgoStr(38),
+          amount: 12000,
+          pips: 24.0,
+          tags: ['USD/JPY', '順張り'],
+          memo: '先月の好スタート。1時間足トレンドに沿って押し目買い。'
+        },
+        {
+          id: 'sample-' + (base + 2),
+          date: daysAgoStr(34),
+          amount: -7500,
+          pips: -15.0,
+          tags: ['EUR/USD', '逆張り'],
+          memo: '天井狙いの逆張りが早すぎた。損切りルールは遵守。'
+        },
+        {
+          id: 'sample-' + (base + 3),
+          date: daysAgoStr(31),
+          amount: 19500,
+          pips: 32.5,
+          tags: ['GOLD', 'ブレイクアウト'],
+          memo: 'NY時間オープン直後のレンジ上抜けで大きく獲得。'
+        },
+        {
+          id: 'sample-' + (base + 4),
+          date: daysAgoStr(26),
+          amount: 8400,
+          pips: 16.8,
+          tags: ['USD/JPY', '指標トレード'],
+          memo: '米指標発表後の初動を見送ってから戻り売りでエントリー。'
+        },
+        {
+          id: 'sample-' + (base + 5),
+          date: daysAgoStr(21),
+          amount: -11200,
+          pips: -22.4,
+          tags: ['GOLD', '逆張り'],
+          memo: 'ボラティリティが高い場面で無理に入ってしまった。反省。'
+        },
+        {
+          id: 'sample-' + (base + 6),
+          date: daysAgoStr(17),
+          amount: 15800,
+          pips: 31.6,
+          tags: ['USD/JPY', '順張り'],
+          memo: '東京時間の押し目買い。リスクリワード1:2を達成。'
+        },
+        {
+          id: 'sample-' + (base + 7),
+          date: daysAgoStr(14),
+          amount: 24500,
+          pips: 41.0,
+          tags: ['GOLD', 'ブレイクアウト'],
+          memo: '日足レジスタンス突破でロング。伸ばせて大満足。'
+        },
+        {
+          id: 'sample-' + (base + 8),
+          date: daysAgoStr(11),
+          amount: -5800,
+          pips: -11.6,
+          tags: ['EUR/USD', 'ブレイクアウト'],
+          memo: '欧州時間のダマシに引っかかり微損撤退。'
+        },
+        {
+          id: 'sample-' + (base + 9),
+          date: daysAgoStr(7),
+          amount: 13200,
+          pips: 26.4,
+          tags: ['USD/JPY', '順張り'],
+          memo: '移動平均線反発を確認してエントリー。手堅く利確。'
+        },
+        {
+          id: 'sample-' + (base + 10),
+          date: daysAgoStr(4),
+          amount: 9600,
+          pips: 19.2,
+          tags: ['USD/JPY', '指標トレード'],
+          memo: '雇用関連指標後のトレンド継続に乗って利確。'
+        },
+        {
+          id: 'sample-' + (base + 11),
+          date: daysAgoStr(2),
+          amount: -4300,
+          pips: -8.6,
+          tags: ['GOLD', '逆張り'],
+          memo: '短期過熱感でショートしたが反発が弱く早めに撤退。'
+        },
+        {
+          id: 'sample-' + (base + 12),
+          date: daysAgoStr(0),
+          amount: 16400,
+          pips: 32.8,
+          tags: ['USD/JPY', '順張り'],
+          memo: '上位足と方向が揃った綺麗な押し目買い。理想のトレード。'
+        }
+      ];
+    }
+
+    // ==========================================
+    // 3. ユーティリティ関数
+    // ==========================================
+    function formatDateStr(year, month, day) {
+      const mm = String(month + 1).padStart(2, '0');
+      const dd = String(day).padStart(2, '0');
+      return `${year}-${mm}-${dd}`;
+    }
+
+    function formatShortDate(dateStr) {
+      const [, m, d] = dateStr.split('-').map(Number);
+      return `${m}/${d}`;
+    }
+
+    function formatYen(amount, withSign = true) {
+      const abs = Math.abs(Math.round(amount)).toLocaleString('ja-JP');
+      if (amount > 0) return withSign ? `+¥${abs}` : `¥${abs}`;
+      if (amount < 0) return `-¥${abs}`;
+      return '¥0';
+    }
+
+    function formatCompactYen(amount) {
+      const abs = Math.abs(Math.round(amount));
+      const sign = amount > 0 ? '+' : (amount < 0 ? '-' : '');
+      if (abs >= 1000000) return `${sign}${(abs / 1000000).toFixed(1)}M`;
+      if (abs >= 100000) return `${sign}${Math.round(abs / 1000)}k`;
+      return `${sign}${abs.toLocaleString('ja-JP')}`;
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgClass = type === 'error' ? 'bg-rose-600' : 'bg-slate-900';
+      toast.className = `${bgClass} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg text-center animate-slide-up`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 2400);
+    }
+
+    // ==========================================
+    // 4. タブ切り替え
+    // ==========================================
+    function switchTab(tab) {
+      state.activeTab = tab;
+      const tabs = ['calendar', 'chart', 'analytics', 'settings'];
+
+      tabs.forEach(t => {
+        document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
+
+        const pcBtn = document.getElementById(`nav-pc-${t}`);
+        pcBtn.className = t === tab
+          ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all'
+          : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
+
+        const spBtn = document.getElementById(`nav-sp-${t}`);
+        spBtn.className = t === tab
+          ? 'flex flex-col items-center justify-center gap-1 text-emerald-600 transition-colors'
+          : 'flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-600 transition-colors';
+      });
+
+      if (tab === 'calendar') renderCalendar();
+      if (tab === 'chart') renderChartTab();
+      if (tab === 'analytics') renderAnalytics();
+      if (tab === 'settings') renderSettings();
+    }
+
+    // ==========================================
+    // 5. カレンダー＆選択日トレード一覧
+    // ==========================================
+    function changeMonth(delta) {
+      let m = state.currentMonth + delta;
+      let y = state.currentYear;
+      if (m < 0) { m = 11; y--; }
+      if (m > 11) { m = 0; y++; }
+      state.currentYear = y;
+      state.currentMonth = m;
+
+      // 月が変わったら、今月なら今日、他月なら1日を選択状態にする
+      if (y === today.getFullYear() && m === today.getMonth()) {
+        state.selectedDateStr = todayStr;
+      } else {
+        state.selectedDateStr = formatDateStr(y, m, 1);
+      }
+      renderCalendar();
+    }
+
+    function goToCurrentMonth() {
+      state.currentYear = today.getFullYear();
+      state.currentMonth = today.getMonth();
+      state.selectedDateStr = todayStr;
+      renderCalendar();
+    }
+
+    function selectCalendarDay(dateStr) {
+      state.selectedDateStr = dateStr;
+      renderCalendar();
+    }
+
+    function getTradesForMonth(year, month) {
+      const prefix = `${year}-${String(month + 1).padStart(2, '0')}-`;
+      return state.trades.filter(t => t.date.startsWith(prefix));
+    }
+
+    function renderCalendar() {
+      const { currentYear, currentMonth, selectedDateStr } = state;
+
+      // 月ラベル更新
+      document.getElementById('calendar-month-label').textContent = `${currentYear}年 ${currentMonth + 1}月`;
+      const isThisMonth = currentYear === today.getFullYear() && currentMonth === today.getMonth();
+      document.getElementById('btn-this-month').classList.toggle('opacity-40', isThisMonth);
+
+      // 月間集計
+      const monthTrades = getTradesForMonth(currentYear, currentMonth);
+      let totalPnl = 0, totalPips = 0, hasPips = false;
+      let wins = 0, losses = 0, draws = 0;
+      const dailyMap = {};
+
+      monthTrades.forEach(t => {
+        totalPnl += t.amount;
+        if (t.pips !== null && t.pips !== '' && !isNaN(t.pips)) {
+          totalPips += Number(t.pips);
+          hasPips = true;
+        }
+        if (t.amount > 0) wins++;
+        else if (t.amount < 0) losses++;
+        else draws++;
+
+        if (!dailyMap[t.date]) dailyMap[t.date] = { pnl: 0, count: 0 };
+        dailyMap[t.date].pnl += t.amount;
+        dailyMap[t.date].count++;
+      });
+
+      const totalCount = monthTrades.length;
+      const decided = wins + losses;
+      const winRate = decided > 0 ? (wins / decided) * 100 : 0;
+      const avgPnl = totalCount > 0 ? totalPnl / totalCount : 0;
+      const activeDays = Object.keys(dailyMap).length;
+
+      // サマリー更新
+      const pnlEl = document.getElementById('summary-total-pnl');
+      pnlEl.textContent = formatYen(totalPnl);
+      pnlEl.className = `text-3xl sm:text-4xl font-extrabold tracking-tight ${
+        totalPnl > 0 ? 'text-emerald-600' : totalPnl < 0 ? 'text-rose-600' : 'text-slate-900'
+      }`;
+
+      const pipsEl = document.getElementById('summary-total-pips');
+      if (hasPips) {
+        pipsEl.textContent = `${totalPips > 0 ? '+' : ''}${totalPips.toFixed(1)} pips`;
+        pipsEl.className = `text-xs font-bold px-2 py-0.5 rounded-md ${
+          totalPips > 0 ? 'bg-emerald-50 text-emerald-700' : totalPips < 0 ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600'
+        }`;
+      } else {
+        pipsEl.className = 'hidden';
+      }
+
+      document.getElementById('summary-record-badge').textContent =
+        draws > 0 ? `${wins}勝 ${losses}敗 ${draws}分（計${totalCount}回）` : `${wins}勝 ${losses}敗（計${totalCount}回）`;
+
+      const winRateEl = document.getElementById('summary-win-rate');
+      winRateEl.textContent = `${winRate.toFixed(1)}%`;
+      winRateEl.className = `text-base sm:text-lg font-extrabold ${
+        decided === 0 ? 'text-slate-800' : winRate >= 50 ? 'text-emerald-600' : 'text-rose-600'
+      }`;
+
+      const avgEl = document.getElementById('summary-avg-pnl');
+      avgEl.textContent = formatYen(avgPnl);
+      avgEl.className = `text-base sm:text-lg font-extrabold ${
+        avgPnl > 0 ? 'text-emerald-600' : avgPnl < 0 ? 'text-rose-600' : 'text-slate-800'
+      }`;
+
+      document.getElementById('summary-active-days').textContent = `${activeDays}日`;
+
+      // カレンダーグリッド生成
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+
+      const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'min-h-[68px] sm:min-h-[84px] bg-slate-50/50';
+        grid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = formatDateStr(currentYear, currentMonth, day);
+        const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+        const data = dailyMap[dateStr];
+        const isToday = dateStr === todayStr;
+        const isSelected = dateStr === selectedDateStr;
+
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.onclick = () => selectCalendarDay(dateStr);
+
+        let bgClass = 'bg-white hover:bg-slate-50';
+        let pnlTextClass = 'text-slate-500';
+        if (data) {
+          if (data.pnl > 0) {
+            bgClass = 'bg-emerald-50/80 hover:bg-emerald-100/70';
+            pnlTextClass = 'text-emerald-700';
+          } else if (data.pnl < 0) {
+            bgClass = 'bg-rose-50/80 hover:bg-rose-100/70';
+            pnlTextClass = 'text-rose-700';
+          } else {
+            bgClass = 'bg-slate-100/80 hover:bg-slate-200/70';
+            pnlTextClass = 'text-slate-600';
+          }
+        }
+
+        const selectedRing = isSelected ? 'ring-2 ring-inset ring-slate-900 z-10' : '';
+        const dateNumClass = isToday
+          ? 'bg-slate-900 text-white w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center'
+          : dayOfWeek === 0 ? 'text-rose-500' : dayOfWeek === 6 ? 'text-blue-500' : 'text-slate-700';
+
+        cell.className = `min-h-[68px] sm:min-h-[84px] p-1 sm:p-1.5 flex flex-col justify-between text-left transition-colors relative ${bgClass} ${selectedRing}`;
+
+        cell.innerHTML = `
+          <div class="flex items-start justify-between w-full">
+            <span class="text-[11px] sm:text-xs font-bold leading-none ${dateNumClass}">${day}</span>
+            ${data ? `<span class="text-[9px] sm:text-[10px] font-bold px-1 py-0.5 rounded bg-white/85 text-slate-500 leading-none">${data.count}</span>` : ''}
+          </div>
+          ${data ? `
+            <div class="w-full mt-auto pt-1">
+              <p class="text-[10px] sm:text-xs font-extrabold tracking-tight truncate text-right ${pnlTextClass}">
+                ${formatCompactYen(data.pnl)}
+              </p>
+            </div>
+          ` : ''}
+        `;
+        grid.appendChild(cell);
+      }
+
+      const remainder = (firstDayOfWeek + daysInMonth) % 7;
+      if (remainder !== 0) {
+        for (let i = 0; i < 7 - remainder; i++) {
+          const empty = document.createElement('div');
+          empty.className = 'min-h-[68px] sm:min-h-[84px] bg-slate-50/50';
+          grid.appendChild(empty);
+        }
+      }
+
+      // 選択中の日のトレード一覧を描画
+      renderSelectedDayList();
+    }
+
+    function renderSelectedDayList() {
+      const dateStr = state.selectedDateStr;
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const weekNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+      document.getElementById('selected-day-title').textContent = `${y}年${m}月${d}日 (${weekNames[dt.getDay()]})`;
+
+      const dayTrades = state.trades.filter(t => t.date === dateStr);
+      const dayTotal = dayTrades.reduce((s, t) => s + t.amount, 0);
+      const totalColor = dayTotal > 0 ? 'text-emerald-600' : dayTotal < 0 ? 'text-rose-600' : 'text-slate-600';
+
+      document.getElementById('selected-day-summary').innerHTML =
+        `合計: <span class="${totalColor} font-extrabold">${formatYen(dayTotal)}</span>（${dayTrades.length}件）`;
+
+      const listEl = document.getElementById('selected-day-list');
+      if (dayTrades.length === 0) {
+        listEl.innerHTML = `
+          <div class="py-7 text-center space-y-1.5">
+            <p class="text-xs font-bold text-slate-500">この日のトレード記録はありません</p>
+            <p class="text-[11px] text-slate-400">「この日に追加」ボタンから収支を登録できます</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = dayTrades.map(trade => {
+        const isWin = trade.amount > 0;
+        const isLoss = trade.amount < 0;
+        const amountColor = isWin ? 'text-emerald-600' : isLoss ? 'text-rose-600' : 'text-slate-600';
+        const badgeBg = isWin ? 'bg-emerald-50 text-emerald-700' : isLoss ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600';
+        const badgeText = isWin ? 'WIN' : isLoss ? 'LOSE' : 'DRAW';
+
+        const pipsHtml = (trade.pips !== null && trade.pips !== '' && !isNaN(trade.pips))
+          ? `<span class="text-xs font-semibold text-slate-400">${Number(trade.pips) > 0 ? '+' : ''}${Number(trade.pips).toFixed(1)} pips</span>`
+          : '';
+
+        const tagsHtml = (trade.tags && trade.tags.length > 0)
+          ? `<div class="flex flex-wrap gap-1.5 mt-2">
+              ${trade.tags.map(tag => `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">#${escapeHTML(tag)}</span>`).join('')}
+            </div>`
+          : '';
+
+        const memoHtml = trade.memo
+          ? `<p class="text-xs text-slate-500 mt-2 bg-slate-50 rounded-lg px-2.5 py-2 leading-relaxed">${escapeHTML(trade.memo)}</p>`
+          : '';
+
+        return `
+          <div onclick="openTradeModal('${trade.id}')" class="cursor-pointer bg-white hover:bg-slate-50/80 active:scale-[0.99] transition-all rounded-xl p-3.5 border border-slate-200/80">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded ${badgeBg}">${badgeText}</span>
+                  <span class="text-lg font-extrabold tracking-tight ${amountColor}">${formatYen(trade.amount)}</span>
+                  ${pipsHtml}
+                </div>
+                ${tagsHtml}
+              </div>
+              <span class="p-1.5 rounded-lg bg-slate-100 text-slate-400 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
+                </svg>
+              </span>
+            </div>
+            ${memoHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // 6. 推移グラフタブ（Chart.js）
+    // ==========================================
+    function setChartPeriod(period) {
+      state.chartPeriod = period;
+      renderChartTab();
+    }
+
+    function setChartMode(mode) {
+      state.chartMode = mode;
+      renderChartTab();
+    }
+
+    function setChartTagFilter(tag) {
+      state.chartTagFilter = tag;
+      renderChartTab();
+    }
+
+    function getFilteredTradesForChart() {
+      let filtered = [...state.trades];
+
+      // 期間フィルター
+      if (state.chartPeriod === 'month') {
+        const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+        filtered = filtered.filter(t => t.date.startsWith(prefix));
+      } else if (state.chartPeriod === '30d') {
+        const cutoff = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29);
+        const cutoffStr = formatDateStr(cutoff.getFullYear(), cutoff.getMonth(), cutoff.getDate());
+        filtered = filtered.filter(t => t.date >= cutoffStr);
+      }
+
+      // タグフィルター
+      if (state.chartTagFilter !== 'ALL') {
+        filtered = filtered.filter(t => (t.tags || []).includes(state.chartTagFilter));
+      }
+
+      // 日付昇順ソート
+      filtered.sort((a, b) => a.date.localeCompare(b.date));
+      return filtered;
+    }
+
+    function renderChartTab() {
+      // 期間ボタン状態更新
+      ['month', '30d', 'all'].forEach(p => {
+        const btn = document.getElementById(`chart-period-${p}`);
+        if (p === 'month') {
+          btn.textContent = `${state.currentMonth + 1}月`;
+        }
+        btn.className = state.chartPeriod === p
+          ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all'
+          : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
+      });
+
+      // モードボタン状態更新
+      ['cumulative', 'daily', 'both'].forEach(m => {
+        const btn = document.getElementById(`chart-mode-${m}`);
+        btn.className = state.chartMode === m
+          ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all'
+          : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
+      });
+
+      // カード表示切替
+      document.getElementById('cumulative-chart-card').classList.toggle('hidden', state.chartMode === 'daily');
+      document.getElementById('daily-chart-card').classList.toggle('hidden', state.chartMode === 'cumulative');
+
+      // タグフィルターチップ描画
+      const allUsedTags = new Set(state.tags);
+      state.trades.forEach(t => (t.tags || []).forEach(tag => allUsedTags.add(tag)));
+      const tagList = ['ALL', ...Array.from(allUsedTags)];
+
+      document.getElementById('chart-tag-chips').innerHTML = tagList.map(tag => {
+        const isActive = state.chartTagFilter === tag;
+        const label = tag === 'ALL' ? 'すべて' : `#${escapeHTML(tag)}`;
+        const cls = isActive
+          ? 'bg-slate-900 text-white border-slate-900'
+          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
+        return `
+          <button onclick="setChartTagFilter('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border whitespace-nowrap transition-all shrink-0 ${cls}">
+            ${label}
+          </button>
+        `;
+      }).join('');
+
+      // 対象データ集計
+      const trades = getFilteredTradesForChart();
+      document.getElementById('chart-filter-count').textContent = `対象: ${trades.length}件`;
+
+      // 日別合算マップを作成
+      const dailyMap = {};
+      trades.forEach(t => {
+        dailyMap[t.date] = (dailyMap[t.date] || 0) + t.amount;
+      });
+      const sortedDates = Object.keys(dailyMap).sort();
+      const labels = sortedDates.map(formatShortDate);
+      const dailyValues = sortedDates.map(d => dailyMap[d]);
+
+      // 累計推移を計算
+      let running = 0;
+      const cumulativeValues = dailyValues.map(v => {
+        running += v;
+        return running;
+      });
+
+      // KPI計算（PF・最大ドローダウン・最大連勝数）
+      let grossProfit = 0;
+      let grossLoss = 0;
+      let wins = 0, losses = 0;
+      let currentWinStreak = 0, maxWinStreak = 0;
+      let currentLossStreak = 0, maxLossStreak = 0;
+      let equity = 0, peak = 0, maxDD = 0;
+
+      trades.forEach(t => {
+        if (t.amount > 0) {
+          grossProfit += t.amount;
+          wins++;
+          currentWinStreak++;
+          currentLossStreak = 0;
+          if (currentWinStreak > maxWinStreak) maxWinStreak = currentWinStreak;
+        } else if (t.amount < 0) {
+          grossLoss += Math.abs(t.amount);
+          losses++;
+          currentLossStreak++;
+          currentWinStreak = 0;
+          if (currentLossStreak > maxLossStreak) maxLossStreak = currentLossStreak;
+        }
+
+        equity += t.amount;
+        if (equity > peak) peak = equity;
+        const dd = peak - equity;
+        if (dd > maxDD) maxDD = dd;
+      });
+
+      const totalPnl = equity;
+      const decided = wins + losses;
+      const winRate = decided > 0 ? (wins / decided) * 100 : 0;
+
+      // KPI描画
+      const kpiPnlEl = document.getElementById('kpi-total-pnl');
+      kpiPnlEl.textContent = formatYen(totalPnl);
+      kpiPnlEl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${
+        totalPnl > 0 ? 'text-emerald-600' : totalPnl < 0 ? 'text-rose-600' : 'text-slate-900'
+      }`;
+      document.getElementById('kpi-win-rate').textContent = `勝率 ${winRate.toFixed(1)}%（${wins}勝${losses}敗）`;
+
+      const pfEl = document.getElementById('kpi-pf');
+      if (grossLoss > 0) {
+        const pf = grossProfit / grossLoss;
+        pfEl.textContent = pf.toFixed(2);
+        pfEl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${pf >= 1 ? 'text-emerald-600' : 'text-rose-600'}`;
+      } else if (grossProfit > 0) {
+        pfEl.textContent = '∞';
+        pfEl.className = 'text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-600';
+      } else {
+        pfEl.textContent = '-';
+        pfEl.className = 'text-xl sm:text-2xl font-extrabold tracking-tight text-slate-400';
+      }
+
+      document.getElementById('kpi-max-dd').textContent = maxDD > 0 ? `-¥${Math.round(maxDD).toLocaleString('ja-JP')}` : '¥0';
+      document.getElementById('kpi-max-streak').textContent = `${maxWinStreak}連勝`;
+      document.getElementById('kpi-max-loss-streak').textContent = `最大連敗: ${maxLossStreak}連敗`;
+
+      const cumBadge = document.getElementById('cumulative-chart-badge');
+      cumBadge.textContent = formatYen(totalPnl);
+      cumBadge.className = `text-sm font-extrabold ${
+        totalPnl > 0 ? 'text-emerald-600' : totalPnl < 0 ? 'text-rose-600' : 'text-slate-600'
+      }`;
+
+      // 空状態の切り替え
+      const isEmpty = sortedDates.length === 0;
+      document.getElementById('cumulative-empty-state').classList.toggle('hidden', !isEmpty);
+      document.getElementById('daily-empty-state').classList.toggle('hidden', !isEmpty);
+
+      // Chart.js 描画
+      renderCumulativeChart(labels, cumulativeValues, totalPnl);
+      renderDailyChart(labels, dailyValues);
+    }
+
+    function renderCumulativeChart(labels, values, finalPnl) {
+      const canvas = document.getElementById('cumulative-chart-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      if (cumulativeChartInstance) {
+        cumulativeChartInstance.destroy();
+        cumulativeChartInstance = null;
+      }
+      if (labels.length === 0) return;
+
+      const isPositive = finalPnl >= 0;
+      const lineColor = isPositive ? '#059669' : '#e11d48';
+      const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+      if (isPositive) {
+        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.28)');
+        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+      } else {
+        gradient.addColorStop(0, 'rgba(244, 63, 94, 0.25)');
+        gradient.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
+      }
+
+      cumulativeChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '累計損益',
+            data: values,
+            borderColor: lineColor,
+            backgroundColor: gradient,
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.32,
+            pointRadius: labels.length > 20 ? 2 : 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: lineColor,
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.92)',
+              padding: 10,
+              cornerRadius: 10,
+              titleFont: { size: 12, weight: 'bold' },
+              bodyFont: { size: 13, weight: 'bold' },
+              callbacks: {
+                label: (ctx) => `累計: ${formatYen(ctx.parsed.y)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: '#94a3b8',
+                font: { size: 11, weight: '600' },
+                maxTicksLimit: 7
+              }
+            },
+            y: {
+              grid: {
+                color: (ctx) => ctx.tick.value === 0 ? '#cbd5e1' : '#f1f5f9',
+                lineWidth: (ctx) => ctx.tick.value === 0 ? 1.5 : 1
+              },
+              ticks: {
+                color: '#94a3b8',
+                font: { size: 11, weight: '600' },
+                callback: (val) => formatCompactYen(val)
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderDailyChart(labels, values) {
+      const canvas = document.getElementById('daily-chart-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      if (dailyChartInstance) {
+        dailyChartInstance.destroy();
+        dailyChartInstance = null;
+      }
+      if (labels.length === 0) return;
+
+      const barColors = values.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.85)' : 'rgba(244, 63, 94, 0.85)');
+      const hoverColors = values.map(v => v >= 0 ? '#059669' : '#e11d48');
+
+      dailyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: '日別損益',
+            data: values,
+            backgroundColor: barColors,
+            hoverBackgroundColor: hoverColors,
+            borderRadius: 6,
+            maxBarThickness: 28
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.92)',
+              padding: 10,
+              cornerRadius: 10,
+              callbacks: {
+                label: (ctx) => `日別損益: ${formatYen(ctx.parsed.y)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: '#94a3b8',
+                font: { size: 11, weight: '600' },
+                maxTicksLimit: 8
+              }
+            },
+            y: {
+              grid: {
+                color: (ctx) => ctx.tick.value === 0 ? '#cbd5e1' : '#f1f5f9',
+                lineWidth: (ctx) => ctx.tick.value === 0 ? 1.5 : 1
+              },
+              ticks: {
+                color: '#94a3b8',
+                font: { size: 11, weight: '600' },
+                callback: (val) => formatCompactYen(val)
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ==========================================
+    // 7. トレード入力・編集モーダル
+    // ==========================================
+    function openTradeModal(tradeId = null, presetDate = null) {
+      document.getElementById('trade-form').reset();
+      state.modalSelectedTags = new Set();
+
+      const deleteBtn = document.getElementById('btn-delete-trade');
+      const titleEl = document.getElementById('trade-modal-title');
+
+      if (tradeId) {
+        const trade = state.trades.find(t => t.id === tradeId);
+        if (!trade) return;
+
+        titleEl.textContent = 'トレードを編集';
+        document.getElementById('trade-id').value = trade.id;
+        document.getElementById('trade-date').value = trade.date;
+        document.getElementById('trade-amount').value = Math.abs(trade.amount);
+        document.getElementById('trade-pips').value = (trade.pips !== null && trade.pips !== '') ? Math.abs(Number(trade.pips)) : '';
+        document.getElementById('trade-memo').value = trade.memo || '';
+
+        setTradeSign(trade.amount < 0 ? -1 : 1);
+        (trade.tags || []).forEach(tag => {
+          state.modalSelectedTags.add(tag);
+          if (!state.tags.includes(tag)) state.tags.push(tag);
+        });
+        deleteBtn.classList.remove('hidden');
+      } else {
+        titleEl.textContent = 'トレードを記録';
+        document.getElementById('trade-id').value = '';
+        document.getElementById('trade-date').value = presetDate || todayStr;
+        setTradeSign(1);
+        deleteBtn.classList.add('hidden');
+      }
+
+      renderModalTagSelector();
+      document.getElementById('trade-modal').classList.remove('hidden');
+    }
+
+    function closeTradeModal() {
+      document.getElementById('trade-modal').classList.add('hidden');
+    }
+
+    function setTradeSign(sign) {
+      state.modalSign = sign;
+      const plusBtn = document.getElementById('sign-btn-plus');
+      const minusBtn = document.getElementById('sign-btn-minus');
+      const prefix = document.getElementById('amount-prefix');
+
+      if (sign === 1) {
+        plusBtn.className = 'py-3 rounded-xl text-sm font-extrabold border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition-all flex items-center justify-center gap-1.5';
+        minusBtn.className = 'py-3 rounded-xl text-sm font-bold border-2 border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5';
+        prefix.textContent = '+¥';
+        prefix.className = 'absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-emerald-600';
+      } else {
+        plusBtn.className = 'py-3 rounded-xl text-sm font-bold border-2 border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5';
+        minusBtn.className = 'py-3 rounded-xl text-sm font-extrabold border-2 border-rose-500 bg-rose-50 text-rose-700 transition-all flex items-center justify-center gap-1.5';
+        prefix.textContent = '-¥';
+        prefix.className = 'absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-rose-600';
+      }
+    }
+
+    function renderModalTagSelector() {
+      const container = document.getElementById('modal-tag-selector');
+      container.innerHTML = state.tags.map(tag => {
+        const selected = state.modalSelectedTags.has(tag);
+        const cls = selected
+          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
+        return `
+          <button type="button" onclick="toggleModalTag('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 ${cls}">
+            #${escapeHTML(tag)}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleModalTag(tag) {
+      if (state.modalSelectedTags.has(tag)) state.modalSelectedTags.delete(tag);
+      else state.modalSelectedTags.add(tag);
+      renderModalTagSelector();
+    }
+
+    function addTagFromModal() {
+      const input = document.getElementById('modal-new-tag-input');
+      const newTag = input.value.trim();
+      if (!newTag) return;
+
+      if (!state.tags.includes(newTag)) {
+        state.tags.push(newTag);
+        saveData();
+      }
+      state.modalSelectedTags.add(newTag);
+      input.value = '';
+      renderModalTagSelector();
+      showToast(`タグ「#${newTag}」を追加しました`);
+    }
+
+    function saveTrade(event) {
+      event.preventDefault();
+
+      const id = document.getElementById('trade-id').value;
+      const date = document.getElementById('trade-date').value;
+      const rawAmount = parseFloat(document.getElementById('trade-amount').value);
+      const rawPipsStr = document.getElementById('trade-pips').value.trim();
+      const memo = document.getElementById('trade-memo').value.trim();
+
+      if (!date || isNaN(rawAmount)) {
+        showToast('日付と金額を正しく入力してください', 'error');
+        return;
+      }
+
+      const amount = rawAmount === 0 ? 0 : Math.abs(rawAmount) * state.modalSign;
+      let pips = null;
+      if (rawPipsStr !== '' && !isNaN(parseFloat(rawPipsStr))) {
+        pips = amount === 0 ? 0 : Math.abs(parseFloat(rawPipsStr)) * state.modalSign;
+      }
+
+      const tradeObj = {
+        id: id || ('trade-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)),
+        date,
+        amount,
+        pips,
+        tags: Array.from(state.modalSelectedTags),
+        memo
+      };
+
+      if (id) {
+        const idx = state.trades.findIndex(t => t.id === id);
+        if (idx !== -1) state.trades[idx] = tradeObj;
+        showToast('トレードを更新しました');
+      } else {
+        state.trades.push(tradeObj);
+        showToast('トレードを記録しました');
+      }
+
+      const [y, m] = date.split('-').map(Number);
+      state.currentYear = y;
+      state.currentMonth = m - 1;
+      state.selectedDateStr = date;
+
+      saveData();
+      closeTradeModal();
+      refreshActiveView();
+    }
+
+    function confirmDeleteCurrentTrade() {
+      const id = document.getElementById('trade-id').value;
+      if (!id) return;
+
+      openConfirmModal(
+        'トレードの削除',
+        'このトレード記録を削除してもよろしいですか？この操作は取り消せません。',
+        () => {
+          state.trades = state.trades.filter(t => t.id !== id);
+          saveData();
+          closeTradeModal();
+          refreshActiveView();
+          showToast('トレードを削除しました');
+        }
+      );
+    }
+
+    function refreshActiveView() {
+      if (state.activeTab === 'calendar') renderCalendar();
+      if (state.activeTab === 'chart') renderChartTab();
+      if (state.activeTab === 'analytics') renderAnalytics();
+      if (state.activeTab === 'settings') renderSettings();
+    }
+
+    // ==========================================
+    // 8. タグ別勝率分析画面
+    // ==========================================
+    function setAnalyticsPeriod(period) {
+      state.analyticsPeriod = period;
+      renderAnalytics();
+    }
+
+    function renderAnalytics() {
+      const { currentYear, currentMonth, analyticsPeriod } = state;
+      document.getElementById('analytics-month-text').textContent = `${currentYear}/${currentMonth + 1}`;
+
+      const monthBtn = document.getElementById('period-btn-month');
+      const allBtn = document.getElementById('period-btn-all');
+      if (analyticsPeriod === 'month') {
+        monthBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all';
+        allBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
+      } else {
+        monthBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
+        allBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all';
+      }
+
+      const targetTrades = analyticsPeriod === 'month'
+        ? getTradesForMonth(currentYear, currentMonth)
+        : state.trades;
+
+      const totalPnl = targetTrades.reduce((s, t) => s + t.amount, 0);
+      const totalWins = targetTrades.filter(t => t.amount > 0).length;
+      const totalLosses = targetTrades.filter(t => t.amount < 0).length;
+      const overallWinRate = (totalWins + totalLosses) > 0 ? (totalWins / (totalWins + totalLosses)) * 100 : 0;
+
+      document.getElementById('analytics-overview').innerHTML = `
+        <span>対象: <strong class="text-slate-800">${targetTrades.length}件</strong>（勝率 <strong class="text-slate-800">${overallWinRate.toFixed(1)}%</strong>）</span>
+        <span>合計: <strong class="${totalPnl > 0 ? 'text-emerald-600' : totalPnl < 0 ? 'text-rose-600' : 'text-slate-800'}">${formatYen(totalPnl)}</strong></span>
+      `;
+
+      const tagStatsMap = {};
+      targetTrades.forEach(t => {
+        const tradeTags = (t.tags && t.tags.length > 0) ? t.tags : ['タグなし'];
+        tradeTags.forEach(tag => {
+          if (!tagStatsMap[tag]) {
+            tagStatsMap[tag] = { tag, wins: 0, losses: 0, draws: 0, count: 0, pnl: 0, pips: 0, hasPips: false };
+          }
+          const st = tagStatsMap[tag];
+          st.count++;
+          st.pnl += t.amount;
+          if (t.amount > 0) st.wins++;
+          else if (t.amount < 0) st.losses++;
+          else st.draws++;
+
+          if (t.pips !== null && t.pips !== '' && !isNaN(t.pips)) {
+            st.pips += Number(t.pips);
+            st.hasPips = true;
+          }
+        });
+      });
+
+      const statsList = Object.values(tagStatsMap).map(st => {
+        const decided = st.wins + st.losses;
+        return {
+          ...st,
+          winRate: decided > 0 ? (st.wins / decided) * 100 : 0,
+          avgPnl: st.count > 0 ? st.pnl / st.count : 0
+        };
+      });
+
+      const sortBy = document.getElementById('analytics-sort').value;
+      statsList.sort((a, b) => {
+        if (sortBy === 'winRate') return b.winRate - a.winRate || b.pnl - a.pnl;
+        if (sortBy === 'pnl') return b.pnl - a.pnl;
+        if (sortBy === 'count') return b.count - a.count || b.winRate - a.winRate;
+        return 0;
+      });
+
+      const listEl = document.getElementById('analytics-list');
+      if (statsList.length === 0) {
+        listEl.innerHTML = `
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-10 text-center space-y-2">
+            <p class="text-sm font-bold text-slate-600">この期間のトレードデータがありません</p>
+            <p class="text-xs text-slate-400">トレードを記録するとタグ別の勝率が自動で計算されます</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = statsList.map(st => {
+        const pnlColor = st.pnl > 0 ? 'text-emerald-600' : st.pnl < 0 ? 'text-rose-600' : 'text-slate-700';
+        const avgColor = st.avgPnl > 0 ? 'text-emerald-600' : st.avgPnl < 0 ? 'text-rose-600' : 'text-slate-700';
+        const barColor = st.winRate >= 50 ? 'bg-emerald-500' : st.winRate > 0 ? 'bg-rose-500' : 'bg-slate-300';
+        const winRateTextColor = st.winRate >= 50 ? 'text-emerald-600' : st.winRate > 0 ? 'text-rose-600' : 'text-slate-500';
+
+        return `
+          <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 text-xs font-extrabold truncate">
+                  #${escapeHTML(st.tag)}
+                </span>
+                <span class="text-xs font-semibold text-slate-400 shrink-0">
+                  ${st.wins}勝 ${st.losses}敗（計${st.count}回）
+                </span>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-xs font-medium text-slate-400 mr-1">勝率</span>
+                <span class="text-lg font-extrabold ${winRateTextColor}">${st.winRate.toFixed(1)}%</span>
+              </div>
+            </div>
+
+            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500 ${barColor}" style="width: ${Math.min(100, Math.max(0, st.winRate))}%"></div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+              <div class="bg-slate-50 rounded-xl px-3 py-2">
+                <p class="text-[10px] font-semibold text-slate-400">合計損益</p>
+                <p class="text-sm font-extrabold ${pnlColor}">${formatYen(st.pnl)}</p>
+              </div>
+              <div class="bg-slate-50 rounded-xl px-3 py-2">
+                <p class="text-[10px] font-semibold text-slate-400">平均損益</p>
+                <p class="text-sm font-extrabold ${avgColor}">${formatYen(st.avgPnl)}</p>
+              </div>
+              <div class="col-span-2 sm:col-span-1 bg-slate-50 rounded-xl px-3 py-2 flex sm:block items-center justify-between">
+                <p class="text-[10px] font-semibold text-slate-400">合計 pips</p>
+                <p class="text-sm font-bold text-slate-700">
+                  ${st.hasPips ? `${st.pips > 0 ? '+' : ''}${st.pips.toFixed(1)} pips` : '-'}
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // 9. 設定・タグ管理・CSV出力
+    // ==========================================
+    function renderSettings() {
+      const container = document.getElementById('settings-tag-list');
+      if (state.tags.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400">登録されているタグがありません</p>`;
+        return;
+      }
+
+      container.innerHTML = state.tags.map(tag => `
+        <div class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 pl-3 pr-1.5 py-1.5 rounded-xl text-xs font-bold">
+          <span>#${escapeHTML(tag)}</span>
+          <button onclick="confirmDeleteTag('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="p-1 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-rose-600 transition-colors" aria-label="タグを削除">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function addTagFromSettings() {
+      const input = document.getElementById('settings-new-tag-input');
+      const newTag = input.value.trim();
+      if (!newTag) return;
+
+      if (state.tags.includes(newTag)) {
+        showToast('そのタグはすでに登録されています', 'error');
+        return;
+      }
+
+      state.tags.push(newTag);
+      saveData();
+      input.value = '';
+      renderSettings();
+      showToast(`タグ「#${newTag}」を追加しました`);
+    }
+
+    function confirmDeleteTag(tag) {
+      openConfirmModal(
+        'タグの削除',
+        `タグ「#${tag}」を選択肢から削除しますか？（過去のトレード記録に付いているタグ履歴はそのまま残ります）`,
+        () => {
+          state.tags = state.tags.filter(t => t !== tag);
+          if (state.chartTagFilter === tag) state.chartTagFilter = 'ALL';
+          saveData();
+          renderSettings();
+          showToast(`タグ「#${tag}」を削除しました`);
+        }
+      );
+    }
+
+    function exportCSV() {
+      if (state.trades.length === 0) {
+        showToast('エクスポートするデータがありません', 'error');
+        return;
+      }
+
+      const sorted = [...state.trades].sort((a, b) => a.date.localeCompare(b.date));
+      const header = ['日付', '損益(円)', '獲得pips', 'タグ', 'メモ'];
+      const escapeCSV = (val) => {
+        const s = val === null || val === undefined ? '' : String(val);
+        return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+
+      const rows = sorted.map(t => [
+        t.date,
+        t.amount,
+        t.pips !== null && t.pips !== '' ? t.pips : '',
+        (t.tags || []).join(' / '),
+        t.memo || ''
+      ].map(escapeCSV).join(','));
+
+      const csvContent = '\uFEFF' + [header.join(','), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fx_trades_${todayStr}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('CSVファイルをダウンロードしました');
+    }
+
+    function confirmLoadSample() {
+      openConfirmModal(
+        'サンプルデータの再読み込み',
+        '現在のトレード記録をサンプルデータ（先月〜今月の12件）に置き換えますか？',
+        () => {
+          state.trades = generateSampleTrades();
+          state.tags = [...DEFAULT_TAGS];
+          state.chartTagFilter = 'ALL';
+          saveData();
+          goToCurrentMonth();
+          renderSettings();
+          showToast('サンプルデータを読み込みました');
+        }
+      );
+    }
+
+    function confirmClearAll() {
+      openConfirmModal(
+        '全データのリセット',
+        'すべてのトレード記録を削除して空の状態にしますか？この操作は取り消せません。',
+        () => {
+          state.trades = [];
+          saveData();
+          refreshActiveView();
+          showToast('すべてのトレード記録を削除しました');
+        }
+      );
+    }
+
+    // ==========================================
+    // 10. 汎用確認ダイアログ
+    // ==========================================
+    function openConfirmModal(title, message, onConfirm) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+      state.confirmCallback = onConfirm;
+
+      const okBtn = document.getElementById('confirm-ok-btn');
+      okBtn.onclick = () => {
+        closeConfirmModal();
+        if (typeof state.confirmCallback === 'function') state.confirmCallback();
+      };
+
+      document.getElementById('confirm-modal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirm-modal').classList.add('hidden');
+    }
+
+    // Enterキーでのタグ追加
+    document.getElementById('settings-new-tag-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addTagFromSettings();
+      }
+    });
+    document.getElementById('modal-new-tag-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addTagFromModal();
+      }
+    });
+
+    // アプリ起動
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
