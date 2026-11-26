@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- スマホのホーム画面追加（PWA風フルスクリーン起動）用メタタグ -->
+  <!-- iPhone / Android ホーム画面追加（PWA風フルスクリーン）用メタタグ -->
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="FXカレンダー">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FX Calendar v3">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#ffffff">
-  <title>FX Calendar - 損益カレンダー＆推移グラフ・タグ分析</title>
+  <meta name="theme-color" content="#020617">
+  <title>FX Calendar v3 - 損益・利益率・曜日別分析・確定申告</title>
 
   <!-- Tailwind CSS (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,6 +22,7 @@
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -35,161 +36,154 @@
     body {
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
+      color-scheme: dark;
     }
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    .pb-safe {
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideUp {
-      from { transform: translateY(18px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .animate-fade-in {
-      animation: fadeIn 0.18s ease-out forwards;
-    }
-    .animate-slide-up {
-      animation: slideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+    .animate-slide-up { animation: slideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen pb-24 sm:pb-12">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen pb-24 sm:pb-12">
 
   <!-- ==================== ヘッダー ==================== -->
-  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
-    <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
+  <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-3xl mx-auto px-3.5 sm:px-4 h-14 flex items-center justify-between gap-2">
       <!-- ロゴ -->
       <div class="flex items-center gap-2.5 min-w-0">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-sm shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 shrink-0">
+          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
           </svg>
         </div>
         <div class="truncate">
-          <h1 class="text-base font-extrabold tracking-tight text-slate-900 leading-tight">FX Calendar</h1>
-          <p class="text-[10px] font-medium text-slate-400 leading-none">損益管理・推移・タグ分析</p>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white leading-tight">FX Calendar</h1>
+            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v3</span>
+          </div>
+          <p class="text-[10px] font-medium text-slate-400 leading-none mt-0.5">利益率%・曜日分析・確定申告</p>
         </div>
       </div>
 
       <!-- PC向け上部ナビゲーション -->
-      <nav class="hidden sm:flex items-center bg-slate-100 p-1 rounded-xl">
-        <button onclick="switchTab('calendar')" id="nav-pc-calendar" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">カレンダー</button>
-        <button onclick="switchTab('chart')" id="nav-pc-chart" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">推移グラフ</button>
-        <button onclick="switchTab('analytics')" id="nav-pc-analytics" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">タグ分析</button>
-        <button onclick="switchTab('settings')" id="nav-pc-settings" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">設定・データ</button>
+      <nav class="hidden sm:flex items-center bg-slate-900 border border-slate-800 p-1 rounded-xl">
+        <button onclick="switchTab('calendar')" id="nav-pc-calendar" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all">カレンダー</button>
+        <button onclick="switchTab('chart')" id="nav-pc-chart" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all">グラフ</button>
+        <button onclick="switchTab('analytics')" id="nav-pc-analytics" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all">分析</button>
+        <button onclick="switchTab('annual')" id="nav-pc-annual" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all">年間</button>
+        <button onclick="switchTab('settings')" id="nav-pc-settings" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all">設定</button>
       </nav>
 
-      <!-- ＋記録ボタン -->
-      <button onclick="openTradeModal(null, state.selectedDateStr)" class="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-all shrink-0">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <!-- ＋記録するボタン -->
+      <button onclick="openRecordModal('trade', null, state.selectedDateStr)" class="flex items-center gap-1 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-md shadow-emerald-500/20 transition-all shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        <span>記録</span>
+        <span>記録する</span>
       </button>
     </div>
   </header>
 
   <!-- ==================== メインコンテンツ ==================== -->
-  <main class="max-w-3xl mx-auto px-3 sm:px-4 pt-4 space-y-4">
+  <main class="max-w-3xl mx-auto px-3 sm:px-4 pt-3.5 space-y-4">
 
     <!-- ########## タブ1: カレンダー画面 ########## -->
-    <section id="view-calendar" class="space-y-4">
+    <section id="view-calendar" class="space-y-3.5">
 
       <!-- 月切り替えバー -->
-      <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-2xl shadow-xs border border-slate-200/80">
-        <button onclick="changeMonth(-1)" class="p-2 -ml-2 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-600 transition-colors" aria-label="前月">
+      <div class="flex items-center justify-between bg-slate-900 px-3.5 py-2.5 rounded-2xl border border-slate-800">
+        <button onclick="changeMonth(-1)" class="p-2 -ml-1 rounded-xl hover:bg-slate-800 active:bg-slate-700 text-slate-300 transition-colors" aria-label="前月">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
 
         <div class="flex items-center gap-2.5">
-          <h2 id="calendar-month-label" class="text-lg font-extrabold text-slate-900 tracking-tight">2026年 11月</h2>
-          <button onclick="goToCurrentMonth()" id="btn-this-month" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors">
+          <h2 id="calendar-month-label" class="text-base sm:text-lg font-extrabold text-white tracking-tight">2026年 11月</h2>
+          <button onclick="goToCurrentMonth()" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors">
             今月
           </button>
         </div>
 
-        <button onclick="changeMonth(1)" class="p-2 -mr-2 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-600 transition-colors" aria-label="翌月">
+        <button onclick="changeMonth(1)" class="p-2 -mr-1 rounded-xl hover:bg-slate-800 active:bg-slate-700 text-slate-300 transition-colors" aria-label="翌月">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </button>
       </div>
 
-      <!-- 月間サマリーカード -->
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 sm:p-5">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3.5 border-b border-slate-100">
+      <!-- 月間サマリーカード（月利%・平均ロット追加） -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3 border-b border-slate-800">
           <div>
-            <p class="text-[11px] font-bold text-slate-400 tracking-wider mb-1">月間合計損益</p>
+            <p class="text-[11px] font-bold text-slate-400 tracking-wider mb-0.5">月間トレード損益 ／ 月利（月初残高比）</p>
             <div class="flex items-baseline gap-2.5 flex-wrap">
-              <span id="summary-total-pnl" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">¥0</span>
-              <span id="summary-total-pips" class="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 hidden">0 pips</span>
+              <span id="summary-total-pnl" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">¥0</span>
+              <span id="summary-monthly-roi" class="text-sm sm:text-base font-extrabold px-2.5 py-0.5 rounded-lg bg-slate-800 text-slate-300">-</span>
             </div>
           </div>
-          <div class="text-left sm:text-right">
-            <span id="summary-record-badge" class="inline-flex items-center gap-1.5 text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="summary-record-badge" class="inline-flex items-center text-xs font-bold bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700/70">
               0勝 0敗（計0回）
             </span>
           </div>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 pt-3.5 text-center">
-          <div class="bg-slate-50 rounded-xl p-2.5">
-            <p class="text-[11px] font-semibold text-slate-400 mb-0.5">月間勝率</p>
-            <p id="summary-win-rate" class="text-base sm:text-lg font-extrabold text-slate-800">0.0%</p>
+        <div class="grid grid-cols-3 gap-2 pt-3 text-center">
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5">
+            <p class="text-[10px] font-semibold text-slate-400 mb-0.5">月間勝率</p>
+            <p id="summary-win-rate" class="text-base sm:text-lg font-extrabold text-white">0.0%</p>
           </div>
-          <div class="bg-slate-50 rounded-xl p-2.5">
-            <p class="text-[11px] font-semibold text-slate-400 mb-0.5">平均損益</p>
-            <p id="summary-avg-pnl" class="text-base sm:text-lg font-extrabold text-slate-800">¥0</p>
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5">
+            <p class="text-[10px] font-semibold text-slate-400 mb-0.5">平均損益</p>
+            <p id="summary-avg-pnl" class="text-base sm:text-lg font-extrabold text-white">¥0</p>
           </div>
-          <div class="bg-slate-50 rounded-xl p-2.5">
-            <p class="text-[11px] font-semibold text-slate-400 mb-0.5">取引日数</p>
-            <p id="summary-active-days" class="text-base sm:text-lg font-extrabold text-slate-800">0日</p>
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5">
+            <p class="text-[10px] font-semibold text-sky-400/90 mb-0.5">平均ロット</p>
+            <p id="summary-avg-lot" class="text-base sm:text-lg font-extrabold text-sky-300">-</p>
           </div>
         </div>
       </div>
 
       <!-- カレンダーグリッド -->
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
-        <!-- 曜日ヘッダー -->
-        <div class="grid grid-cols-7 border-b border-slate-100 bg-slate-50/80 text-center py-2 text-[11px] font-bold">
-          <div class="text-rose-500">日</div>
-          <div class="text-slate-500">月</div>
-          <div class="text-slate-500">火</div>
-          <div class="text-slate-500">水</div>
-          <div class="text-slate-500">木</div>
-          <div class="text-slate-500">金</div>
-          <div class="text-blue-500">土</div>
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+        <div class="grid grid-cols-7 border-b border-slate-800 bg-slate-950/50 text-center py-2 text-[11px] font-bold">
+          <div class="text-rose-400">日</div>
+          <div class="text-slate-400">月</div>
+          <div class="text-slate-400">火</div>
+          <div class="text-slate-400">水</div>
+          <div class="text-slate-400">木</div>
+          <div class="text-slate-400">金</div>
+          <div class="text-sky-400">土</div>
         </div>
-        <!-- 日付マス -->
-        <div id="calendar-grid" class="grid grid-cols-7 divide-x divide-y divide-slate-100">
+        <div id="calendar-grid" class="grid grid-cols-7 divide-x divide-y divide-slate-800/80">
           <!-- JSで動的生成 -->
+        </div>
+        <div class="px-3.5 py-2 bg-slate-950/40 border-t border-slate-800 flex items-center justify-end gap-3 text-[10px] text-slate-400">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>利益</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400"></span>損失</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span>資金移動あり</span>
         </div>
       </div>
 
-      <!-- 選択中の日のトレード一覧（カレンダー下部に常時表示） -->
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
-        <div class="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/50">
-          <div>
-            <h3 id="selected-day-title" class="text-sm font-extrabold text-slate-900">2026年11月26日 (木)</h3>
-            <p id="selected-day-summary" class="text-xs font-semibold text-slate-500 mt-0.5">合計: ¥0（0件）</p>
+      <!-- 選択中の日のトレード＆資金移動一覧 -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-2 bg-slate-950/40">
+          <div class="min-w-0">
+            <h3 id="selected-day-title" class="text-sm font-extrabold text-white">2026年11月26日 (木)</h3>
+            <p id="selected-day-summary" class="text-xs font-semibold text-slate-400 mt-0.5">損益: ¥0（0件）</p>
           </div>
-          <button onclick="openTradeModal(null, state.selectedDateStr)" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            <span>この日に追加</span>
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="openRecordModal('transfer', null, state.selectedDateStr)" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-bold transition-all active:scale-95">
+              ＋資金移動
+            </button>
+            <button onclick="openRecordModal('trade', null, state.selectedDateStr)" class="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-extrabold transition-all active:scale-95">
+              ＋損益
+            </button>
+          </div>
         </div>
         <div id="selected-day-list" class="p-3.5 space-y-2.5">
           <!-- JSで描画 -->
@@ -197,36 +191,35 @@
       </div>
     </section>
 
-    <!-- ########## タブ2: 推移グラフ画面（Chart.js） ########## -->
-    <section id="view-chart" class="hidden space-y-4">
+    <!-- ########## タブ2: 推移グラフ画面（金額 / 利益率% 切替） ########## -->
+    <section id="view-chart" class="hidden space-y-3.5">
 
-      <!-- フィルター＆グラフモード切り替えカード -->
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 space-y-3.5">
-        <!-- 期間フィルター -->
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-bold text-slate-500">表示期間</span>
-          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
-            <button onclick="setChartPeriod('month')" id="chart-period-month" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">表示中の月</button>
+      <!-- モード・期間・タグフィルタカード -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
+        <!-- 金額(円) / 利益率(%) ワンタップ切替 -->
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400">表示モード</span>
+          <div class="inline-flex bg-slate-950 border border-slate-800 p-1 rounded-xl">
+            <button onclick="setChartMode('yen')" id="chart-mode-yen" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all">金額（円）</button>
+            <button onclick="setChartMode('roi')" id="chart-mode-roi" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all">利益率（%）</button>
+          </div>
+        </div>
+
+        <!-- 期間切替 -->
+        <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+          <span class="text-xs font-bold text-slate-400">表示期間</span>
+          <div class="inline-flex bg-slate-950 border border-slate-800 p-1 rounded-xl">
+            <button onclick="setChartPeriod('month')" id="chart-period-month" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">今月</button>
             <button onclick="setChartPeriod('30d')" id="chart-period-30d" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">直近30日</button>
             <button onclick="setChartPeriod('all')" id="chart-period-all" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">全期間</button>
           </div>
         </div>
 
-        <!-- グラフモード切替 -->
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-bold text-slate-500">表示モード</span>
-          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
-            <button onclick="setChartMode('cumulative')" id="chart-mode-cumulative" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">累計損益</button>
-            <button onclick="setChartMode('daily')" id="chart-mode-daily" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">日別損益</button>
-            <button onclick="setChartMode('both')" id="chart-mode-both" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">2段表示</button>
-          </div>
-        </div>
-
-        <!-- タグフィルター（横スクロールチップ） -->
-        <div class="pt-1 border-t border-slate-100">
+        <!-- タグ絞り込み -->
+        <div class="pt-2 border-t border-slate-800/80">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-slate-500">タグ絞り込み</span>
-            <span id="chart-filter-count" class="text-[11px] font-semibold text-slate-400">0件</span>
+            <span class="text-xs font-bold text-slate-400">タグ・EA絞り込み</span>
+            <span id="chart-filter-count" class="text-[11px] font-semibold text-slate-400">対象: 0件</span>
           </div>
           <div id="chart-tag-chips" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
             <!-- JSで生成 -->
@@ -234,251 +227,327 @@
         </div>
       </div>
 
-      <!-- 累計損益グラフカード -->
-      <div id="cumulative-chart-card" class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 space-y-2">
+      <!-- 累計推移グラフ -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-2">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-sm font-extrabold text-slate-900">累計損益（資産曲線）</h3>
-            <p id="cumulative-chart-subtitle" class="text-[11px] text-slate-400">選択期間内の累積収支推移</p>
+            <h3 id="cumulative-chart-title" class="text-sm font-extrabold text-white">累計損益（資産曲線）</h3>
+            <p id="cumulative-chart-sub" class="text-[11px] text-slate-400">選択期間・タグの累積収支推移</p>
           </div>
-          <span id="cumulative-chart-badge" class="text-sm font-extrabold text-emerald-600">+¥0</span>
-        </div>
-        <div class="relative w-full h-60 sm:h-72">
-          <canvas id="cumulative-chart-canvas"></canvas>
-          <div id="cumulative-empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center bg-white/90">
-            <p class="text-sm font-bold text-slate-500">表示できるデータがありません</p>
-            <p class="text-xs text-slate-400 mt-1">期間やタグの絞り込みを変更してください</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 日別損益グラフカード -->
-      <div id="daily-chart-card" class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 space-y-2">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-sm font-extrabold text-slate-900">日別損益（棒グラフ）</h3>
-            <p class="text-[11px] text-slate-400">取引日ごとの損益バランス</p>
-          </div>
+          <span id="cumulative-chart-badge" class="text-sm font-extrabold text-emerald-400">+¥0</span>
         </div>
         <div class="relative w-full h-56 sm:h-64">
-          <canvas id="daily-chart-canvas"></canvas>
-          <div id="daily-empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center bg-white/90">
-            <p class="text-sm font-bold text-slate-500">表示できるデータがありません</p>
-            <p class="text-xs text-slate-400 mt-1">期間やタグの絞り込みを変更してください</p>
+          <canvas id="cumulative-chart-canvas"></canvas>
+          <div id="cumulative-empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center bg-slate-900/90">
+            <p class="text-sm font-bold text-slate-400">表示できるデータがありません</p>
           </div>
         </div>
       </div>
 
-      <!-- パフォーマンス指標カード（4項目） -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4">
+      <!-- 日別棒グラフ -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-2">
+        <div>
+          <h3 id="daily-chart-title" class="text-sm font-extrabold text-white">日別損益（棒グラフ）</h3>
+          <p id="daily-chart-sub" class="text-[11px] text-slate-400">取引日ごとの損益バランス</p>
+        </div>
+        <div class="relative w-full h-52 sm:h-60">
+          <canvas id="daily-chart-canvas"></canvas>
+          <div id="daily-empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center bg-slate-900/90">
+            <p class="text-sm font-bold text-slate-400">表示できるデータがありません</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下部KPIカード（5項目：累計損益・累計利益率%・PF・最大DD・最大連勝） -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5">
           <p class="text-[11px] font-bold text-slate-400 mb-1">累計損益</p>
-          <p id="kpi-total-pnl" class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">¥0</p>
+          <p id="kpi-total-pnl" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">¥0</p>
           <p id="kpi-win-rate" class="text-[11px] font-semibold text-slate-400 mt-1">勝率 0.0%</p>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4">
-          <p class="text-[11px] font-bold text-slate-400 mb-1">プロフィットファクター (PF)</p>
-          <p id="kpi-pf" class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">-</p>
-          <p class="text-[11px] font-medium text-slate-400 mt-1">総利益 ÷ 総損失</p>
+        <div class="bg-slate-900 rounded-2xl border border-emerald-500/30 p-3.5">
+          <p class="text-[11px] font-bold text-emerald-400 mb-1">累計利益率（%）</p>
+          <p id="kpi-total-roi" class="text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-400">0.0%</p>
+          <p class="text-[11px] font-medium text-slate-400 mt-1">日次利益率の累計</p>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4">
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5">
+          <p class="text-[11px] font-bold text-slate-400 mb-1">プロフィットファクター</p>
+          <p id="kpi-pf" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">-</p>
+          <p class="text-[11px] font-medium text-slate-500 mt-1">総利益 ÷ 総損失</p>
+        </div>
+
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5">
           <p class="text-[11px] font-bold text-slate-400 mb-1">最大ドローダウン</p>
-          <p id="kpi-max-dd" class="text-xl sm:text-2xl font-extrabold tracking-tight text-rose-600">¥0</p>
-          <p class="text-[11px] font-medium text-slate-400 mt-1">ピークからの最大下落幅</p>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4">
-          <p class="text-[11px] font-bold text-slate-400 mb-1">最大連勝数</p>
-          <p id="kpi-max-streak" class="text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-600">0連勝</p>
-          <p id="kpi-max-loss-streak" class="text-[11px] font-medium text-slate-400 mt-1">最大連敗: 0連敗</p>
+          <p id="kpi-max-dd" class="text-xl sm:text-2xl font-extrabold tracking-tight text-rose-400">¥0</p>
+          <p id="kpi-max-streak-inline" class="text-[11px] font-medium text-slate-400 mt-1">最大連勝: 0連勝</p>
         </div>
       </div>
-
     </section>
 
-    <!-- ########## タブ3: タグ別勝率分析画面 ########## -->
-    <section id="view-analytics" class="hidden space-y-4">
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-3.5 space-y-3">
+    <!-- ########## タブ3: 分析画面（曜日別自動集計 ＋ タグ別勝率） ########## -->
+    <section id="view-analytics" class="hidden space-y-3.5">
+
+      <!-- サブタブ切替（曜日別 / タグ別）＆期間切替 -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5 space-y-3">
+        <div class="grid grid-cols-2 bg-slate-950 border border-slate-800 p-1 rounded-xl">
+          <button onclick="setAnalyticsSubTab('weekday')" id="subtab-btn-weekday" class="py-2 rounded-lg text-xs font-extrabold transition-all">
+            曜日別（月〜金）
+          </button>
+          <button onclick="setAnalyticsSubTab('tag')" id="subtab-btn-tag" class="py-2 rounded-lg text-xs font-extrabold transition-all">
+            タグ・EA別勝率
+          </button>
+        </div>
+
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <!-- 期間切り替え -->
-          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
-            <button onclick="setAnalyticsPeriod('month')" id="period-btn-month" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all">
+          <div class="inline-flex bg-slate-950 border border-slate-800 p-1 rounded-xl">
+            <button onclick="setAnalyticsPeriod('month')" id="period-btn-month" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
               表示月 (<span id="analytics-month-text">今月</span>)
             </button>
-            <button onclick="setAnalyticsPeriod('all')" id="period-btn-all" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all">
+            <button onclick="setAnalyticsPeriod('all')" id="period-btn-all" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
               全期間
             </button>
           </div>
 
-          <!-- 並び替え -->
-          <div class="flex items-center gap-1.5">
+          <div id="analytics-tag-sort-wrap" class="hidden flex items-center gap-1.5">
             <span class="text-xs font-semibold text-slate-400">並び替え:</span>
-            <select id="analytics-sort" onchange="renderAnalytics()" class="bg-slate-100 border-none text-slate-700 text-xs font-bold rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer">
+            <select id="analytics-sort" onchange="renderAnalytics()" class="bg-slate-800 border border-slate-700 text-slate-100 text-xs font-bold rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer">
               <option value="winRate">勝率が高い順</option>
               <option value="pnl">合計損益が高い順</option>
-              <option value="count">トレード回数が多い順</option>
+              <option value="count">回数が多い順</option>
             </select>
           </div>
         </div>
+      </div>
 
-        <div id="analytics-overview" class="flex items-center justify-between text-xs bg-slate-50 rounded-xl px-3.5 py-2.5 text-slate-600">
+      <!-- ===== サブタブA: 曜日別（月〜金）自動集計 [NEW in v3] ===== -->
+      <div id="analytics-panel-weekday" class="space-y-3.5">
+        <!-- 曜日別グラフ -->
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-extrabold text-white">曜日別パフォーマンス比較</h3>
+              <p class="text-[11px] text-slate-400">手動停止ルールの判断材料に（棒＝合計損益）</p>
+            </div>
+          </div>
+          <div class="relative w-full h-52">
+            <canvas id="weekday-chart-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- 曜日別カード一覧 -->
+        <div id="weekday-cards-list" class="space-y-2.5">
           <!-- JSで描画 -->
         </div>
       </div>
 
-      <!-- タグ別分析リスト -->
-      <div id="analytics-list" class="space-y-3">
-        <!-- JSで描画 -->
+      <!-- ===== サブタブB: タグ別勝率分析 ===== -->
+      <div id="analytics-panel-tag" class="hidden space-y-3">
+        <div id="analytics-overview" class="flex items-center justify-between text-xs bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-slate-300">
+          <!-- JSで描画 -->
+        </div>
+        <div id="analytics-list" class="space-y-2.5">
+          <!-- JSで描画 -->
+        </div>
       </div>
     </section>
 
-    <!-- ########## タブ4: 設定・データ管理画面 ########## -->
-    <section id="view-settings" class="hidden space-y-4">
-
-      <!-- スマホのホーム画面追加ガイドカード -->
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 sm:p-5 space-y-3.5">
-        <div class="flex items-start gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-base font-extrabold text-slate-900">スマホのホーム画面に追加する手順</h2>
-            <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
-              ホーム画面にアイコンを置くと、通常のアプリのようにワンタップ・全画面ですぐにカレンダーを開けます。
-            </p>
-          </div>
+    <!-- ########## タブ4: 年間・確定申告サマリー画面 ########## -->
+    <section id="view-annual" class="hidden space-y-3.5">
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xs font-bold text-slate-400">対象年</span>
+          <select id="annual-year-select" onchange="renderAnnualTab()" class="bg-slate-800 border border-slate-700 text-white text-sm font-extrabold rounded-xl px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer">
+            <!-- JSで動的生成 -->
+          </select>
         </div>
 
-        <!-- iPhone / Android ガイド切り替え -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- iPhone (Safari) -->
-          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/60 space-y-2">
-            <div class="flex items-center gap-1.5">
-              <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-extrabold">iPhone</span>
-              <span class="text-xs font-bold text-slate-800">Safari からの手順</span>
-            </div>
-            <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside leading-relaxed">
-              <li>このページを <strong>Safari</strong> で開く</li>
-              <li>画面下部の <strong>共有ボタン（□↑）</strong> をタップ</li>
-              <li>下にスクロールし <strong>「ホーム画面に追加」</strong> を選択</li>
-              <li>右上の <strong>「追加」</strong> をタップして完了</li>
-            </ol>
-          </div>
+        <button onclick="exportAnnualTaxCSV()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 text-xs font-extrabold shadow-sm transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          <span>確定申告用 年間CSV出力</span>
+        </button>
+      </div>
 
-          <!-- Android (Chrome) -->
-          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/60 space-y-2">
-            <div class="flex items-center gap-1.5">
-              <span class="px-2 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-extrabold">Android</span>
-              <span class="text-xs font-bold text-slate-800">Chrome からの手順</span>
-            </div>
-            <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside leading-relaxed">
-              <li>このページを <strong>Chrome</strong> で開く</li>
-              <li>画面右上の <strong>メニュー（︙）</strong> をタップ</li>
-              <li><strong>「ホーム画面に追加」</strong> または <strong>「アプリをインストール」</strong> を選択</li>
-              <li><strong>「追加」</strong> をタップして完了</li>
-            </ol>
-          </div>
+      <!-- 年間サマリーカード（4枚 + 年間利益率%） -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5">
+          <p class="text-[11px] font-bold text-slate-400 mb-1">年間トレード損益（確定申告）</p>
+          <p id="annual-net-pnl" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">¥0</p>
+          <p id="annual-roi-badge" class="text-[11px] font-extrabold text-emerald-400 mt-1">年間利益率: -</p>
         </div>
 
-        <div class="bg-amber-50/80 border border-amber-200/70 rounded-xl p-3 text-[11px] text-amber-800 leading-relaxed">
-          <strong>ヒント：</strong>Webアプリの仕様上、ホーム画面に直接カレンダーを描画する「OS標準ウィジェット」には対応していませんが、アイコンをホーム画面の目立つ位置に置くことで1タップで即確認できます。
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5">
+          <p class="text-[11px] font-bold text-amber-400/90 mb-1">累計ウォレット隔離額</p>
+          <p id="annual-wallet-isolation" class="text-xl sm:text-2xl font-extrabold tracking-tight text-amber-400">¥0</p>
+          <p id="annual-trade-count" class="text-[11px] font-medium text-slate-400 mt-1">0回（勝率 0.0%）</p>
+        </div>
+
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5">
+          <p class="text-[11px] font-bold text-slate-400 mb-1">純入出金額（入金 − 出金）</p>
+          <p id="annual-net-deposit" class="text-xl sm:text-2xl font-extrabold tracking-tight text-sky-400">¥0</p>
+          <p id="annual-deposit-detail" class="text-[11px] font-medium text-slate-500 mt-1">入金 ¥0 / 出金 ¥0</p>
+        </div>
+
+        <div class="bg-slate-900 rounded-2xl border border-emerald-500/30 p-3.5">
+          <p class="text-[11px] font-bold text-emerald-400 mb-1">推定口座残高（全期間累計）</p>
+          <p id="annual-est-balance" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">¥0</p>
+          <p id="annual-initial-capital-hint" class="text-[10px] font-medium text-slate-400 mt-1">初期資金ベース</p>
         </div>
       </div>
 
-      <!-- タグ管理カード -->
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 sm:p-5 space-y-4">
+      <!-- 月別内訳テーブル（1〜12月：損益・月利%・勝率・平均ロット・資金移動） -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-800 bg-slate-950/40 flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-white">月別サマリー（1月〜12月）</h3>
+          <span class="text-[10px] text-slate-400">横スクロール可</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[440px]">
+            <thead>
+              <tr class="border-b border-slate-800 text-[11px] font-bold text-slate-400 bg-slate-950/30">
+                <th class="py-2.5 px-3">月</th>
+                <th class="py-2.5 px-2 text-right">月間損益</th>
+                <th class="py-2.5 px-2 text-right text-emerald-400/90">月利%</th>
+                <th class="py-2.5 px-2 text-right">勝率</th>
+                <th class="py-2.5 px-2 text-right text-sky-400/90">平均Lot</th>
+                <th class="py-2.5 px-3 text-right text-amber-400/90">隔離</th>
+              </tr>
+            </thead>
+            <tbody id="annual-monthly-tbody" class="divide-y divide-slate-800/70 text-xs">
+              <!-- JSで描画 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ########## タブ5: 設定・データ管理画面 ########## -->
+    <section id="view-settings" class="hidden space-y-3.5">
+
+      <!-- 1. 初期口座資金の設定（利益率%の基準） -->
+      <div class="bg-slate-900 rounded-2xl border border-emerald-500/30 p-4 space-y-3">
         <div>
-          <h2 class="text-base font-extrabold text-slate-900">タグの管理</h2>
-          <p class="text-xs text-slate-500 mt-0.5">通貨ペアやトレード手法など、自由にタグを追加・削除できます。</p>
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm font-extrabold text-white">初期口座資金の設定</h2>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400">利益率%の基準</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+            日次・月次・年間の利益率（%）および推定口座残高を計算するためのスタート資金を設定します（デフォルト: 100,000円）。
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">¥</span>
+            <input type="number" id="settings-initial-capital" inputmode="numeric" placeholder="100000" class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-3.5 py-2.5 text-sm font-extrabold text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <button onclick="saveInitialCapital()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold transition-colors shrink-0">
+            保存
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. JSONバックアップ＆復元 -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3.5">
+        <div>
+          <h2 class="text-sm font-extrabold text-white">JSONバックアップ＆復元</h2>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+            OSアップデートや機種変更に備え、全データ（トレード・ロット・資金移動・設定）をJSONファイルに保存・復元できます。
+          </p>
         </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button onclick="exportJSONBackup()" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-400 text-xs font-extrabold transition-all">
+            <span>JSONバックアップを保存</span>
+          </button>
+
+          <label class="cursor-pointer flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-400 text-xs font-extrabold transition-all">
+            <span>JSONから復元（インポート）</span>
+            <input type="file" id="json-import-input" accept=".json,application/json" onchange="handleJSONImportFile(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <!-- 3. MT5履歴CSVインポート -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
+        <div>
+          <h2 class="text-sm font-extrabold text-white">MT5履歴 CSVインポート</h2>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+            UTF-8 / Shift-JIS / UTF-16LE を自動判定し、日付・通貨ペア・損益・ロット数（Volume/Lot）・コメント列を一括取り込みします。
+          </p>
+        </div>
+        <label class="cursor-pointer w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-extrabold transition-all">
+          <span>CSVファイルを選択してプレビュー</span>
+          <input type="file" id="csv-import-input" accept=".csv,text/csv,text/plain" onchange="handleCSVImportFile(event)" class="hidden">
+        </label>
+      </div>
+
+      <!-- 4. タグ・EAプリセット管理 -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
+        <div>
+          <h2 class="text-sm font-extrabold text-white">タグ・EAプリセット管理</h2>
+          <p class="text-xs text-slate-400 mt-0.5">稼働中のEA名や通貨ペアを自由に追加・削除できます。</p>
+        </div>
         <div class="flex gap-2">
-          <input type="text" id="settings-new-tag-input" placeholder="新しいタグ名（例: 押し目買い, 欧州時間）" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-          <button onclick="addTagFromSettings()" class="bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shrink-0">
+          <input type="text" id="settings-new-tag-input" placeholder="新しいタグ（例: EA-6, GBPJPY）" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+          <button onclick="addTagFromSettings()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0">
             追加
           </button>
         </div>
-
-        <div id="settings-tag-list" class="flex flex-wrap gap-2 pt-1">
-          <!-- JSで描画 -->
-        </div>
+        <div id="settings-tag-list" class="flex flex-wrap gap-2 pt-1"></div>
       </div>
 
-      <!-- データ管理カード -->
-      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 sm:p-5 space-y-4">
-        <div>
-          <h2 class="text-base font-extrabold text-slate-900">データのバックアップ・初期化</h2>
-          <p class="text-xs text-slate-500 mt-0.5">入力データはお使いのブラウザ（localStorage）に自動保存されています。</p>
-        </div>
+      <!-- 5. その他データ操作 -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-2.5">
+        <h2 class="text-sm font-extrabold text-white mb-1">その他データ操作</h2>
+        <button onclick="exportCSV()" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-left">
+          <div>
+            <p class="text-xs font-bold text-slate-200">全トレード履歴をCSV出力</p>
+            <p class="text-[11px] text-slate-400">ロット数・pips・タグを含むExcel用CSV</p>
+          </div>
+          <span class="text-xs font-bold text-emerald-400">出力</span>
+        </button>
 
-        <div class="space-y-2.5">
-          <!-- CSV出力 -->
-          <button onclick="exportCSV()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 transition-colors text-left">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-bold text-slate-800">CSV形式でエクスポート</p>
-                <p class="text-xs text-slate-500">Excelやスプレッドシートで開ける形式で保存します</p>
-              </div>
-            </div>
-            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
+        <button onclick="confirmLoadSample()" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-left">
+          <div>
+            <p class="text-xs font-bold text-slate-200">サンプルデータを再読み込み</p>
+            <p class="text-[11px] text-slate-400">0.35〜0.40Lotの10件＋85,000円隔離のデモデータ</p>
+          </div>
+          <span class="text-xs font-bold text-sky-400">復元</span>
+        </button>
 
-          <!-- サンプルデータ再読み込み -->
-          <button onclick="confirmLoadSample()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 transition-colors text-left">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-bold text-slate-800">サンプルデータを再読み込み</p>
-                <p class="text-xs text-slate-500">今月・先月のデモ用トレード12件を復元します</p>
-              </div>
-            </div>
-            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-
-          <!-- 全データリセット -->
-          <button onclick="confirmClearAll()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/70 transition-colors text-left">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-bold text-rose-700">全データリセット</p>
-                <p class="text-xs text-rose-500">すべてのトレード記録を削除して最初から始めます</p>
-              </div>
-            </div>
-            <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-        </div>
+        <button onclick="confirmClearAll()" class="w-full flex items-center justify-between p-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-left">
+          <div>
+            <p class="text-xs font-bold text-rose-400">全データリセット</p>
+            <p class="text-[11px] text-rose-300/70">サンプルデータを消して本番運用を始める際に使用</p>
+          </div>
+          <span class="text-xs font-bold text-rose-400">削除</span>
+        </button>
       </div>
 
+      <!-- 6. ホーム画面追加ガイド -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-2.5">
+        <h2 class="text-sm font-extrabold text-white">スマホのホーム画面に追加する方法</h2>
+        <div class="space-y-2 text-xs text-slate-400 leading-relaxed">
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">
+            <p class="font-bold text-slate-200 mb-1">iPhone（Chrome / Safari）</p>
+            <p>画面の「共有」アイコン（四角から上矢印）をタップ ＞ 下にスクロールして「ホーム画面に追加」＞「追加」をタップ。</p>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">
+            <p class="font-bold text-slate-200 mb-1">Android（Chrome）</p>
+            <p>右上のメニュー（︙）をタップ ＞「ホーム画面に追加」または「アプリをインストール」をタップ。</p>
+          </div>
+        </div>
+      </div>
     </section>
 
   </main>
 
-  <!-- ==================== スマホ向け固定ボトムナビ（4タブ） ==================== -->
-  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 pb-safe">
-    <div class="grid grid-cols-4 h-16">
+  <!-- ==================== スマホ向け固定ボトムナビ（5タブ） ==================== -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 pb-safe">
+    <div class="grid grid-cols-5 h-16">
       <button onclick="switchTab('calendar')" id="nav-sp-calendar" class="flex flex-col items-center justify-center gap-1 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -490,7 +559,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
         </svg>
-        <span class="text-[10px] font-bold">推移グラフ</span>
+        <span class="text-[10px] font-bold">グラフ</span>
       </button>
 
       <button onclick="switchTab('analytics')" id="nav-sp-analytics" class="flex flex-col items-center justify-center gap-1 transition-colors">
@@ -498,7 +567,14 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
         </svg>
-        <span class="text-[10px] font-bold">タグ分析</span>
+        <span class="text-[10px] font-bold">分析</span>
+      </button>
+
+      <button onclick="switchTab('annual')" id="nav-sp-annual" class="flex flex-col items-center justify-center gap-1 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+        <span class="text-[10px] font-bold">年間</span>
       </button>
 
       <button onclick="switchTab('settings')" id="nav-sp-settings" class="flex flex-col items-center justify-center gap-1 transition-colors">
@@ -511,110 +587,197 @@
     </div>
   </nav>
 
-  <!-- ==================== モーダル: トレード入力・編集 ==================== -->
-  <div id="trade-modal" class="fixed inset-0 z-50 hidden">
-    <div onclick="closeTradeModal()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-xs animate-fade-in"></div>
+  <!-- ==================== モーダル: 記録入力・編集 ==================== -->
+  <div id="record-modal" class="fixed inset-0 z-50 hidden">
+    <div onclick="closeRecordModal()" class="absolute inset-0 bg-black/70 backdrop-blur-xs animate-fade-in"></div>
     <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none p-0 sm:p-4">
-      <div class="pointer-events-auto w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] flex flex-col animate-slide-up overflow-hidden">
-        <!-- ヘッダー -->
-        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-          <h3 id="trade-modal-title" class="text-base font-extrabold text-slate-900">トレードを記録</h3>
-          <button onclick="closeTradeModal()" class="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+      <div class="pointer-events-auto w-full sm:max-w-lg bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] flex flex-col animate-slide-up overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
+          <h3 id="record-modal-title" class="text-base font-extrabold text-white">記録を追加</h3>
+          <button onclick="closeRecordModal()" class="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <!-- 入力フォーム -->
-        <form id="trade-form" onsubmit="saveTrade(event)" class="p-5 overflow-y-auto space-y-5 flex-1">
-          <input type="hidden" id="trade-id">
-
-          <!-- 損益入力（勝ち・負け 大きな切替ボタン） -->
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">結果・損益金額（円）</label>
-            <div class="grid grid-cols-2 gap-2.5 mb-3">
-              <button type="button" id="sign-btn-plus" onclick="setTradeSign(1)" class="py-3 rounded-xl text-sm font-extrabold border-2 transition-all flex items-center justify-center gap-1.5">
-                <span>＋ 勝ち（利益）</span>
-              </button>
-              <button type="button" id="sign-btn-minus" onclick="setTradeSign(-1)" class="py-3 rounded-xl text-sm font-extrabold border-2 transition-all flex items-center justify-center gap-1.5">
-                <span>− 負け（損失）</span>
-              </button>
-            </div>
-            <div class="relative">
-              <span id="amount-prefix" class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-emerald-600">+¥</span>
-              <input type="number" id="trade-amount" inputmode="numeric" min="0" step="1" placeholder="10000" required class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-xl font-extrabold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-            </div>
-            <p class="text-[11px] text-slate-400 mt-1">※ 0を入力すると「引き分け（同値撤退）」になります</p>
+        <div id="record-type-switcher" class="px-5 pt-3.5 shrink-0">
+          <div class="grid grid-cols-2 bg-slate-950 border border-slate-800 p-1 rounded-xl">
+            <button type="button" id="type-tab-trade" onclick="setRecordType('trade')" class="py-2 rounded-lg text-xs font-extrabold transition-all">
+              トレード損益
+            </button>
+            <button type="button" id="type-tab-transfer" onclick="setRecordType('transfer')" class="py-2 rounded-lg text-xs font-extrabold transition-all">
+              資金移動・ウォレット隔離
+            </button>
           </div>
+        </div>
 
-          <!-- 日付 & 獲得pips（横並び） -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <form id="record-form" onsubmit="saveRecord(event)" class="p-5 overflow-y-auto space-y-4 flex-1">
+          <input type="hidden" id="record-id">
+
+          <!-- トレード損益フィールド -->
+          <div id="fields-trade" class="space-y-4">
             <div>
-              <label for="trade-date" class="block text-xs font-bold text-slate-500 mb-1.5">日付</label>
-              <input type="date" id="trade-date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-            </div>
-            <div>
-              <label for="trade-pips" class="block text-xs font-bold text-slate-500 mb-1.5">獲得 pips <span class="font-normal text-slate-400">(任意)</span></label>
+              <label class="block text-xs font-bold text-slate-400 mb-1.5">結果・損益金額（円）</label>
+              <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+                <button type="button" id="sign-btn-plus" onclick="setTradeSign(1)" class="py-2.5 rounded-xl text-sm font-extrabold border-2 transition-all">
+                  ＋ 勝ち（利益）
+                </button>
+                <button type="button" id="sign-btn-minus" onclick="setTradeSign(-1)" class="py-2.5 rounded-xl text-sm font-extrabold border-2 transition-all">
+                  − 負け（損失）
+                </button>
+              </div>
               <div class="relative">
-                <input type="number" id="trade-pips" inputmode="decimal" step="0.1" placeholder="例: 25.5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 pr-12 text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">pips</span>
+                <span id="amount-prefix" class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-emerald-400">+¥</span>
+                <input type="number" id="trade-amount" inputmode="numeric" min="0" step="1" placeholder="12500" class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-12 pr-4 py-3 text-xl font-extrabold text-white focus:ring-2 focus:ring-emerald-500 outline-none">
               </div>
             </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <div class="col-span-3 sm:col-span-1">
+                <label for="trade-date" class="block text-xs font-bold text-slate-400 mb-1">日付</label>
+                <input type="date" id="trade-date" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm font-semibold text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+              </div>
+              <div class="col-span-3 sm:col-span-1 grid grid-cols-2 sm:grid-cols-1 gap-2">
+                <div>
+                  <label for="trade-lot" class="block text-xs font-bold text-sky-400 mb-1">ロット数 <span class="font-normal text-slate-500">(任意)</span></label>
+                  <input type="number" id="trade-lot" inputmode="decimal" min="0" step="0.01" placeholder="0.35" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm font-bold text-sky-300 focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+                <div class="sm:hidden">
+                  <label for="trade-pips-sp" class="block text-xs font-bold text-slate-400 mb-1">pips <span class="font-normal text-slate-500">(任意)</span></label>
+                  <input type="number" id="trade-pips-sp" inputmode="decimal" step="0.1" placeholder="25.0" oninput="document.getElementById('trade-pips').value = this.value" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm font-semibold text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+              </div>
+              <div class="hidden sm:block sm:col-span-1">
+                <label for="trade-pips" class="block text-xs font-bold text-slate-400 mb-1">獲得 pips <span class="font-normal text-slate-500">(任意)</span></label>
+                <input type="number" id="trade-pips" inputmode="decimal" step="0.1" placeholder="25.0" oninput="document.getElementById('trade-pips-sp').value = this.value" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm font-semibold text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-400 mb-1.5">タグ・EA <span class="font-normal text-slate-500">（複数選択可）</span></label>
+              <div id="modal-tag-selector" class="flex flex-wrap gap-1.5 mb-2"></div>
+              <div class="flex gap-2">
+                <input type="text" id="modal-new-tag-input" placeholder="新しいタグを追加..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                <button type="button" onclick="addTagFromModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl shrink-0">＋追加</button>
+              </div>
+            </div>
+
+            <div>
+              <label for="trade-memo" class="block text-xs font-bold text-slate-400 mb-1">メモ <span class="font-normal text-slate-500">(任意)</span></label>
+              <textarea id="trade-memo" rows="2" placeholder="EA稼働状況やエントリー根拠など..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
+            </div>
           </div>
 
-          <!-- タグ選択 -->
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">タグ <span class="font-normal text-slate-400">（複数選択可）</span></label>
-            <div id="modal-tag-selector" class="flex flex-wrap gap-2 mb-2.5">
-              <!-- JSで生成 -->
+          <!-- 資金移動フィールド -->
+          <div id="fields-transfer" class="hidden space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-400 mb-1.5">移動カテゴリー</label>
+              <div class="grid grid-cols-1 gap-2">
+                <button type="button" id="cat-btn-isolation" onclick="setTransferCategory('isolation')" class="p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between">
+                  <div>
+                    <p class="text-xs font-extrabold">ウォレット隔離（利益退避）</p>
+                    <p class="text-[10px] opacity-75">運用口座から別ウォレットへ利益を退避</p>
+                  </div>
+                  <span class="text-xs font-bold">退避</span>
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                  <button type="button" id="cat-btn-deposit" onclick="setTransferCategory('deposit')" class="p-3 rounded-xl border-2 text-left transition-all">
+                    <p class="text-xs font-extrabold">入金</p>
+                    <p class="text-[10px] opacity-75">口座へ資金追加</p>
+                  </button>
+                  <button type="button" id="cat-btn-withdrawal" onclick="setTransferCategory('withdrawal')" class="p-3 rounded-xl border-2 text-left transition-all">
+                    <p class="text-xs font-extrabold">出金</p>
+                    <p class="text-[10px] opacity-75">銀行口座等へ出金</p>
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="flex gap-2">
-              <input type="text" id="modal-new-tag-input" placeholder="新しいタグを追加..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-              <button type="button" onclick="addTagFromModal()" class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition-colors shrink-0">
-                ＋追加
-              </button>
-            </div>
-          </div>
 
-          <!-- メモ -->
-          <div>
-            <label for="trade-memo" class="block text-xs font-bold text-slate-500 mb-1.5">メモ・振り返り <span class="font-normal text-slate-400">(任意)</span></label>
-            <textarea id="trade-memo" rows="2" placeholder="エントリー根拠や反省点など..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
+            <div>
+              <label for="transfer-amount" class="block text-xs font-bold text-slate-400 mb-1">金額（円）</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-amber-400">¥</span>
+                <input type="number" id="transfer-amount" inputmode="numeric" min="1" step="1" placeholder="85000" class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-xl font-extrabold text-white focus:ring-2 focus:ring-amber-500 outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label for="transfer-date" class="block text-xs font-bold text-slate-400 mb-1">日付</label>
+              <input type="date" id="transfer-date" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-white focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+
+            <div>
+              <label for="transfer-memo" class="block text-xs font-bold text-slate-400 mb-1">メモ <span class="font-normal text-slate-500">(任意)</span></label>
+              <input type="text" id="transfer-memo" placeholder="例: 利益分をウォレットへ隔離" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
           </div>
         </form>
 
-        <!-- フッター -->
-        <div class="p-4 bg-white border-t border-slate-100 flex items-center gap-2.5 shrink-0">
-          <button type="button" id="btn-delete-trade" onclick="confirmDeleteCurrentTrade()" class="hidden px-4 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-sm transition-colors">
-            削除
-          </button>
-          <button type="button" onclick="closeTradeModal()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors">
-            キャンセル
-          </button>
-          <button type="submit" form="trade-form" class="flex-[2] py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-sm transition-all">
-            保存する
-          </button>
+        <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2 shrink-0">
+          <button type="button" id="btn-delete-record" onclick="confirmDeleteCurrentRecord()" class="hidden px-4 py-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 font-bold text-sm">削除</button>
+          <button type="button" onclick="closeRecordModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm">キャンセル</button>
+          <button type="submit" form="record-form" class="flex-[2] py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm">保存する</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 汎用確認ダイアログ（alert/confirm代替） ==================== -->
+  <!-- ==================== モーダル: MT5 CSVインポートプレビュー ==================== -->
+  <div id="csv-preview-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div onclick="closeCSVPreviewModal()" class="absolute inset-0 bg-black/75 backdrop-blur-xs animate-fade-in"></div>
+    <div class="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl max-h-[88vh] flex flex-col animate-slide-up overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="text-base font-extrabold text-white">CSVインポート確認</h3>
+          <p id="csv-preview-subtitle" class="text-xs text-slate-400 mt-0.5">0件のトレードを検出しました</p>
+        </div>
+        <button onclick="closeCSVPreviewModal()" class="p-2 rounded-full hover:bg-slate-800 text-slate-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-3 overflow-y-auto flex-1">
+        <div>
+          <label for="csv-default-tag" class="block text-xs font-bold text-slate-400 mb-1">全行に付与するデフォルトタグ（任意）</label>
+          <input type="text" id="csv-default-tag" placeholder="例: EA-1" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:ring-2 focus:ring-sky-500 outline-none">
+        </div>
+
+        <div class="border border-slate-800 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                <th class="py-2 px-2">日付</th>
+                <th class="py-2 px-2 text-right">損益</th>
+                <th class="py-2 px-2 text-right">Lot</th>
+                <th class="py-2 px-2">タグ / メモ</th>
+              </tr>
+            </thead>
+            <tbody id="csv-preview-tbody" class="divide-y divide-slate-800/70"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 flex gap-2.5 shrink-0">
+        <button onclick="closeCSVPreviewModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">キャンセル</button>
+        <button onclick="executeCSVImport()" class="flex-[2] py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold">この内容でインポートする</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 汎用確認ダイアログ ==================== -->
   <div id="confirm-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div onclick="closeConfirmModal()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-xs animate-fade-in"></div>
-    <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl p-5 space-y-4 animate-slide-up">
+    <div onclick="closeConfirmModal()" class="absolute inset-0 bg-black/75 backdrop-blur-xs animate-fade-in"></div>
+    <div class="relative w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-5 space-y-4 animate-slide-up">
       <div class="space-y-1.5">
-        <h3 id="confirm-title" class="text-base font-extrabold text-slate-900">確認</h3>
-        <p id="confirm-message" class="text-sm text-slate-600 leading-relaxed">本当に実行しますか？</p>
+        <h3 id="confirm-title" class="text-base font-extrabold text-white">確認</h3>
+        <p id="confirm-message" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line">実行しますか？</p>
       </div>
       <div class="flex gap-2.5 pt-1">
-        <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition-colors">
-          キャンセル
-        </button>
-        <button id="confirm-ok-btn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold transition-colors">
-          実行する
-        </button>
+        <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">キャンセル</button>
+        <button id="confirm-ok-btn" class="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-extrabold">実行する</button>
       </div>
     </div>
   </div>
@@ -627,79 +790,90 @@
     // ==========================================
     // 1. 定数・アプリ状態
     // ==========================================
-    const STORAGE_KEYS = {
-      TRADES: 'fx_calendar_trades_v2',
-      TAGS: 'fx_calendar_tags_v2',
-      INIT: 'fx_calendar_initialized_v2'
-    };
+    const STORAGE_KEY_V3 = 'fx_calendar_v3_state';
+    const STORAGE_KEY_V2 = 'fx_calendar_v2_state';
+    const DEFAULT_TAGS = ['EA-1', 'EA-2', 'EA-3', 'EA-4', 'EA-5', '裁量', 'USDJPY', 'GOLD'];
 
-    const DEFAULT_TAGS = [
-      'USD/JPY', 'EUR/USD', 'GOLD',
-      '順張り', '逆張り', 'ブレイクアウト', '指標トレード'
-    ];
+    const TRANSFER_LABELS = {
+      isolation: { name: 'ウォレット隔離', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+      deposit:   { name: '入金',           badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30' },
+      withdrawal:{ name: '出金',           badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30' }
+    };
 
     const today = new Date();
     const todayStr = formatDateStr(today.getFullYear(), today.getMonth(), today.getDate());
 
     let state = {
       currentYear: today.getFullYear(),
-      currentMonth: today.getMonth(), // 0-11
-      selectedDateStr: todayStr,      // カレンダーで選択中の日付
-      activeTab: 'calendar',          // 'calendar' | 'chart' | 'analytics' | 'settings'
+      currentMonth: today.getMonth(),
+      selectedDateStr: todayStr,
+      activeTab: 'calendar',
 
-      // グラフタブの状態
-      chartPeriod: 'all',             // 'month' | '30d' | 'all'
-      chartMode: 'both',              // 'cumulative' | 'daily' | 'both'
-      chartTagFilter: 'ALL',          // 'ALL' または特定タグ名
+      // フィルター状態
+      chartMode: 'yen',          // 'yen' | 'roi'
+      chartPeriod: 'all',        // 'month' | '30d' | 'all'
+      chartTagFilter: 'ALL',
+      analyticsSubTab: 'weekday',// 'weekday' | 'tag'
+      analyticsPeriod: 'all',    // 'month' | 'all'
+      annualYear: today.getFullYear(),
 
-      // タグ分析タブの状態
-      analyticsPeriod: 'month',       // 'month' | 'all'
-
-      // データ本体
+      // 永続化データ
       trades: [],
-      tags: [],
+      transfers: [],
+      tags: [...DEFAULT_TAGS],
+      initialCapital: 100000,
 
-      // モーダル用一時状態
+      // モーダル一時状態
+      modalType: 'trade',
       modalSign: 1,
+      modalTransferCategory: 'isolation',
       modalSelectedTags: new Set(),
+      pendingCSVRows: [],
       confirmCallback: null
     };
 
-    // Chart.js インスタンス保持用
     let cumulativeChartInstance = null;
     let dailyChartInstance = null;
+    let weekdayChartInstance = null;
 
     // ==========================================
-    // 2. 初期化・データ永続化
+    // 2. 初期化・データ永続化（v2互換マイグレーション対応）
     // ==========================================
     function initApp() {
       try {
-        const savedTags = localStorage.getItem(STORAGE_KEYS.TAGS);
-        state.tags = savedTags ? JSON.parse(savedTags) : [...DEFAULT_TAGS];
+        const rawV3 = localStorage.getItem(STORAGE_KEY_V3);
+        const rawV2 = localStorage.getItem(STORAGE_KEY_V2);
+        const raw = rawV3 || rawV2;
 
-        const isInitialized = localStorage.getItem(STORAGE_KEYS.INIT);
-        const savedTrades = localStorage.getItem(STORAGE_KEYS.TRADES);
-
-        if (!isInitialized) {
-          state.trades = generateSampleTrades();
-          saveData();
-          localStorage.setItem(STORAGE_KEYS.INIT, 'true');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state.trades = Array.isArray(parsed.trades) ? parsed.trades : [];
+          state.transfers = Array.isArray(parsed.transfers) ? parsed.transfers : [];
+          state.tags = Array.isArray(parsed.tags) && parsed.tags.length > 0 ? parsed.tags : [...DEFAULT_TAGS];
+          state.initialCapital = typeof parsed.initialCapital === 'number' ? parsed.initialCapital : 100000;
+          if (!rawV3 && rawV2) saveData(); // v2からv3へ自動移行
         } else {
-          state.trades = savedTrades ? JSON.parse(savedTrades) : [];
+          loadSampleDataInternal();
+          saveData();
         }
       } catch (e) {
         console.error('データ読み込みエラー:', e);
-        state.tags = [...DEFAULT_TAGS];
-        state.trades = [];
+        loadSampleDataInternal();
       }
-
       switchTab('calendar');
     }
 
     function saveData() {
       try {
-        localStorage.setItem(STORAGE_KEYS.TRADES, JSON.stringify(state.trades));
-        localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(state.tags));
+        const payload = {
+          version: 3,
+          updatedAt: new Date().toISOString(),
+          trades: state.trades,
+          transfers: state.transfers,
+          tags: state.tags,
+          initialCapital: state.initialCapital
+        };
+        localStorage.setItem(STORAGE_KEY_V3, JSON.stringify(payload));
       } catch (e) {
         console.error('データ保存エラー:', e);
         showToast('データの保存に失敗しました', 'error');
@@ -707,123 +881,99 @@
     }
 
     /**
-     * 先月〜今月のリアルなFXサンプルデータ（12件）を生成
-     * 全期間グラフ・直近30日グラフ・月間カレンダーすべてが映える構成
+     * 初回サンプルデータ（初期資金100,000円、ロット0.35〜0.40の10件＋85,000円ウォレット隔離1件）
      */
-    function generateSampleTrades() {
-      const daysAgoStr = (daysAgo) => {
-        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - daysAgo);
-        return formatDateStr(d.getFullYear(), d.getMonth(), d.getDate());
-      };
+    function loadSampleDataInternal() {
+      const y = today.getFullYear();
+      const m = today.getMonth();
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
 
-      const base = Date.now();
-      return [
-        {
-          id: 'sample-' + (base + 1),
-          date: daysAgoStr(38),
-          amount: 12000,
-          pips: 24.0,
-          tags: ['USD/JPY', '順張り'],
-          memo: '先月の好スタート。1時間足トレンドに沿って押し目買い。'
-        },
-        {
-          id: 'sample-' + (base + 2),
-          date: daysAgoStr(34),
-          amount: -7500,
-          pips: -15.0,
-          tags: ['EUR/USD', '逆張り'],
-          memo: '天井狙いの逆張りが早すぎた。損切りルールは遵守。'
-        },
-        {
-          id: 'sample-' + (base + 3),
-          date: daysAgoStr(31),
-          amount: 19500,
-          pips: 32.5,
-          tags: ['GOLD', 'ブレイクアウト'],
-          memo: 'NY時間オープン直後のレンジ上抜けで大きく獲得。'
-        },
-        {
-          id: 'sample-' + (base + 4),
-          date: daysAgoStr(26),
-          amount: 8400,
-          pips: 16.8,
-          tags: ['USD/JPY', '指標トレード'],
-          memo: '米指標発表後の初動を見送ってから戻り売りでエントリー。'
-        },
-        {
-          id: 'sample-' + (base + 5),
-          date: daysAgoStr(21),
-          amount: -11200,
-          pips: -22.4,
-          tags: ['GOLD', '逆張り'],
-          memo: 'ボラティリティが高い場面で無理に入ってしまった。反省。'
-        },
-        {
-          id: 'sample-' + (base + 6),
-          date: daysAgoStr(17),
-          amount: 15800,
-          pips: 31.6,
-          tags: ['USD/JPY', '順張り'],
-          memo: '東京時間の押し目買い。リスクリワード1:2を達成。'
-        },
-        {
-          id: 'sample-' + (base + 7),
-          date: daysAgoStr(14),
-          amount: 24500,
-          pips: 41.0,
-          tags: ['GOLD', 'ブレイクアウト'],
-          memo: '日足レジスタンス突破でロング。伸ばせて大満足。'
-        },
-        {
-          id: 'sample-' + (base + 8),
-          date: daysAgoStr(11),
-          amount: -5800,
-          pips: -11.6,
-          tags: ['EUR/USD', 'ブレイクアウト'],
-          memo: '欧州時間のダマシに引っかかり微損撤退。'
-        },
-        {
-          id: 'sample-' + (base + 9),
-          date: daysAgoStr(7),
-          amount: 13200,
-          pips: 26.4,
-          tags: ['USD/JPY', '順張り'],
-          memo: '移動平均線反発を確認してエントリー。手堅く利確。'
-        },
-        {
-          id: 'sample-' + (base + 10),
-          date: daysAgoStr(4),
-          amount: 9600,
-          pips: 19.2,
-          tags: ['USD/JPY', '指標トレード'],
-          memo: '雇用関連指標後のトレンド継続に乗って利確。'
-        },
-        {
-          id: 'sample-' + (base + 11),
-          date: daysAgoStr(2),
-          amount: -4300,
-          pips: -8.6,
-          tags: ['GOLD', '逆張り'],
-          memo: '短期過熱感でショートしたが反発が弱く早めに撤退。'
-        },
-        {
-          id: 'sample-' + (base + 12),
-          date: daysAgoStr(0),
-          amount: 16400,
-          pips: 32.8,
-          tags: ['USD/JPY', '順張り'],
-          memo: '上位足と方向が揃った綺麗な押し目買い。理想のトレード。'
+      // 今月の月〜金の日付を収集して自然なサンプルを作成
+      const weekdays = [];
+      for (let d = 1; d <= Math.min(today.getDate(), daysInMonth); d++) {
+        const dow = new Date(y, m, d).getDay();
+        if (dow >= 1 && dow <= 5) weekdays.push({ d, dow, str: formatDateStr(y, m, d) });
+      }
+      // 月初で平日が少ない場合は前月からも補完
+      if (weekdays.length < 10) {
+        for (let i = 1; weekdays.length < 10; i++) {
+          const dt = new Date(y, m, 1 - i);
+          const dow = dt.getDay();
+          if (dow >= 1 && dow <= 5) {
+            weekdays.unshift({ d: dt.getDate(), dow, str: formatDateStr(dt.getFullYear(), dt.getMonth(), dt.getDate()) });
+          }
         }
+      }
+
+      const pick = weekdays.slice(-10);
+      const base = Date.now();
+      state.tags = [...DEFAULT_TAGS];
+      state.initialCapital = 100000;
+
+      const templates = [
+        { amount: 14200,  lot: 0.35, pips: 20.5, tags: ['EA-1', 'USDJPY'], memo: '東京〜欧州トレンド追随' },
+        { amount: 18600,  lot: 0.35, pips: 26.0, tags: ['EA-3', 'GOLD'],   memo: '押し目買い好調' },
+        { amount: -7800,  lot: 0.35, pips: -11.5,tags: ['EA-2', 'GOLD'],   memo: '指標前後のボラで損切り' },
+        { amount: 11500,  lot: 0.35, pips: 16.0, tags: ['EA-1', 'USDJPY'], memo: 'EA-1安定稼働' },
+        { amount: -10500, lot: 0.35, pips: -15.0,tags: ['EA-4', 'USDJPY'], memo: '金曜NYの急変動で微損' },
+        { amount: 22400,  lot: 0.40, pips: 28.0, tags: ['EA-5', 'GOLD'],   memo: 'ロット0.40へ引き上げ後初戦' },
+        { amount: 16800,  lot: 0.40, pips: 21.0, tags: ['EA-3', 'GOLD'],   memo: 'ブレイクアウト利確' },
+        { amount: 13200,  lot: 0.40, pips: 16.5, tags: ['EA-1', 'USDJPY'], memo: '順張り利確' },
+        { amount: -6200,  lot: 0.40, pips: -8.0, tags: ['裁量', 'USDJPY'], memo: '早めの損切り徹底' },
+        { amount: 19500,  lot: 0.40, pips: 24.5, tags: ['EA-5', 'GOLD'],   memo: '本日分EA集計' }
+      ];
+
+      state.trades = pick.map((dayObj, idx) => ({
+        id: 's-' + (base + idx + 1),
+        date: dayObj.str,
+        ...templates[idx]
+      }));
+
+      const isoDate = pick[Math.max(0, pick.length - 3)].str;
+      state.transfers = [
+        { id: 'tr-' + (base + 1), date: isoDate, category: 'isolation', amount: 85000, memo: '利益分をウォレットへ隔離（資金保護）' }
       ];
     }
 
     // ==========================================
-    // 3. ユーティリティ関数
+    // 3. 口座残高・利益率（%）計算コアロジック [NEW in v3]
     // ==========================================
-    function formatDateStr(year, month, day) {
-      const mm = String(month + 1).padStart(2, '0');
-      const dd = String(day).padStart(2, '0');
-      return `${year}-${mm}-${dd}`;
+    /**
+     * 指定日（dateStr）の「開始時点（その日の取引・移動より前）」の推定口座残高を返す
+     */
+    function getStartingBalanceAt(dateStr) {
+      let balance = state.initialCapital;
+      state.trades.forEach(t => {
+        if (t.date < dateStr) balance += t.amount;
+      });
+      state.transfers.forEach(tr => {
+        if (tr.date < dateStr) {
+          if (tr.category === 'deposit') balance += tr.amount;
+          else if (tr.category === 'withdrawal' || tr.category === 'isolation') balance -= tr.amount;
+        }
+      });
+      return balance;
+    }
+
+    /**
+     * 損益と基準残高から利益率（%）を安全に計算（残高<=0ならnull）
+     */
+    function calcROI(pnl, baseBalance) {
+      if (!baseBalance || baseBalance <= 0) return null;
+      return (pnl / baseBalance) * 100;
+    }
+
+    function formatROI(roi, withSign = true) {
+      if (roi === null || isNaN(roi)) return '-';
+      const sign = roi > 0 && withSign ? '+' : '';
+      return `${sign}${roi.toFixed(1)}%`;
+    }
+
+    // ==========================================
+    // 4. ユーティリティ
+    // ==========================================
+    function formatDateStr(y, m, d) {
+      return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     }
 
     function formatShortDate(dateStr) {
@@ -859,47 +1009,48 @@
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      const bgClass = type === 'error' ? 'bg-rose-600' : 'bg-slate-900';
-      toast.className = `${bgClass} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg text-center animate-slide-up`;
+      const cls = type === 'error' ? 'bg-rose-600 text-white border-rose-500' : 'bg-slate-800 text-white border-slate-700';
+      toast.className = `${cls} border text-xs font-bold px-4 py-3 rounded-xl shadow-xl text-center animate-slide-up`;
       toast.textContent = message;
       container.appendChild(toast);
-
       setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transition = 'opacity 0.25s ease';
         setTimeout(() => toast.remove(), 250);
-      }, 2400);
+      }, 2500);
     }
 
     // ==========================================
-    // 4. タブ切り替え
+    // 5. タブ切り替え
     // ==========================================
     function switchTab(tab) {
       state.activeTab = tab;
-      const tabs = ['calendar', 'chart', 'analytics', 'settings'];
-
-      tabs.forEach(t => {
+      ['calendar', 'chart', 'analytics', 'annual', 'settings'].forEach(t => {
         document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
 
         const pcBtn = document.getElementById(`nav-pc-${t}`);
         pcBtn.className = t === tab
-          ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all'
-          : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
+          ? 'px-2.5 py-1.5 rounded-lg text-xs font-extrabold bg-slate-800 text-emerald-400 transition-all'
+          : 'px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all';
 
         const spBtn = document.getElementById(`nav-sp-${t}`);
         spBtn.className = t === tab
-          ? 'flex flex-col items-center justify-center gap-1 text-emerald-600 transition-colors'
-          : 'flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-600 transition-colors';
+          ? 'flex flex-col items-center justify-center gap-1 text-emerald-400 transition-colors'
+          : 'flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-slate-300 transition-colors';
       });
+      refreshActiveView();
+    }
 
-      if (tab === 'calendar') renderCalendar();
-      if (tab === 'chart') renderChartTab();
-      if (tab === 'analytics') renderAnalytics();
-      if (tab === 'settings') renderSettings();
+    function refreshActiveView() {
+      if (state.activeTab === 'calendar') renderCalendar();
+      if (state.activeTab === 'chart') renderChartTab();
+      if (state.activeTab === 'analytics') renderAnalytics();
+      if (state.activeTab === 'annual') renderAnnualTab();
+      if (state.activeTab === 'settings') renderSettings();
     }
 
     // ==========================================
-    // 5. カレンダー＆選択日トレード一覧
+    // 6. カレンダー画面
     // ==========================================
     function changeMonth(delta) {
       let m = state.currentMonth + delta;
@@ -908,13 +1059,9 @@
       if (m > 11) { m = 0; y++; }
       state.currentYear = y;
       state.currentMonth = m;
-
-      // 月が変わったら、今月なら今日、他月なら1日を選択状態にする
-      if (y === today.getFullYear() && m === today.getMonth()) {
-        state.selectedDateStr = todayStr;
-      } else {
-        state.selectedDateStr = formatDateStr(y, m, 1);
-      }
+      state.selectedDateStr = (y === today.getFullYear() && m === today.getMonth())
+        ? todayStr
+        : formatDateStr(y, m, 1);
       renderCalendar();
     }
 
@@ -935,57 +1082,63 @@
       return state.trades.filter(t => t.date.startsWith(prefix));
     }
 
+    function getTransfersForMonth(year, month) {
+      const prefix = `${year}-${String(month + 1).padStart(2, '0')}-`;
+      return state.transfers.filter(t => t.date.startsWith(prefix));
+    }
+
     function renderCalendar() {
       const { currentYear, currentMonth, selectedDateStr } = state;
-
-      // 月ラベル更新
       document.getElementById('calendar-month-label').textContent = `${currentYear}年 ${currentMonth + 1}月`;
-      const isThisMonth = currentYear === today.getFullYear() && currentMonth === today.getMonth();
-      document.getElementById('btn-this-month').classList.toggle('opacity-40', isThisMonth);
 
-      // 月間集計
       const monthTrades = getTradesForMonth(currentYear, currentMonth);
-      let totalPnl = 0, totalPips = 0, hasPips = false;
-      let wins = 0, losses = 0, draws = 0;
-      const dailyMap = {};
+      const monthTransfers = getTransfersForMonth(currentYear, currentMonth);
+      const monthStartStr = formatDateStr(currentYear, currentMonth, 1);
+      const monthStartBal = getStartingBalanceAt(monthStartStr);
+
+      let totalPnl = 0, wins = 0, losses = 0, draws = 0;
+      let lotSum = 0, lotCount = 0;
+      const dailyTradeMap = {};
+      const dailyTransferMap = {};
 
       monthTrades.forEach(t => {
         totalPnl += t.amount;
-        if (t.pips !== null && t.pips !== '' && !isNaN(t.pips)) {
-          totalPips += Number(t.pips);
-          hasPips = true;
-        }
         if (t.amount > 0) wins++;
         else if (t.amount < 0) losses++;
         else draws++;
+        if (t.lot !== null && t.lot !== undefined && t.lot !== '' && !isNaN(Number(t.lot))) {
+          lotSum += Number(t.lot);
+          lotCount++;
+        }
+        if (!dailyTradeMap[t.date]) dailyTradeMap[t.date] = { pnl: 0, count: 0 };
+        dailyTradeMap[t.date].pnl += t.amount;
+        dailyTradeMap[t.date].count++;
+      });
 
-        if (!dailyMap[t.date]) dailyMap[t.date] = { pnl: 0, count: 0 };
-        dailyMap[t.date].pnl += t.amount;
-        dailyMap[t.date].count++;
+      monthTransfers.forEach(tr => {
+        dailyTransferMap[tr.date] = (dailyTransferMap[tr.date] || 0) + 1;
       });
 
       const totalCount = monthTrades.length;
       const decided = wins + losses;
       const winRate = decided > 0 ? (wins / decided) * 100 : 0;
       const avgPnl = totalCount > 0 ? totalPnl / totalCount : 0;
-      const activeDays = Object.keys(dailyMap).length;
+      const monthlyROI = totalCount > 0 ? calcROI(totalPnl, monthStartBal) : null;
 
-      // サマリー更新
+      // 月間サマリー更新
       const pnlEl = document.getElementById('summary-total-pnl');
       pnlEl.textContent = formatYen(totalPnl);
       pnlEl.className = `text-3xl sm:text-4xl font-extrabold tracking-tight ${
-        totalPnl > 0 ? 'text-emerald-600' : totalPnl < 0 ? 'text-rose-600' : 'text-slate-900'
+        totalPnl > 0 ? 'text-emerald-400' : totalPnl < 0 ? 'text-rose-400' : 'text-white'
       }`;
 
-      const pipsEl = document.getElementById('summary-total-pips');
-      if (hasPips) {
-        pipsEl.textContent = `${totalPips > 0 ? '+' : ''}${totalPips.toFixed(1)} pips`;
-        pipsEl.className = `text-xs font-bold px-2 py-0.5 rounded-md ${
-          totalPips > 0 ? 'bg-emerald-50 text-emerald-700' : totalPips < 0 ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600'
-        }`;
-      } else {
-        pipsEl.className = 'hidden';
-      }
+      const roiEl = document.getElementById('summary-monthly-roi');
+      roiEl.textContent = monthlyROI !== null ? `月利 ${formatROI(monthlyROI)}` : '月利 -';
+      roiEl.className = `text-sm sm:text-base font-extrabold px-2.5 py-0.5 rounded-lg ${
+        monthlyROI > 0 ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+        : monthlyROI < 0 ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+        : 'bg-slate-800 text-slate-400'
+      }`;
 
       document.getElementById('summary-record-badge').textContent =
         draws > 0 ? `${wins}勝 ${losses}敗 ${draws}分（計${totalCount}回）` : `${wins}勝 ${losses}敗（計${totalCount}回）`;
@@ -993,18 +1146,18 @@
       const winRateEl = document.getElementById('summary-win-rate');
       winRateEl.textContent = `${winRate.toFixed(1)}%`;
       winRateEl.className = `text-base sm:text-lg font-extrabold ${
-        decided === 0 ? 'text-slate-800' : winRate >= 50 ? 'text-emerald-600' : 'text-rose-600'
+        decided === 0 ? 'text-white' : winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'
       }`;
 
       const avgEl = document.getElementById('summary-avg-pnl');
       avgEl.textContent = formatYen(avgPnl);
       avgEl.className = `text-base sm:text-lg font-extrabold ${
-        avgPnl > 0 ? 'text-emerald-600' : avgPnl < 0 ? 'text-rose-600' : 'text-slate-800'
+        avgPnl > 0 ? 'text-emerald-400' : avgPnl < 0 ? 'text-rose-400' : 'text-white'
       }`;
 
-      document.getElementById('summary-active-days').textContent = `${activeDays}日`;
+      document.getElementById('summary-avg-lot').textContent = lotCount > 0 ? `${(lotSum / lotCount).toFixed(2)} Lot` : '-';
 
-      // カレンダーグリッド生成
+      // カレンダーグリッド描画
       const grid = document.getElementById('calendar-grid');
       grid.innerHTML = '';
 
@@ -1013,14 +1166,15 @@
 
       for (let i = 0; i < firstDayOfWeek; i++) {
         const empty = document.createElement('div');
-        empty.className = 'min-h-[68px] sm:min-h-[84px] bg-slate-50/50';
+        empty.className = 'min-h-[66px] sm:min-h-[80px] bg-slate-950/40';
         grid.appendChild(empty);
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = formatDateStr(currentYear, currentMonth, day);
         const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
-        const data = dailyMap[dateStr];
+        const tData = dailyTradeMap[dateStr];
+        const hasTransfer = !!dailyTransferMap[dateStr];
         const isToday = dateStr === todayStr;
         const isSelected = dateStr === selectedDateStr;
 
@@ -1028,37 +1182,31 @@
         cell.type = 'button';
         cell.onclick = () => selectCalendarDay(dateStr);
 
-        let bgClass = 'bg-white hover:bg-slate-50';
-        let pnlTextClass = 'text-slate-500';
-        if (data) {
-          if (data.pnl > 0) {
-            bgClass = 'bg-emerald-50/80 hover:bg-emerald-100/70';
-            pnlTextClass = 'text-emerald-700';
-          } else if (data.pnl < 0) {
-            bgClass = 'bg-rose-50/80 hover:bg-rose-100/70';
-            pnlTextClass = 'text-rose-700';
-          } else {
-            bgClass = 'bg-slate-100/80 hover:bg-slate-200/70';
-            pnlTextClass = 'text-slate-600';
-          }
+        let bgClass = 'bg-slate-900 hover:bg-slate-800/70';
+        let pnlTextClass = 'text-slate-400';
+        if (tData) {
+          if (tData.pnl > 0) { bgClass = 'bg-emerald-500/15 hover:bg-emerald-500/20'; pnlTextClass = 'text-emerald-400'; }
+          else if (tData.pnl < 0) { bgClass = 'bg-rose-500/15 hover:bg-rose-500/20'; pnlTextClass = 'text-rose-400'; }
         }
 
-        const selectedRing = isSelected ? 'ring-2 ring-inset ring-slate-900 z-10' : '';
+        const selectedRing = isSelected ? 'ring-2 ring-inset ring-emerald-400 z-10' : '';
         const dateNumClass = isToday
-          ? 'bg-slate-900 text-white w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center'
-          : dayOfWeek === 0 ? 'text-rose-500' : dayOfWeek === 6 ? 'text-blue-500' : 'text-slate-700';
+          ? 'bg-emerald-500 text-slate-950 w-5 h-5 rounded-full flex items-center justify-center font-extrabold'
+          : dayOfWeek === 0 ? 'text-rose-400' : dayOfWeek === 6 ? 'text-sky-400' : 'text-slate-300';
 
-        cell.className = `min-h-[68px] sm:min-h-[84px] p-1 sm:p-1.5 flex flex-col justify-between text-left transition-colors relative ${bgClass} ${selectedRing}`;
-
+        cell.className = `min-h-[66px] sm:min-h-[80px] p-1 sm:p-1.5 flex flex-col justify-between text-left transition-colors relative ${bgClass} ${selectedRing}`;
         cell.innerHTML = `
           <div class="flex items-start justify-between w-full">
             <span class="text-[11px] sm:text-xs font-bold leading-none ${dateNumClass}">${day}</span>
-            ${data ? `<span class="text-[9px] sm:text-[10px] font-bold px-1 py-0.5 rounded bg-white/85 text-slate-500 leading-none">${data.count}</span>` : ''}
+            <div class="flex items-center gap-1">
+              ${hasTransfer ? `<span class="w-2 h-2 rounded-full bg-amber-400" title="資金移動あり"></span>` : ''}
+              ${tData ? `<span class="text-[9px] font-bold px-1 py-0.5 rounded bg-slate-950/70 text-slate-300 leading-none">${tData.count}</span>` : ''}
+            </div>
           </div>
-          ${data ? `
+          ${tData ? `
             <div class="w-full mt-auto pt-1">
               <p class="text-[10px] sm:text-xs font-extrabold tracking-tight truncate text-right ${pnlTextClass}">
-                ${formatCompactYen(data.pnl)}
+                ${formatCompactYen(tData.pnl)}
               </p>
             </div>
           ` : ''}
@@ -1070,12 +1218,11 @@
       if (remainder !== 0) {
         for (let i = 0; i < 7 - remainder; i++) {
           const empty = document.createElement('div');
-          empty.className = 'min-h-[68px] sm:min-h-[84px] bg-slate-50/50';
+          empty.className = 'min-h-[66px] sm:min-h-[80px] bg-slate-950/40';
           grid.appendChild(empty);
         }
       }
 
-      // 選択中の日のトレード一覧を描画
       renderSelectedDayList();
     }
 
@@ -1088,77 +1235,99 @@
       document.getElementById('selected-day-title').textContent = `${y}年${m}月${d}日 (${weekNames[dt.getDay()]})`;
 
       const dayTrades = state.trades.filter(t => t.date === dateStr);
+      const dayTransfers = state.transfers.filter(tr => tr.date === dateStr);
       const dayTotal = dayTrades.reduce((s, t) => s + t.amount, 0);
-      const totalColor = dayTotal > 0 ? 'text-emerald-600' : dayTotal < 0 ? 'text-rose-600' : 'text-slate-600';
+      const dayStartBal = getStartingBalanceAt(dateStr);
+      const dayROI = dayTrades.length > 0 ? calcROI(dayTotal, dayStartBal) : null;
+      const totalColor = dayTotal > 0 ? 'text-emerald-400' : dayTotal < 0 ? 'text-rose-400' : 'text-slate-300';
 
       document.getElementById('selected-day-summary').innerHTML =
-        `合計: <span class="${totalColor} font-extrabold">${formatYen(dayTotal)}</span>（${dayTrades.length}件）`;
+        `損益: <span class="${totalColor} font-extrabold">${formatYen(dayTotal)}</span>` +
+        (dayROI !== null ? ` <span class="text-xs font-bold text-slate-300">(${formatROI(dayROI)})</span>` : '') +
+        `（${dayTrades.length}件）` +
+        (dayTransfers.length > 0 ? ` / 資金移動 ${dayTransfers.length}件` : '');
 
       const listEl = document.getElementById('selected-day-list');
-      if (dayTrades.length === 0) {
+      if (dayTrades.length === 0 && dayTransfers.length === 0) {
         listEl.innerHTML = `
-          <div class="py-7 text-center space-y-1.5">
-            <p class="text-xs font-bold text-slate-500">この日のトレード記録はありません</p>
-            <p class="text-[11px] text-slate-400">「この日に追加」ボタンから収支を登録できます</p>
+          <div class="py-6 text-center space-y-1">
+            <p class="text-xs font-bold text-slate-400">この日の記録はありません</p>
+            <p class="text-[11px] text-slate-500">右上のボタンからトレード損益や資金移動を追加できます</p>
           </div>
         `;
         return;
       }
 
-      listEl.innerHTML = dayTrades.map(trade => {
+      let html = '';
+      dayTransfers.forEach(tr => {
+        const meta = TRANSFER_LABELS[tr.category] || TRANSFER_LABELS.isolation;
+        html += `
+          <div onclick="openRecordModal('transfer', '${tr.id}')" class="cursor-pointer bg-slate-950/60 hover:bg-slate-800/80 border border-amber-500/25 rounded-xl p-3 transition-all active:scale-[0.99]">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${meta.badge}">${meta.name}</span>
+                <span class="text-base font-extrabold text-amber-300">¥${Math.round(tr.amount).toLocaleString('ja-JP')}</span>
+              </div>
+              <span class="text-[10px] font-bold text-slate-500">編集 ›</span>
+            </div>
+            ${tr.memo ? `<p class="text-xs text-slate-400 mt-1.5">${escapeHTML(tr.memo)}</p>` : ''}
+          </div>
+        `;
+      });
+
+      dayTrades.forEach(trade => {
         const isWin = trade.amount > 0;
         const isLoss = trade.amount < 0;
-        const amountColor = isWin ? 'text-emerald-600' : isLoss ? 'text-rose-600' : 'text-slate-600';
-        const badgeBg = isWin ? 'bg-emerald-50 text-emerald-700' : isLoss ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600';
+        const amountColor = isWin ? 'text-emerald-400' : isLoss ? 'text-rose-400' : 'text-slate-300';
+        const badgeBg = isWin ? 'bg-emerald-500/15 text-emerald-400' : isLoss ? 'bg-rose-500/15 text-rose-400' : 'bg-slate-800 text-slate-400';
         const badgeText = isWin ? 'WIN' : isLoss ? 'LOSE' : 'DRAW';
 
-        const pipsHtml = (trade.pips !== null && trade.pips !== '' && !isNaN(trade.pips))
+        const lotHtml = (trade.lot !== null && trade.lot !== undefined && trade.lot !== '' && !isNaN(Number(trade.lot)))
+          ? `<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-300">${Number(trade.lot).toFixed(2)} Lot</span>`
+          : '';
+
+        const pipsHtml = (trade.pips !== null && trade.pips !== undefined && trade.pips !== '' && !isNaN(Number(trade.pips)))
           ? `<span class="text-xs font-semibold text-slate-400">${Number(trade.pips) > 0 ? '+' : ''}${Number(trade.pips).toFixed(1)} pips</span>`
           : '';
 
         const tagsHtml = (trade.tags && trade.tags.length > 0)
           ? `<div class="flex flex-wrap gap-1.5 mt-2">
-              ${trade.tags.map(tag => `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">#${escapeHTML(tag)}</span>`).join('')}
+              ${trade.tags.map(tag => `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-slate-300">#${escapeHTML(tag)}</span>`).join('')}
             </div>`
           : '';
 
-        const memoHtml = trade.memo
-          ? `<p class="text-xs text-slate-500 mt-2 bg-slate-50 rounded-lg px-2.5 py-2 leading-relaxed">${escapeHTML(trade.memo)}</p>`
-          : '';
-
-        return `
-          <div onclick="openTradeModal('${trade.id}')" class="cursor-pointer bg-white hover:bg-slate-50/80 active:scale-[0.99] transition-all rounded-xl p-3.5 border border-slate-200/80">
+        html += `
+          <div onclick="openRecordModal('trade', '${trade.id}')" class="cursor-pointer bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 rounded-xl p-3 transition-all active:scale-[0.99]">
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded ${badgeBg}">${badgeText}</span>
-                  <span class="text-lg font-extrabold tracking-tight ${amountColor}">${formatYen(trade.amount)}</span>
+                  <span class="text-base font-extrabold tracking-tight ${amountColor}">${formatYen(trade.amount)}</span>
+                  ${lotHtml}
                   ${pipsHtml}
                 </div>
                 ${tagsHtml}
               </div>
-              <span class="p-1.5 rounded-lg bg-slate-100 text-slate-400 shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
-                </svg>
-              </span>
+              <span class="text-[10px] font-bold text-slate-500 shrink-0">編集 ›</span>
             </div>
-            ${memoHtml}
+            ${trade.memo ? `<p class="text-xs text-slate-400 mt-2 bg-slate-900/90 rounded-lg px-2.5 py-1.5 leading-relaxed">${escapeHTML(trade.memo)}</p>` : ''}
           </div>
         `;
-      }).join('');
+      });
+
+      listEl.innerHTML = html;
     }
 
     // ==========================================
-    // 6. 推移グラフタブ（Chart.js）
+    // 7. 推移グラフ画面（金額 / 利益率% 切替）
     // ==========================================
-    function setChartPeriod(period) {
-      state.chartPeriod = period;
+    function setChartMode(mode) {
+      state.chartMode = mode;
       renderChartTab();
     }
 
-    function setChartMode(mode) {
-      state.chartMode = mode;
+    function setChartPeriod(period) {
+      state.chartPeriod = period;
       renderChartTab();
     }
 
@@ -1169,8 +1338,6 @@
 
     function getFilteredTradesForChart() {
       let filtered = [...state.trades];
-
-      // 期間フィルター
       if (state.chartPeriod === 'month') {
         const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
         filtered = filtered.filter(t => t.date.startsWith(prefix));
@@ -1179,42 +1346,34 @@
         const cutoffStr = formatDateStr(cutoff.getFullYear(), cutoff.getMonth(), cutoff.getDate());
         filtered = filtered.filter(t => t.date >= cutoffStr);
       }
-
-      // タグフィルター
       if (state.chartTagFilter !== 'ALL') {
         filtered = filtered.filter(t => (t.tags || []).includes(state.chartTagFilter));
       }
-
-      // 日付昇順ソート
       filtered.sort((a, b) => a.date.localeCompare(b.date));
       return filtered;
     }
 
     function renderChartTab() {
-      // 期間ボタン状態更新
+      const isRoi = state.chartMode === 'roi';
+
+      // モードボタン更新
+      document.getElementById('chart-mode-yen').className = !isRoi
+        ? 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-500 text-slate-950 transition-all'
+        : 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all';
+      document.getElementById('chart-mode-roi').className = isRoi
+        ? 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-500 text-slate-950 transition-all'
+        : 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all';
+
+      // 期間ボタン更新
       ['month', '30d', 'all'].forEach(p => {
         const btn = document.getElementById(`chart-period-${p}`);
-        if (p === 'month') {
-          btn.textContent = `${state.currentMonth + 1}月`;
-        }
+        if (p === 'month') btn.textContent = `${state.currentMonth + 1}月`;
         btn.className = state.chartPeriod === p
-          ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all'
-          : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
+          ? 'px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-800 text-emerald-400 transition-all'
+          : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all';
       });
 
-      // モードボタン状態更新
-      ['cumulative', 'daily', 'both'].forEach(m => {
-        const btn = document.getElementById(`chart-mode-${m}`);
-        btn.className = state.chartMode === m
-          ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all'
-          : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
-      });
-
-      // カード表示切替
-      document.getElementById('cumulative-chart-card').classList.toggle('hidden', state.chartMode === 'daily');
-      document.getElementById('daily-chart-card').classList.toggle('hidden', state.chartMode === 'cumulative');
-
-      // タグフィルターチップ描画
+      // タグチップ更新
       const allUsedTags = new Set(state.tags);
       state.trades.forEach(t => (t.tags || []).forEach(tag => allUsedTags.add(tag)));
       const tagList = ['ALL', ...Array.from(allUsedTags)];
@@ -1223,146 +1382,122 @@
         const isActive = state.chartTagFilter === tag;
         const label = tag === 'ALL' ? 'すべて' : `#${escapeHTML(tag)}`;
         const cls = isActive
-          ? 'bg-slate-900 text-white border-slate-900'
-          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
-        return `
-          <button onclick="setChartTagFilter('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border whitespace-nowrap transition-all shrink-0 ${cls}">
-            ${label}
-          </button>
-        `;
+          ? 'bg-emerald-500 text-slate-950 border-emerald-500 font-extrabold'
+          : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800 font-bold';
+        return `<button onclick="setChartTagFilter('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs border whitespace-nowrap transition-all shrink-0 ${cls}">${label}</button>`;
       }).join('');
 
-      // 対象データ集計
       const trades = getFilteredTradesForChart();
       document.getElementById('chart-filter-count').textContent = `対象: ${trades.length}件`;
 
-      // 日別合算マップを作成
+      // 日別集計（金額＆日次利益率%）
       const dailyMap = {};
       trades.forEach(t => {
         dailyMap[t.date] = (dailyMap[t.date] || 0) + t.amount;
       });
       const sortedDates = Object.keys(dailyMap).sort();
       const labels = sortedDates.map(formatShortDate);
-      const dailyValues = sortedDates.map(d => dailyMap[d]);
-
-      // 累計推移を計算
-      let running = 0;
-      const cumulativeValues = dailyValues.map(v => {
-        running += v;
-        return running;
+      const dailyYen = sortedDates.map(d => dailyMap[d]);
+      const dailyRoi = sortedDates.map(d => {
+        const bal = getStartingBalanceAt(d);
+        const r = calcROI(dailyMap[d], bal);
+        return r !== null ? Number(r.toFixed(2)) : 0;
       });
 
-      // KPI計算（PF・最大ドローダウン・最大連勝数）
-      let grossProfit = 0;
-      let grossLoss = 0;
-      let wins = 0, losses = 0;
-      let currentWinStreak = 0, maxWinStreak = 0;
-      let currentLossStreak = 0, maxLossStreak = 0;
-      let equity = 0, peak = 0, maxDD = 0;
+      let runYen = 0;
+      const cumYen = dailyYen.map(v => (runYen += v));
+      let runRoi = 0;
+      const cumRoi = dailyRoi.map(v => Number((runRoi += v).toFixed(2)));
+
+      // KPI計算
+      let grossProfit = 0, grossLoss = 0, wins = 0, losses = 0;
+      let curWin = 0, maxWin = 0, equity = 0, peak = 0, maxDD = 0;
 
       trades.forEach(t => {
         if (t.amount > 0) {
-          grossProfit += t.amount;
-          wins++;
-          currentWinStreak++;
-          currentLossStreak = 0;
-          if (currentWinStreak > maxWinStreak) maxWinStreak = currentWinStreak;
+          grossProfit += t.amount; wins++; curWin++;
+          if (curWin > maxWin) maxWin = curWin;
         } else if (t.amount < 0) {
-          grossLoss += Math.abs(t.amount);
-          losses++;
-          currentLossStreak++;
-          currentWinStreak = 0;
-          if (currentLossStreak > maxLossStreak) maxLossStreak = currentLossStreak;
+          grossLoss += Math.abs(t.amount); losses++; curWin = 0;
         }
-
         equity += t.amount;
         if (equity > peak) peak = equity;
-        const dd = peak - equity;
-        if (dd > maxDD) maxDD = dd;
+        if (peak - equity > maxDD) maxDD = peak - equity;
       });
 
-      const totalPnl = equity;
-      const decided = wins + losses;
-      const winRate = decided > 0 ? (wins / decided) * 100 : 0;
+      const winRate = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0;
+      const finalRoi = cumRoi.length > 0 ? cumRoi[cumRoi.length - 1] : 0;
 
-      // KPI描画
-      const kpiPnlEl = document.getElementById('kpi-total-pnl');
-      kpiPnlEl.textContent = formatYen(totalPnl);
-      kpiPnlEl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${
-        totalPnl > 0 ? 'text-emerald-600' : totalPnl < 0 ? 'text-rose-600' : 'text-slate-900'
-      }`;
+      // KPIカード更新
+      const kpiPnl = document.getElementById('kpi-total-pnl');
+      kpiPnl.textContent = formatYen(equity);
+      kpiPnl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${equity > 0 ? 'text-emerald-400' : equity < 0 ? 'text-rose-400' : 'text-white'}`;
       document.getElementById('kpi-win-rate').textContent = `勝率 ${winRate.toFixed(1)}%（${wins}勝${losses}敗）`;
+
+      const kpiRoi = document.getElementById('kpi-total-roi');
+      kpiRoi.textContent = sortedDates.length > 0 ? formatROI(finalRoi) : '-';
+      kpiRoi.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${finalRoi > 0 ? 'text-emerald-400' : finalRoi < 0 ? 'text-rose-400' : 'text-white'}`;
 
       const pfEl = document.getElementById('kpi-pf');
       if (grossLoss > 0) {
         const pf = grossProfit / grossLoss;
         pfEl.textContent = pf.toFixed(2);
-        pfEl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${pf >= 1 ? 'text-emerald-600' : 'text-rose-600'}`;
+        pfEl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${pf >= 1 ? 'text-emerald-400' : 'text-rose-400'}`;
       } else if (grossProfit > 0) {
         pfEl.textContent = '∞';
-        pfEl.className = 'text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-600';
+        pfEl.className = 'text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-400';
       } else {
         pfEl.textContent = '-';
-        pfEl.className = 'text-xl sm:text-2xl font-extrabold tracking-tight text-slate-400';
+        pfEl.className = 'text-xl sm:text-2xl font-extrabold tracking-tight text-slate-500';
       }
 
       document.getElementById('kpi-max-dd').textContent = maxDD > 0 ? `-¥${Math.round(maxDD).toLocaleString('ja-JP')}` : '¥0';
-      document.getElementById('kpi-max-streak').textContent = `${maxWinStreak}連勝`;
-      document.getElementById('kpi-max-loss-streak').textContent = `最大連敗: ${maxLossStreak}連敗`;
+      document.getElementById('kpi-max-streak-inline').textContent = `最大連勝: ${maxWin}連勝`;
+
+      // グラフタイトル・バッジ更新
+      document.getElementById('cumulative-chart-title').textContent = isRoi ? '累計利益率（%）推移' : '累計損益（資産曲線）';
+      document.getElementById('cumulative-chart-sub').textContent = isRoi ? '各日の開始残高に対する日次利益率の累積' : '選択期間・タグの累積収支推移';
+      document.getElementById('daily-chart-title').textContent = isRoi ? '日別利益率（%・棒グラフ）' : '日別損益（棒グラフ）';
+      document.getElementById('daily-chart-sub').textContent = isRoi ? 'その日の開始時点の口座残高に対する損益率' : '取引日ごとの損益バランス';
 
       const cumBadge = document.getElementById('cumulative-chart-badge');
-      cumBadge.textContent = formatYen(totalPnl);
-      cumBadge.className = `text-sm font-extrabold ${
-        totalPnl > 0 ? 'text-emerald-600' : totalPnl < 0 ? 'text-rose-600' : 'text-slate-600'
-      }`;
+      const finalVal = isRoi ? finalRoi : equity;
+      cumBadge.textContent = isRoi ? formatROI(finalRoi) : formatYen(equity);
+      cumBadge.className = `text-sm font-extrabold ${finalVal >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-      // 空状態の切り替え
       const isEmpty = sortedDates.length === 0;
       document.getElementById('cumulative-empty-state').classList.toggle('hidden', !isEmpty);
       document.getElementById('daily-empty-state').classList.toggle('hidden', !isEmpty);
 
-      // Chart.js 描画
-      renderCumulativeChart(labels, cumulativeValues, totalPnl);
-      renderDailyChart(labels, dailyValues);
+      renderCumulativeChart(labels, isRoi ? cumRoi : cumYen, finalVal, isRoi);
+      renderDailyChart(labels, isRoi ? dailyRoi : dailyYen, isRoi);
     }
 
-    function renderCumulativeChart(labels, values, finalPnl) {
-      const canvas = document.getElementById('cumulative-chart-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-
-      if (cumulativeChartInstance) {
-        cumulativeChartInstance.destroy();
-        cumulativeChartInstance = null;
-      }
+    function renderCumulativeChart(labels, values, finalVal, isRoi) {
+      const ctx = document.getElementById('cumulative-chart-canvas').getContext('2d');
+      if (cumulativeChartInstance) { cumulativeChartInstance.destroy(); cumulativeChartInstance = null; }
       if (labels.length === 0) return;
 
-      const isPositive = finalPnl >= 0;
-      const lineColor = isPositive ? '#059669' : '#e11d48';
-      const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-      if (isPositive) {
-        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.28)');
-        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-      } else {
-        gradient.addColorStop(0, 'rgba(244, 63, 94, 0.25)');
-        gradient.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
-      }
+      const isPos = finalVal >= 0;
+      const lineColor = isPos ? '#34d399' : '#fb7185';
+      const grad = ctx.createLinearGradient(0, 0, 0, 240);
+      grad.addColorStop(0, isPos ? 'rgba(52, 211, 153, 0.28)' : 'rgba(251, 113, 133, 0.28)');
+      grad.addColorStop(1, 'rgba(15, 23, 42, 0)');
 
       cumulativeChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels,
           datasets: [{
-            label: '累計損益',
+            label: isRoi ? '累計利益率' : '累計損益',
             data: values,
             borderColor: lineColor,
-            backgroundColor: gradient,
+            backgroundColor: grad,
             borderWidth: 2.5,
             fill: true,
-            tension: 0.32,
+            tension: 0.3,
             pointRadius: labels.length > 20 ? 2 : 4,
-            pointHoverRadius: 6,
-            pointBackgroundColor: '#ffffff',
+            pointBackgroundColor: '#0f172a',
             pointBorderColor: lineColor,
             pointBorderWidth: 2
           }]
@@ -1370,41 +1505,27 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          interaction: {
-            mode: 'index',
-            intersect: false
-          },
+          interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.92)',
+              backgroundColor: 'rgba(2, 6, 23, 0.95)',
+              borderColor: '#334155',
+              borderWidth: 1,
               padding: 10,
-              cornerRadius: 10,
-              titleFont: { size: 12, weight: 'bold' },
-              bodyFont: { size: 13, weight: 'bold' },
               callbacks: {
-                label: (ctx) => `累計: ${formatYen(ctx.parsed.y)}`
+                label: (c) => isRoi ? `累計: ${formatROI(c.parsed.y)}` : `累計: ${formatYen(c.parsed.y)}`
               }
             }
           },
           scales: {
-            x: {
-              grid: { display: false },
-              ticks: {
-                color: '#94a3b8',
-                font: { size: 11, weight: '600' },
-                maxTicksLimit: 7
-              }
-            },
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 }, maxTicksLimit: 7 } },
             y: {
-              grid: {
-                color: (ctx) => ctx.tick.value === 0 ? '#cbd5e1' : '#f1f5f9',
-                lineWidth: (ctx) => ctx.tick.value === 0 ? 1.5 : 1
-              },
+              grid: { color: (c) => c.tick.value === 0 ? '#475569' : '#1e293b' },
               ticks: {
                 color: '#94a3b8',
-                font: { size: 11, weight: '600' },
-                callback: (val) => formatCompactYen(val)
+                font: { size: 11 },
+                callback: (v) => isRoi ? `${v > 0 ? '+' : ''}${v}%` : formatCompactYen(v)
               }
             }
           }
@@ -1412,31 +1533,21 @@
       });
     }
 
-    function renderDailyChart(labels, values) {
-      const canvas = document.getElementById('daily-chart-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-
-      if (dailyChartInstance) {
-        dailyChartInstance.destroy();
-        dailyChartInstance = null;
-      }
+    function renderDailyChart(labels, values, isRoi) {
+      const ctx = document.getElementById('daily-chart-canvas').getContext('2d');
+      if (dailyChartInstance) { dailyChartInstance.destroy(); dailyChartInstance = null; }
       if (labels.length === 0) return;
-
-      const barColors = values.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.85)' : 'rgba(244, 63, 94, 0.85)');
-      const hoverColors = values.map(v => v >= 0 ? '#059669' : '#e11d48');
 
       dailyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
           labels,
           datasets: [{
-            label: '日別損益',
+            label: isRoi ? '日別利益率' : '日別損益',
             data: values,
-            backgroundColor: barColors,
-            hoverBackgroundColor: hoverColors,
+            backgroundColor: values.map(v => v >= 0 ? 'rgba(52, 211, 153, 0.8)' : 'rgba(251, 113, 133, 0.8)'),
             borderRadius: 6,
-            maxBarThickness: 28
+            maxBarThickness: 26
           }]
         },
         options: {
@@ -1445,32 +1556,22 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.92)',
-              padding: 10,
-              cornerRadius: 10,
+              backgroundColor: 'rgba(2, 6, 23, 0.95)',
+              borderColor: '#334155',
+              borderWidth: 1,
               callbacks: {
-                label: (ctx) => `日別損益: ${formatYen(ctx.parsed.y)}`
+                label: (c) => isRoi ? `日別: ${formatROI(c.parsed.y)}` : `日別: ${formatYen(c.parsed.y)}`
               }
             }
           },
           scales: {
-            x: {
-              grid: { display: false },
-              ticks: {
-                color: '#94a3b8',
-                font: { size: 11, weight: '600' },
-                maxTicksLimit: 8
-              }
-            },
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 }, maxTicksLimit: 8 } },
             y: {
-              grid: {
-                color: (ctx) => ctx.tick.value === 0 ? '#cbd5e1' : '#f1f5f9',
-                lineWidth: (ctx) => ctx.tick.value === 0 ? 1.5 : 1
-              },
+              grid: { color: (c) => c.tick.value === 0 ? '#475569' : '#1e293b' },
               ticks: {
                 color: '#94a3b8',
-                font: { size: 11, weight: '600' },
-                callback: (val) => formatCompactYen(val)
+                font: { size: 11 },
+                callback: (v) => isRoi ? `${v > 0 ? '+' : ''}${v}%` : formatCompactYen(v)
               }
             }
           }
@@ -1479,46 +1580,473 @@
     }
 
     // ==========================================
-    // 7. トレード入力・編集モーダル
+    // 8. 分析タブ（曜日別自動集計 ＋ タグ別勝率） [NEW in v3]
     // ==========================================
-    function openTradeModal(tradeId = null, presetDate = null) {
-      document.getElementById('trade-form').reset();
+    function setAnalyticsSubTab(sub) {
+      state.analyticsSubTab = sub;
+      renderAnalytics();
+    }
+
+    function setAnalyticsPeriod(period) {
+      state.analyticsPeriod = period;
+      renderAnalytics();
+    }
+
+    function renderAnalytics() {
+      const { currentYear, currentMonth, analyticsPeriod, analyticsSubTab } = state;
+      document.getElementById('analytics-month-text').textContent = `${currentYear}/${currentMonth + 1}`;
+
+      // サブタブ切替UI
+      document.getElementById('subtab-btn-weekday').className = analyticsSubTab === 'weekday'
+        ? 'py-2 rounded-lg text-xs font-extrabold bg-emerald-500 text-slate-950 transition-all'
+        : 'py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all';
+      document.getElementById('subtab-btn-tag').className = analyticsSubTab === 'tag'
+        ? 'py-2 rounded-lg text-xs font-extrabold bg-emerald-500 text-slate-950 transition-all'
+        : 'py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all';
+
+      document.getElementById('analytics-panel-weekday').classList.toggle('hidden', analyticsSubTab !== 'weekday');
+      document.getElementById('analytics-panel-tag').classList.toggle('hidden', analyticsSubTab !== 'tag');
+      document.getElementById('analytics-tag-sort-wrap').classList.toggle('hidden', analyticsSubTab !== 'tag');
+
+      ['month', 'all'].forEach(p => {
+        const btn = document.getElementById(`period-btn-${p}`);
+        btn.className = analyticsPeriod === p
+          ? 'px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-800 text-emerald-400 transition-all'
+          : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all';
+      });
+
+      const targetTrades = analyticsPeriod === 'month' ? getTradesForMonth(currentYear, currentMonth) : state.trades;
+
+      if (analyticsSubTab === 'weekday') {
+        renderWeekdayAnalytics(targetTrades);
+      } else {
+        renderTagAnalytics(targetTrades);
+      }
+    }
+
+    /**
+     * 曜日別（月〜金＋土日参考）の自動集計・Chart.js棒グラフ・得意/要注意バッジ描画
+     */
+    function renderWeekdayAnalytics(trades) {
+      const dayDefs = [
+        { dow: 1, label: '月曜日', short: '月' },
+        { dow: 2, label: '火曜日', short: '火' },
+        { dow: 3, label: '水曜日', short: '水' },
+        { dow: 4, label: '木曜日', short: '木' },
+        { dow: 5, label: '金曜日', short: '金' },
+        { dow: 6, label: '土曜日（参考）', short: '土', optional: true },
+        { dow: 0, label: '日曜日（参考）', short: '日', optional: true }
+      ];
+
+      const statsMap = {};
+      dayDefs.forEach(d => {
+        statsMap[d.dow] = { ...d, wins: 0, losses: 0, count: 0, pnl: 0, roiSum: 0, roiCount: 0 };
+      });
+
+      trades.forEach(t => {
+        const [y, m, d] = t.date.split('-').map(Number);
+        const dow = new Date(y, m - 1, d).getDay();
+        const st = statsMap[dow];
+        if (!st) return;
+        st.count++;
+        st.pnl += t.amount;
+        if (t.amount > 0) st.wins++;
+        else if (t.amount < 0) st.losses++;
+
+        const bal = getStartingBalanceAt(t.date);
+        const roi = calcROI(t.amount, bal);
+        if (roi !== null) {
+          st.roiSum += roi;
+          st.roiCount++;
+        }
+      });
+
+      // 月〜金は必ず表示、土日はデータがある場合のみ表示
+      const displayList = dayDefs
+        .map(d => statsMap[d.dow])
+        .filter(st => !st.optional || st.count > 0)
+        .map(st => {
+          const decided = st.wins + st.losses;
+          return {
+            ...st,
+            winRate: decided > 0 ? (st.wins / decided) * 100 : 0,
+            avgPnl: st.count > 0 ? st.pnl / st.count : 0,
+            avgRoi: st.roiCount > 0 ? st.roiSum / st.roiCount : null
+          };
+        });
+
+      // 最も成績が良い曜日（得意）・悪い曜日（要注意）を判定（月〜金かつ1件以上）
+      const activeWeekdays = displayList.filter(st => !st.optional && st.count > 0);
+      let bestDow = null, worstDow = null;
+      if (activeWeekdays.length >= 2) {
+        const sortedByPnl = [...activeWeekdays].sort((a, b) => b.pnl - a.pnl);
+        if (sortedByPnl[0].pnl > 0) bestDow = sortedByPnl[0].dow;
+        const last = sortedByPnl[sortedByPnl.length - 1];
+        if (last.pnl < 0 || last.winRate < 50) worstDow = last.dow;
+        if (bestDow === worstDow) worstDow = null;
+      }
+
+      // Chart.js 曜日別グラフ描画
+      const ctx = document.getElementById('weekday-chart-canvas').getContext('2d');
+      if (weekdayChartInstance) { weekdayChartInstance.destroy(); weekdayChartInstance = null; }
+
+      weekdayChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: displayList.map(st => st.short),
+          datasets: [{
+            label: '合計損益',
+            data: displayList.map(st => st.pnl),
+            backgroundColor: displayList.map(st =>
+              st.pnl > 0 ? 'rgba(52, 211, 153, 0.85)' : st.pnl < 0 ? 'rgba(251, 113, 133, 0.85)' : 'rgba(71, 85, 105, 0.5)'
+            ),
+            borderRadius: 8,
+            maxBarThickness: 36
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(2, 6, 23, 0.95)',
+              borderColor: '#334155',
+              borderWidth: 1,
+              callbacks: {
+                label: (c) => {
+                  const st = displayList[c.dataIndex];
+                  return [`合計: ${formatYen(st.pnl)}`, `勝率: ${st.winRate.toFixed(1)}% (${st.wins}勝${st.losses}敗)`];
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { size: 12, weight: 'bold' } } },
+            y: {
+              grid: { color: (c) => c.tick.value === 0 ? '#475569' : '#1e293b' },
+              ticks: { color: '#94a3b8', font: { size: 11 }, callback: (v) => formatCompactYen(v) }
+            }
+          }
+        }
+      });
+
+      // 曜日別カード描画
+      document.getElementById('weekday-cards-list').innerHTML = displayList.map(st => {
+        const pnlColor = st.pnl > 0 ? 'text-emerald-400' : st.pnl < 0 ? 'text-rose-400' : 'text-slate-400';
+        const barColor = st.count === 0 ? 'bg-slate-700' : st.winRate >= 50 ? 'bg-emerald-400' : 'bg-rose-400';
+
+        let badgeHtml = '';
+        if (st.dow === bestDow) {
+          badgeHtml = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">得意</span>`;
+        } else if (st.dow === worstDow) {
+          badgeHtml = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30">要注意</span>`;
+        }
+
+        return `
+          <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-white">${st.label}</span>
+                ${badgeHtml}
+                <span class="text-xs font-semibold text-slate-400">${st.wins}勝 ${st.losses}敗（${st.count}回）</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[11px] text-slate-400 mr-1">勝率</span>
+                <span class="text-sm font-extrabold ${st.count === 0 ? 'text-slate-500' : st.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}">
+                  ${st.count > 0 ? st.winRate.toFixed(1) + '%' : '-'}
+                </span>
+              </div>
+            </div>
+
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full rounded-full ${barColor}" style="width: ${st.count > 0 ? Math.min(100, st.winRate) : 0}%"></div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl px-2.5 py-2">
+                <p class="text-[10px] text-slate-400">合計損益</p>
+                <p class="text-xs sm:text-sm font-extrabold ${pnlColor}">${st.count > 0 ? formatYen(st.pnl) : '-'}</p>
+              </div>
+              <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl px-2.5 py-2">
+                <p class="text-[10px] text-slate-400">平均損益</p>
+                <p class="text-xs sm:text-sm font-extrabold ${pnlColor}">${st.count > 0 ? formatYen(st.avgPnl) : '-'}</p>
+              </div>
+              <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl px-2.5 py-2">
+                <p class="text-[10px] text-slate-400">平均利益率</p>
+                <p class="text-xs sm:text-sm font-extrabold ${st.avgRoi > 0 ? 'text-emerald-400' : st.avgRoi < 0 ? 'text-rose-400' : 'text-slate-400'}">
+                  ${st.avgRoi !== null ? formatROI(st.avgRoi) : '-'}
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTagAnalytics(targetTrades) {
+      const totalPnl = targetTrades.reduce((s, t) => s + t.amount, 0);
+      const wins = targetTrades.filter(t => t.amount > 0).length;
+      const losses = targetTrades.filter(t => t.amount < 0).length;
+      const overallWR = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0;
+
+      document.getElementById('analytics-overview').innerHTML = `
+        <span>対象: <strong class="text-white">${targetTrades.length}件</strong>（勝率 <strong class="text-white">${overallWR.toFixed(1)}%</strong>）</span>
+        <span>合計: <strong class="${totalPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatYen(totalPnl)}</strong></span>
+      `;
+
+      const map = {};
+      targetTrades.forEach(t => {
+        const tags = (t.tags && t.tags.length > 0) ? t.tags : ['タグなし'];
+        tags.forEach(tag => {
+          if (!map[tag]) map[tag] = { tag, wins: 0, losses: 0, count: 0, pnl: 0 };
+          const st = map[tag];
+          st.count++; st.pnl += t.amount;
+          if (t.amount > 0) st.wins++;
+          else if (t.amount < 0) st.losses++;
+        });
+      });
+
+      const list = Object.values(map).map(st => {
+        const decided = st.wins + st.losses;
+        return { ...st, winRate: decided > 0 ? (st.wins / decided) * 100 : 0, avgPnl: st.count > 0 ? st.pnl / st.count : 0 };
+      });
+
+      const sortBy = document.getElementById('analytics-sort').value;
+      list.sort((a, b) => {
+        if (sortBy === 'winRate') return b.winRate - a.winRate || b.pnl - a.pnl;
+        if (sortBy === 'pnl') return b.pnl - a.pnl;
+        return b.count - a.count || b.winRate - a.winRate;
+      });
+
+      const listEl = document.getElementById('analytics-list');
+      if (list.length === 0) {
+        listEl.innerHTML = `<div class="bg-slate-900 rounded-2xl border border-slate-800 p-8 text-center text-xs text-slate-400">この期間のトレードデータがありません</div>`;
+        return;
+      }
+
+      listEl.innerHTML = list.map(st => {
+        const pnlColor = st.pnl > 0 ? 'text-emerald-400' : st.pnl < 0 ? 'text-rose-400' : 'text-slate-300';
+        const barColor = st.winRate >= 50 ? 'bg-emerald-400' : 'bg-rose-400';
+        return `
+          <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-white text-xs font-extrabold truncate">#${escapeHTML(st.tag)}</span>
+                <span class="text-xs font-semibold text-slate-400 shrink-0">${st.wins}勝 ${st.losses}敗（${st.count}回）</span>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[11px] text-slate-400 mr-1">勝率</span>
+                <span class="text-base font-extrabold ${st.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}">${st.winRate.toFixed(1)}%</span>
+              </div>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full rounded-full ${barColor}" style="width: ${Math.min(100, st.winRate)}%"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl px-3 py-2">
+                <p class="text-[10px] text-slate-400">合計損益</p>
+                <p class="text-sm font-extrabold ${pnlColor}">${formatYen(st.pnl)}</p>
+              </div>
+              <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl px-3 py-2">
+                <p class="text-[10px] text-slate-400">平均損益</p>
+                <p class="text-sm font-extrabold ${pnlColor}">${formatYen(st.avgPnl)}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // 9. 年間・確定申告サマリー画面（年間利益率%・月利%・平均ロット追加）
+    // ==========================================
+    function renderAnnualTab() {
+      const yearsSet = new Set([today.getFullYear(), today.getFullYear() - 1]);
+      state.trades.forEach(t => yearsSet.add(Number(t.date.slice(0, 4))));
+      state.transfers.forEach(tr => yearsSet.add(Number(tr.date.slice(0, 4))));
+      const years = Array.from(yearsSet).filter(y => !isNaN(y)).sort((a, b) => b - a);
+
+      const selectEl = document.getElementById('annual-year-select');
+      const prevVal = Number(selectEl.value) || state.annualYear;
+      selectEl.innerHTML = years.map(y => `<option value="${y}" ${y === prevVal ? 'selected' : ''}>${y}年</option>`).join('');
+      const selectedYear = Number(selectEl.value);
+      state.annualYear = selectedYear;
+
+      const yearPrefix = `${selectedYear}-`;
+      const yearTrades = state.trades.filter(t => t.date.startsWith(yearPrefix));
+      const yearTransfers = state.transfers.filter(tr => tr.date.startsWith(yearPrefix));
+
+      const yearPnl = yearTrades.reduce((s, t) => s + t.amount, 0);
+      const yearWins = yearTrades.filter(t => t.amount > 0).length;
+      const yearLosses = yearTrades.filter(t => t.amount < 0).length;
+      const yearWR = (yearWins + yearLosses) > 0 ? (yearWins / (yearWins + yearLosses)) * 100 : 0;
+
+      const yearStartBal = getStartingBalanceAt(`${selectedYear}-01-01`);
+      const yearROI = yearTrades.length > 0 ? calcROI(yearPnl, yearStartBal) : null;
+
+      let yearIsolation = 0, yearDeposit = 0, yearWithdrawal = 0;
+      yearTransfers.forEach(tr => {
+        if (tr.category === 'isolation') yearIsolation += tr.amount;
+        if (tr.category === 'deposit') yearDeposit += tr.amount;
+        if (tr.category === 'withdrawal') yearWithdrawal += tr.amount;
+      });
+      const yearNetDeposit = yearDeposit - yearWithdrawal;
+
+      // 全期間ベースの推定口座残高
+      const allPnl = state.trades.reduce((s, t) => s + t.amount, 0);
+      let allIso = 0, allDep = 0, allWdr = 0;
+      state.transfers.forEach(tr => {
+        if (tr.category === 'isolation') allIso += tr.amount;
+        if (tr.category === 'deposit') allDep += tr.amount;
+        if (tr.category === 'withdrawal') allWdr += tr.amount;
+      });
+      const estBalance = state.initialCapital + allPnl + (allDep - allWdr) - allIso;
+
+      const netPnlEl = document.getElementById('annual-net-pnl');
+      netPnlEl.textContent = formatYen(yearPnl);
+      netPnlEl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${yearPnl > 0 ? 'text-emerald-400' : yearPnl < 0 ? 'text-rose-400' : 'text-white'}`;
+
+      const roiEl = document.getElementById('annual-roi-badge');
+      roiEl.textContent = `年間利益率: ${formatROI(yearROI)}`;
+      roiEl.className = `text-[11px] font-extrabold mt-1 ${yearROI > 0 ? 'text-emerald-400' : yearROI < 0 ? 'text-rose-400' : 'text-slate-400'}`;
+
+      document.getElementById('annual-wallet-isolation').textContent = `¥${Math.round(yearIsolation).toLocaleString('ja-JP')}`;
+      document.getElementById('annual-trade-count').textContent = `${yearTrades.length}回（勝率 ${yearWR.toFixed(1)}%）`;
+      document.getElementById('annual-net-deposit').textContent = formatYen(yearNetDeposit);
+      document.getElementById('annual-deposit-detail').textContent = `入金 ¥${Math.round(yearDeposit).toLocaleString()} / 出金 ¥${Math.round(yearWithdrawal).toLocaleString()}`;
+      document.getElementById('annual-est-balance').textContent = `¥${Math.round(estBalance).toLocaleString('ja-JP')}`;
+      document.getElementById('annual-initial-capital-hint').textContent = `初期資金 ¥${state.initialCapital.toLocaleString()} 基準`;
+
+      // 月別テーブル（1〜12月）
+      const tbody = document.getElementById('annual-monthly-tbody');
+      let rowsHtml = '';
+      for (let m = 1; m <= 12; m++) {
+        const mPrefix = `${selectedYear}-${String(m).padStart(2, '0')}-`;
+        const mTrades = yearTrades.filter(t => t.date.startsWith(mPrefix));
+        const mIso = yearTransfers.filter(tr => tr.date.startsWith(mPrefix) && tr.category === 'isolation')
+          .reduce((s, tr) => s + tr.amount, 0);
+
+        const mPnl = mTrades.reduce((s, t) => s + t.amount, 0);
+        const mStartBal = getStartingBalanceAt(`${mPrefix}01`);
+        const mROI = mTrades.length > 0 ? calcROI(mPnl, mStartBal) : null;
+        const mW = mTrades.filter(t => t.amount > 0).length;
+        const mL = mTrades.filter(t => t.amount < 0).length;
+        const mWR = (mW + mL) > 0 ? `${((mW / (mW + mL)) * 100).toFixed(0)}%` : '-';
+
+        const lotArr = mTrades.map(t => Number(t.lot)).filter(v => !isNaN(v) && v > 0);
+        const mAvgLot = lotArr.length > 0 ? (lotArr.reduce((a, b) => a + b, 0) / lotArr.length).toFixed(2) : '-';
+
+        const pnlCls = mPnl > 0 ? 'text-emerald-400 font-extrabold' : mPnl < 0 ? 'text-rose-400 font-extrabold' : 'text-slate-500';
+        const roiCls = mROI > 0 ? 'text-emerald-400 font-bold' : mROI < 0 ? 'text-rose-400 font-bold' : 'text-slate-500';
+
+        rowsHtml += `
+          <tr class="hover:bg-slate-800/40">
+            <td class="py-2.5 px-3 font-bold text-slate-200">${m}月</td>
+            <td class="py-2.5 px-2 text-right ${pnlCls}">${mTrades.length > 0 ? formatYen(mPnl) : '-'}</td>
+            <td class="py-2.5 px-2 text-right ${roiCls}">${formatROI(mROI)}</td>
+            <td class="py-2.5 px-2 text-right text-slate-300">${mWR}</td>
+            <td class="py-2.5 px-2 text-right text-sky-300">${mAvgLot}</td>
+            <td class="py-2.5 px-3 text-right ${mIso > 0 ? 'text-amber-400 font-bold' : 'text-slate-600'}">${mIso > 0 ? '¥' + Math.round(mIso).toLocaleString() : '-'}</td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = rowsHtml;
+    }
+
+    function exportAnnualTaxCSV() {
+      const y = state.annualYear;
+      const prefix = `${y}-`;
+      const yearTrades = state.trades.filter(t => t.date.startsWith(prefix)).sort((a, b) => a.date.localeCompare(b.date));
+      if (yearTrades.length === 0) {
+        showToast(`${y}年のトレードデータがありません`, 'error');
+        return;
+      }
+      const header = ['日付', '損益(円)', 'ロット数', '獲得pips', 'タグ/EA', 'メモ'];
+      const esc = (v) => {
+        const s = v === null || v === undefined ? '' : String(v);
+        return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const rows = yearTrades.map(t => [t.date, t.amount, t.lot ?? '', t.pips ?? '', (t.tags || []).join(' / '), t.memo || ''].map(esc).join(','));
+      rows.push(['年間合計', yearTrades.reduce((s, t) => s + t.amount, 0), '', '', '', ''].join(','));
+      downloadFile('\uFEFF' + [header.join(','), ...rows].join('\n'), `fx_tax_${y}.csv`, 'text/csv;charset=utf-8;');
+      showToast(`${y}年の確定申告用CSVを出力しました`);
+    }
+
+    // ==========================================
+    // 10. 記録モーダル（トレード / 資金移動）
+    // ==========================================
+    function openRecordModal(type = 'trade', recordId = null, presetDate = null) {
+      document.getElementById('record-form').reset();
       state.modalSelectedTags = new Set();
 
-      const deleteBtn = document.getElementById('btn-delete-trade');
-      const titleEl = document.getElementById('trade-modal-title');
+      const deleteBtn = document.getElementById('btn-delete-record');
+      const switcher = document.getElementById('record-type-switcher');
+      const titleEl = document.getElementById('record-modal-title');
 
-      if (tradeId) {
-        const trade = state.trades.find(t => t.id === tradeId);
-        if (!trade) return;
-
-        titleEl.textContent = 'トレードを編集';
-        document.getElementById('trade-id').value = trade.id;
-        document.getElementById('trade-date').value = trade.date;
-        document.getElementById('trade-amount').value = Math.abs(trade.amount);
-        document.getElementById('trade-pips').value = (trade.pips !== null && trade.pips !== '') ? Math.abs(Number(trade.pips)) : '';
-        document.getElementById('trade-memo').value = trade.memo || '';
-
-        setTradeSign(trade.amount < 0 ? -1 : 1);
-        (trade.tags || []).forEach(tag => {
-          state.modalSelectedTags.add(tag);
-          if (!state.tags.includes(tag)) state.tags.push(tag);
-        });
+      if (recordId) {
+        switcher.classList.add('hidden');
         deleteBtn.classList.remove('hidden');
+        document.getElementById('record-id').value = recordId;
+
+        if (type === 'trade') {
+          const trade = state.trades.find(t => t.id === recordId);
+          if (!trade) return;
+          setRecordType('trade');
+          titleEl.textContent = 'トレードを編集';
+          document.getElementById('trade-date').value = trade.date;
+          document.getElementById('trade-amount').value = Math.abs(trade.amount);
+          document.getElementById('trade-lot').value = (trade.lot !== null && trade.lot !== undefined) ? trade.lot : '';
+          const pipsVal = (trade.pips !== null && trade.pips !== undefined && trade.pips !== '') ? Math.abs(Number(trade.pips)) : '';
+          document.getElementById('trade-pips').value = pipsVal;
+          document.getElementById('trade-pips-sp').value = pipsVal;
+          document.getElementById('trade-memo').value = trade.memo || '';
+          setTradeSign(trade.amount < 0 ? -1 : 1);
+          (trade.tags || []).forEach(tag => {
+            state.modalSelectedTags.add(tag);
+            if (!state.tags.includes(tag)) state.tags.push(tag);
+          });
+        } else {
+          const tr = state.transfers.find(item => item.id === recordId);
+          if (!tr) return;
+          setRecordType('transfer');
+          titleEl.textContent = '資金移動を編集';
+          document.getElementById('transfer-date').value = tr.date;
+          document.getElementById('transfer-amount').value = Math.abs(tr.amount);
+          document.getElementById('transfer-memo').value = tr.memo || '';
+          setTransferCategory(tr.category || 'isolation');
+        }
       } else {
-        titleEl.textContent = 'トレードを記録';
-        document.getElementById('trade-id').value = '';
-        document.getElementById('trade-date').value = presetDate || todayStr;
-        setTradeSign(1);
+        switcher.classList.remove('hidden');
         deleteBtn.classList.add('hidden');
+        document.getElementById('record-id').value = '';
+        titleEl.textContent = '記録を追加';
+        setRecordType(type);
+        document.getElementById('trade-date').value = presetDate || todayStr;
+        document.getElementById('transfer-date').value = presetDate || todayStr;
+        setTradeSign(1);
+        setTransferCategory('isolation');
       }
 
       renderModalTagSelector();
-      document.getElementById('trade-modal').classList.remove('hidden');
+      document.getElementById('record-modal').classList.remove('hidden');
     }
 
-    function closeTradeModal() {
-      document.getElementById('trade-modal').classList.add('hidden');
+    function closeRecordModal() {
+      document.getElementById('record-modal').classList.add('hidden');
+    }
+
+    function setRecordType(type) {
+      state.modalType = type;
+      document.getElementById('fields-trade').classList.toggle('hidden', type !== 'trade');
+      document.getElementById('fields-transfer').classList.toggle('hidden', type !== 'transfer');
+
+      document.getElementById('type-tab-trade').className = type === 'trade'
+        ? 'py-2 rounded-lg text-xs font-extrabold bg-emerald-500 text-slate-950 transition-all'
+        : 'py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all';
+      document.getElementById('type-tab-transfer').className = type === 'transfer'
+        ? 'py-2 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition-all'
+        : 'py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all';
     }
 
     function setTradeSign(sign) {
@@ -1528,30 +2056,39 @@
       const prefix = document.getElementById('amount-prefix');
 
       if (sign === 1) {
-        plusBtn.className = 'py-3 rounded-xl text-sm font-extrabold border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition-all flex items-center justify-center gap-1.5';
-        minusBtn.className = 'py-3 rounded-xl text-sm font-bold border-2 border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5';
+        plusBtn.className = 'py-2.5 rounded-xl text-sm font-extrabold border-2 border-emerald-500 bg-emerald-500/20 text-emerald-300 transition-all';
+        minusBtn.className = 'py-2.5 rounded-xl text-sm font-bold border-2 border-slate-800 bg-slate-950 text-slate-400 transition-all';
         prefix.textContent = '+¥';
-        prefix.className = 'absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-emerald-600';
+        prefix.className = 'absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-emerald-400';
       } else {
-        plusBtn.className = 'py-3 rounded-xl text-sm font-bold border-2 border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5';
-        minusBtn.className = 'py-3 rounded-xl text-sm font-extrabold border-2 border-rose-500 bg-rose-50 text-rose-700 transition-all flex items-center justify-center gap-1.5';
+        plusBtn.className = 'py-2.5 rounded-xl text-sm font-bold border-2 border-slate-800 bg-slate-950 text-slate-400 transition-all';
+        minusBtn.className = 'py-2.5 rounded-xl text-sm font-extrabold border-2 border-rose-500 bg-rose-500/20 text-rose-300 transition-all';
         prefix.textContent = '-¥';
-        prefix.className = 'absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-rose-600';
+        prefix.className = 'absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-rose-400';
       }
     }
 
+    function setTransferCategory(cat) {
+      state.modalTransferCategory = cat;
+      const styles = {
+        isolation:  { active: 'border-amber-500 bg-amber-500/20 text-amber-300',   idle: 'border-slate-800 bg-slate-950 text-slate-400' },
+        deposit:    { active: 'border-sky-500 bg-sky-500/20 text-sky-300',         idle: 'border-slate-800 bg-slate-950 text-slate-400' },
+        withdrawal: { active: 'border-violet-500 bg-violet-500/20 text-violet-300',idle: 'border-slate-800 bg-slate-950 text-slate-400' }
+      };
+      ['isolation', 'deposit', 'withdrawal'].forEach(c => {
+        const el = document.getElementById(`cat-btn-${c}`);
+        const base = c === 'isolation' ? 'p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between ' : 'p-3 rounded-xl border-2 text-left transition-all ';
+        el.className = base + (cat === c ? styles[c].active : styles[c].idle);
+      });
+    }
+
     function renderModalTagSelector() {
-      const container = document.getElementById('modal-tag-selector');
-      container.innerHTML = state.tags.map(tag => {
+      document.getElementById('modal-tag-selector').innerHTML = state.tags.map(tag => {
         const selected = state.modalSelectedTags.has(tag);
         const cls = selected
-          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
-        return `
-          <button type="button" onclick="toggleModalTag('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 ${cls}">
-            #${escapeHTML(tag)}
-          </button>
-        `;
+          ? 'bg-emerald-500 text-slate-950 border-emerald-500 font-extrabold'
+          : 'bg-slate-950 text-slate-300 border-slate-700 hover:bg-slate-800 font-bold';
+        return `<button type="button" onclick="toggleModalTag('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 rounded-xl text-xs border transition-all active:scale-95 ${cls}">#${escapeHTML(tag)}</button>`;
       }).join('');
     }
 
@@ -1565,236 +2102,104 @@
       const input = document.getElementById('modal-new-tag-input');
       const newTag = input.value.trim();
       if (!newTag) return;
-
-      if (!state.tags.includes(newTag)) {
-        state.tags.push(newTag);
-        saveData();
-      }
+      if (!state.tags.includes(newTag)) { state.tags.push(newTag); saveData(); }
       state.modalSelectedTags.add(newTag);
       input.value = '';
       renderModalTagSelector();
-      showToast(`タグ「#${newTag}」を追加しました`);
     }
 
-    function saveTrade(event) {
+    function saveRecord(event) {
       event.preventDefault();
+      const id = document.getElementById('record-id').value;
 
-      const id = document.getElementById('trade-id').value;
-      const date = document.getElementById('trade-date').value;
-      const rawAmount = parseFloat(document.getElementById('trade-amount').value);
-      const rawPipsStr = document.getElementById('trade-pips').value.trim();
-      const memo = document.getElementById('trade-memo').value.trim();
+      if (state.modalType === 'trade') {
+        const date = document.getElementById('trade-date').value;
+        const rawAmount = parseFloat(document.getElementById('trade-amount').value);
+        const rawLotStr = document.getElementById('trade-lot').value.trim();
+        const rawPipsStr = (document.getElementById('trade-pips').value || document.getElementById('trade-pips-sp').value).trim();
+        const memo = document.getElementById('trade-memo').value.trim();
 
-      if (!date || isNaN(rawAmount)) {
-        showToast('日付と金額を正しく入力してください', 'error');
-        return;
-      }
+        if (!date || isNaN(rawAmount)) {
+          showToast('日付と損益金額を入力してください', 'error');
+          return;
+        }
+        const amount = rawAmount === 0 ? 0 : Math.abs(rawAmount) * state.modalSign;
+        const lot = (rawLotStr !== '' && !isNaN(parseFloat(rawLotStr))) ? Math.abs(parseFloat(rawLotStr)) : null;
+        let pips = null;
+        if (rawPipsStr !== '' && !isNaN(parseFloat(rawPipsStr))) {
+          pips = amount === 0 ? 0 : Math.abs(parseFloat(rawPipsStr)) * state.modalSign;
+        }
 
-      const amount = rawAmount === 0 ? 0 : Math.abs(rawAmount) * state.modalSign;
-      let pips = null;
-      if (rawPipsStr !== '' && !isNaN(parseFloat(rawPipsStr))) {
-        pips = amount === 0 ? 0 : Math.abs(parseFloat(rawPipsStr)) * state.modalSign;
-      }
+        const obj = {
+          id: id || ('trd-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5)),
+          date, amount, lot, pips,
+          tags: Array.from(state.modalSelectedTags),
+          memo
+        };
 
-      const tradeObj = {
-        id: id || ('trade-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)),
-        date,
-        amount,
-        pips,
-        tags: Array.from(state.modalSelectedTags),
-        memo
-      };
-
-      if (id) {
-        const idx = state.trades.findIndex(t => t.id === id);
-        if (idx !== -1) state.trades[idx] = tradeObj;
-        showToast('トレードを更新しました');
+        if (id) {
+          const idx = state.trades.findIndex(t => t.id === id);
+          if (idx !== -1) state.trades[idx] = obj;
+          showToast('トレードを更新しました');
+        } else {
+          state.trades.push(obj);
+          showToast('トレードを記録しました');
+        }
+        const [y, m] = date.split('-').map(Number);
+        state.currentYear = y; state.currentMonth = m - 1; state.selectedDateStr = date;
       } else {
-        state.trades.push(tradeObj);
-        showToast('トレードを記録しました');
-      }
+        const date = document.getElementById('transfer-date').value;
+        const rawAmount = parseFloat(document.getElementById('transfer-amount').value);
+        const memo = document.getElementById('transfer-memo').value.trim();
 
-      const [y, m] = date.split('-').map(Number);
-      state.currentYear = y;
-      state.currentMonth = m - 1;
-      state.selectedDateStr = date;
+        if (!date || isNaN(rawAmount) || rawAmount <= 0) {
+          showToast('日付と金額を正しく入力してください', 'error');
+          return;
+        }
+        const obj = {
+          id: id || ('mov-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5)),
+          date, category: state.modalTransferCategory, amount: Math.abs(rawAmount), memo
+        };
+
+        if (id) {
+          const idx = state.transfers.findIndex(tr => tr.id === id);
+          if (idx !== -1) state.transfers[idx] = obj;
+          showToast('資金移動を更新しました');
+        } else {
+          state.transfers.push(obj);
+          showToast('資金移動を記録しました');
+        }
+        const [y, m] = date.split('-').map(Number);
+        state.currentYear = y; state.currentMonth = m - 1; state.selectedDateStr = date;
+      }
 
       saveData();
-      closeTradeModal();
+      closeRecordModal();
       refreshActiveView();
     }
 
-    function confirmDeleteCurrentTrade() {
-      const id = document.getElementById('trade-id').value;
+    function confirmDeleteCurrentRecord() {
+      const id = document.getElementById('record-id').value;
       if (!id) return;
-
-      openConfirmModal(
-        'トレードの削除',
-        'このトレード記録を削除してもよろしいですか？この操作は取り消せません。',
-        () => {
-          state.trades = state.trades.filter(t => t.id !== id);
-          saveData();
-          closeTradeModal();
-          refreshActiveView();
-          showToast('トレードを削除しました');
-        }
-      );
-    }
-
-    function refreshActiveView() {
-      if (state.activeTab === 'calendar') renderCalendar();
-      if (state.activeTab === 'chart') renderChartTab();
-      if (state.activeTab === 'analytics') renderAnalytics();
-      if (state.activeTab === 'settings') renderSettings();
+      openConfirmModal('記録の削除', 'この記録を削除してもよろしいですか？', () => {
+        if (state.modalType === 'trade') state.trades = state.trades.filter(t => t.id !== id);
+        else state.transfers = state.transfers.filter(tr => tr.id !== id);
+        saveData();
+        closeRecordModal();
+        refreshActiveView();
+        showToast('記録を削除しました');
+      });
     }
 
     // ==========================================
-    // 8. タグ別勝率分析画面
-    // ==========================================
-    function setAnalyticsPeriod(period) {
-      state.analyticsPeriod = period;
-      renderAnalytics();
-    }
-
-    function renderAnalytics() {
-      const { currentYear, currentMonth, analyticsPeriod } = state;
-      document.getElementById('analytics-month-text').textContent = `${currentYear}/${currentMonth + 1}`;
-
-      const monthBtn = document.getElementById('period-btn-month');
-      const allBtn = document.getElementById('period-btn-all');
-      if (analyticsPeriod === 'month') {
-        monthBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all';
-        allBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
-      } else {
-        monthBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all';
-        allBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs transition-all';
-      }
-
-      const targetTrades = analyticsPeriod === 'month'
-        ? getTradesForMonth(currentYear, currentMonth)
-        : state.trades;
-
-      const totalPnl = targetTrades.reduce((s, t) => s + t.amount, 0);
-      const totalWins = targetTrades.filter(t => t.amount > 0).length;
-      const totalLosses = targetTrades.filter(t => t.amount < 0).length;
-      const overallWinRate = (totalWins + totalLosses) > 0 ? (totalWins / (totalWins + totalLosses)) * 100 : 0;
-
-      document.getElementById('analytics-overview').innerHTML = `
-        <span>対象: <strong class="text-slate-800">${targetTrades.length}件</strong>（勝率 <strong class="text-slate-800">${overallWinRate.toFixed(1)}%</strong>）</span>
-        <span>合計: <strong class="${totalPnl > 0 ? 'text-emerald-600' : totalPnl < 0 ? 'text-rose-600' : 'text-slate-800'}">${formatYen(totalPnl)}</strong></span>
-      `;
-
-      const tagStatsMap = {};
-      targetTrades.forEach(t => {
-        const tradeTags = (t.tags && t.tags.length > 0) ? t.tags : ['タグなし'];
-        tradeTags.forEach(tag => {
-          if (!tagStatsMap[tag]) {
-            tagStatsMap[tag] = { tag, wins: 0, losses: 0, draws: 0, count: 0, pnl: 0, pips: 0, hasPips: false };
-          }
-          const st = tagStatsMap[tag];
-          st.count++;
-          st.pnl += t.amount;
-          if (t.amount > 0) st.wins++;
-          else if (t.amount < 0) st.losses++;
-          else st.draws++;
-
-          if (t.pips !== null && t.pips !== '' && !isNaN(t.pips)) {
-            st.pips += Number(t.pips);
-            st.hasPips = true;
-          }
-        });
-      });
-
-      const statsList = Object.values(tagStatsMap).map(st => {
-        const decided = st.wins + st.losses;
-        return {
-          ...st,
-          winRate: decided > 0 ? (st.wins / decided) * 100 : 0,
-          avgPnl: st.count > 0 ? st.pnl / st.count : 0
-        };
-      });
-
-      const sortBy = document.getElementById('analytics-sort').value;
-      statsList.sort((a, b) => {
-        if (sortBy === 'winRate') return b.winRate - a.winRate || b.pnl - a.pnl;
-        if (sortBy === 'pnl') return b.pnl - a.pnl;
-        if (sortBy === 'count') return b.count - a.count || b.winRate - a.winRate;
-        return 0;
-      });
-
-      const listEl = document.getElementById('analytics-list');
-      if (statsList.length === 0) {
-        listEl.innerHTML = `
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-10 text-center space-y-2">
-            <p class="text-sm font-bold text-slate-600">この期間のトレードデータがありません</p>
-            <p class="text-xs text-slate-400">トレードを記録するとタグ別の勝率が自動で計算されます</p>
-          </div>
-        `;
-        return;
-      }
-
-      listEl.innerHTML = statsList.map(st => {
-        const pnlColor = st.pnl > 0 ? 'text-emerald-600' : st.pnl < 0 ? 'text-rose-600' : 'text-slate-700';
-        const avgColor = st.avgPnl > 0 ? 'text-emerald-600' : st.avgPnl < 0 ? 'text-rose-600' : 'text-slate-700';
-        const barColor = st.winRate >= 50 ? 'bg-emerald-500' : st.winRate > 0 ? 'bg-rose-500' : 'bg-slate-300';
-        const winRateTextColor = st.winRate >= 50 ? 'text-emerald-600' : st.winRate > 0 ? 'text-rose-600' : 'text-slate-500';
-
-        return `
-          <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 space-y-3">
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-2 min-w-0">
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 text-xs font-extrabold truncate">
-                  #${escapeHTML(st.tag)}
-                </span>
-                <span class="text-xs font-semibold text-slate-400 shrink-0">
-                  ${st.wins}勝 ${st.losses}敗（計${st.count}回）
-                </span>
-              </div>
-              <div class="text-right shrink-0">
-                <span class="text-xs font-medium text-slate-400 mr-1">勝率</span>
-                <span class="text-lg font-extrabold ${winRateTextColor}">${st.winRate.toFixed(1)}%</span>
-              </div>
-            </div>
-
-            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-500 ${barColor}" style="width: ${Math.min(100, Math.max(0, st.winRate))}%"></div>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-              <div class="bg-slate-50 rounded-xl px-3 py-2">
-                <p class="text-[10px] font-semibold text-slate-400">合計損益</p>
-                <p class="text-sm font-extrabold ${pnlColor}">${formatYen(st.pnl)}</p>
-              </div>
-              <div class="bg-slate-50 rounded-xl px-3 py-2">
-                <p class="text-[10px] font-semibold text-slate-400">平均損益</p>
-                <p class="text-sm font-extrabold ${avgColor}">${formatYen(st.avgPnl)}</p>
-              </div>
-              <div class="col-span-2 sm:col-span-1 bg-slate-50 rounded-xl px-3 py-2 flex sm:block items-center justify-between">
-                <p class="text-[10px] font-semibold text-slate-400">合計 pips</p>
-                <p class="text-sm font-bold text-slate-700">
-                  ${st.hasPips ? `${st.pips > 0 ? '+' : ''}${st.pips.toFixed(1)} pips` : '-'}
-                </p>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // ==========================================
-    // 9. 設定・タグ管理・CSV出力
+    // 11. 設定・JSONバックアップ・MT5 CSVインポート
     // ==========================================
     function renderSettings() {
-      const container = document.getElementById('settings-tag-list');
-      if (state.tags.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400">登録されているタグがありません</p>`;
-        return;
-      }
-
-      container.innerHTML = state.tags.map(tag => `
-        <div class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 pl-3 pr-1.5 py-1.5 rounded-xl text-xs font-bold">
+      document.getElementById('settings-initial-capital').value = state.initialCapital;
+      document.getElementById('settings-tag-list').innerHTML = state.tags.map(tag => `
+        <div class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 pl-3 pr-1.5 py-1.5 rounded-xl text-xs font-bold">
           <span>#${escapeHTML(tag)}</span>
-          <button onclick="confirmDeleteTag('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="p-1 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-rose-600 transition-colors" aria-label="タグを削除">
+          <button onclick="confirmDeleteTag('${escapeHTML(tag).replace(/'/g, "\\'")}')" class="p-0.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-rose-400">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -1803,16 +2208,22 @@
       `).join('');
     }
 
+    function saveInitialCapital() {
+      const val = parseFloat(document.getElementById('settings-initial-capital').value);
+      if (isNaN(val) || val < 0) {
+        showToast('0以上の金額を入力してください', 'error');
+        return;
+      }
+      state.initialCapital = Math.round(val);
+      saveData();
+      showToast('初期口座資金を保存しました');
+    }
+
     function addTagFromSettings() {
       const input = document.getElementById('settings-new-tag-input');
       const newTag = input.value.trim();
       if (!newTag) return;
-
-      if (state.tags.includes(newTag)) {
-        showToast('そのタグはすでに登録されています', 'error');
-        return;
-      }
-
+      if (state.tags.includes(newTag)) { showToast('すでに登録されているタグです', 'error'); return; }
       state.tags.push(newTag);
       saveData();
       input.value = '';
@@ -1821,98 +2232,236 @@
     }
 
     function confirmDeleteTag(tag) {
-      openConfirmModal(
-        'タグの削除',
-        `タグ「#${tag}」を選択肢から削除しますか？（過去のトレード記録に付いているタグ履歴はそのまま残ります）`,
-        () => {
-          state.tags = state.tags.filter(t => t !== tag);
-          if (state.chartTagFilter === tag) state.chartTagFilter = 'ALL';
-          saveData();
-          renderSettings();
-          showToast(`タグ「#${tag}」を削除しました`);
+      openConfirmModal('タグの削除', `タグ「#${tag}」を選択肢から削除しますか？`, () => {
+        state.tags = state.tags.filter(t => t !== tag);
+        if (state.chartTagFilter === tag) state.chartTagFilter = 'ALL';
+        saveData();
+        renderSettings();
+      });
+    }
+
+    function exportJSONBackup() {
+      const payload = {
+        app: 'FX Calendar v3',
+        version: 3,
+        exportedAt: new Date().toISOString(),
+        initialCapital: state.initialCapital,
+        tags: state.tags,
+        trades: state.trades,
+        transfers: state.transfers
+      };
+      downloadFile(JSON.stringify(payload, null, 2), `fx_calendar_v3_backup_${todayStr}.json`, 'application/json');
+      showToast('JSONバックアップを保存しました');
+    }
+
+    function handleJSONImportFile(event) {
+      const file = event.target.files[0];
+      event.target.value = '';
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!Array.isArray(data.trades)) throw new Error('Invalid format');
+          const tCount = data.trades.length;
+          const trCount = Array.isArray(data.transfers) ? data.transfers.length : 0;
+          openConfirmModal(
+            'JSONバックアップの復元',
+            `以下のデータを読み込み、現在のデータを上書きします。\n・トレード記録: ${tCount}件\n・資金移動: ${trCount}件\nよろしいですか？`,
+            () => {
+              state.trades = data.trades;
+              state.transfers = Array.isArray(data.transfers) ? data.transfers : [];
+              if (Array.isArray(data.tags) && data.tags.length > 0) state.tags = data.tags;
+              if (typeof data.initialCapital === 'number') state.initialCapital = data.initialCapital;
+              saveData();
+              refreshActiveView();
+              showToast(`バックアップを復元しました（${tCount}件）`);
+            }
+          );
+        } catch (err) {
+          showToast('JSONファイルの形式が正しくありません', 'error');
         }
-      );
+      };
+      reader.readAsText(file);
+    }
+
+    function handleCSVImportFile(event) {
+      const file = event.target.files[0];
+      event.target.value = '';
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const buffer = e.target.result;
+          const bytes = new Uint8Array(buffer);
+          let text = '';
+          if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
+            text = new TextDecoder('utf-16le').decode(buffer);
+          } else if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
+            text = new TextDecoder('utf-16be').decode(buffer);
+          } else {
+            text = new TextDecoder('utf-8').decode(buffer);
+            if (text.includes('\uFFFD')) text = new TextDecoder('shift-jis').decode(buffer);
+          }
+          const parsedRows = parseMT5OrGenericCSV(text);
+          if (parsedRows.length === 0) {
+            showToast('取り込めるトレード行が見つかりませんでした', 'error');
+            return;
+          }
+          state.pendingCSVRows = parsedRows;
+          openCSVPreviewModal(parsedRows);
+        } catch (err) {
+          showToast('CSVの読み込みに失敗しました', 'error');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function parseMT5OrGenericCSV(text) {
+      const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim() !== '');
+      if (lines.length < 2) return [];
+      const sep = lines[0].includes('\t') ? '\t' : (lines[0].includes(';') ? ';' : ',');
+      const splitLine = (line) => line.split(sep).map(c => c.replace(/^"|"$/g, '').trim());
+
+      let headerIdx = 0;
+      let colDate = -1, colSymbol = -1, colProfit = -1, colLot = -1, colComment = -1;
+
+      for (let i = 0; i < Math.min(10, lines.length); i++) {
+        const cols = splitLine(lines[i]).map(c => c.toLowerCase());
+        const dIdx = cols.findIndex(c => c.includes('time') || c.includes('date') || c.includes('日付') || c.includes('時間'));
+        const pIdx = cols.findIndex(c => c.includes('profit') || c.includes('損益') || c.includes('利益'));
+        if (dIdx !== -1 && pIdx !== -1) {
+          headerIdx = i; colDate = dIdx; colProfit = pIdx;
+          colSymbol = cols.findIndex(c => c.includes('symbol') || c.includes('銘柄') || c.includes('通貨'));
+          colLot = cols.findIndex(c => c.includes('volume') || c.includes('lot') || c.includes('ロット') || c.includes('数量'));
+          colComment = cols.findIndex(c => c.includes('comment') || c.includes('コメント') || c.includes('ea') || c.includes('メモ'));
+          break;
+        }
+      }
+      if (colDate === -1 || colProfit === -1) { colDate = 0; colProfit = 1; colLot = 2; colSymbol = 3; colComment = 4; }
+
+      const results = [];
+      for (let i = headerIdx + 1; i < lines.length; i++) {
+        const cols = splitLine(lines[i]);
+        if (cols.length <= Math.max(colDate, colProfit)) continue;
+        const dateMatch = cols[colDate].match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+        if (!dateMatch) continue;
+        const date = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
+        const amount = parseFloat(cols[colProfit].replace(/[,¥円\s]/g, ''));
+        if (isNaN(amount)) continue;
+
+        let lot = null;
+        if (colLot !== -1 && cols[colLot]) {
+          const parsedLot = parseFloat(cols[colLot].replace(/[^0-9.]/g, ''));
+          if (!isNaN(parsedLot) && parsedLot > 0) lot = parsedLot;
+        }
+
+        const tags = [];
+        const symbol = colSymbol !== -1 && cols[colSymbol] ? cols[colSymbol].trim() : '';
+        const comment = colComment !== -1 && cols[colComment] ? cols[colComment].trim() : '';
+        if (symbol) tags.push(symbol);
+        results.push({ date, amount: Math.round(amount), lot, tags, memo: comment });
+      }
+      return results;
+    }
+
+    function openCSVPreviewModal(rows) {
+      document.getElementById('csv-preview-subtitle').textContent = `${rows.length}件のトレードを検出しました（先頭15件を表示）`;
+      document.getElementById('csv-default-tag').value = '';
+      document.getElementById('csv-preview-tbody').innerHTML = rows.slice(0, 15).map(r => `
+        <tr>
+          <td class="py-2 px-2 text-slate-300 whitespace-nowrap">${r.date}</td>
+          <td class="py-2 px-2 text-right font-bold whitespace-nowrap ${r.amount >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatYen(r.amount)}</td>
+          <td class="py-2 px-2 text-right text-sky-300 whitespace-nowrap">${r.lot !== null ? r.lot : '-'}</td>
+          <td class="py-2 px-2 text-slate-400 truncate max-w-[130px]">${escapeHTML([...r.tags, r.memo].filter(Boolean).join(' / ') || '-')}</td>
+        </tr>
+      `).join('');
+      document.getElementById('csv-preview-modal').classList.remove('hidden');
+    }
+
+    function closeCSVPreviewModal() {
+      document.getElementById('csv-preview-modal').classList.add('hidden');
+      state.pendingCSVRows = [];
+    }
+
+    function executeCSVImport() {
+      const defaultTag = document.getElementById('csv-default-tag').value.trim();
+      if (defaultTag && !state.tags.includes(defaultTag)) state.tags.push(defaultTag);
+
+      const base = Date.now();
+      state.pendingCSVRows.forEach((r, idx) => {
+        const tags = [...r.tags];
+        if (defaultTag && !tags.includes(defaultTag)) tags.unshift(defaultTag);
+        tags.forEach(t => { if (!state.tags.includes(t)) state.tags.push(t); });
+        state.trades.push({
+          id: `csv-${base}-${idx}`,
+          date: r.date,
+          amount: r.amount,
+          lot: r.lot,
+          pips: null,
+          tags,
+          memo: r.memo
+        });
+      });
+
+      const count = state.pendingCSVRows.length;
+      saveData();
+      closeCSVPreviewModal();
+      refreshActiveView();
+      showToast(`${count}件のトレードをインポートしました`);
     }
 
     function exportCSV() {
-      if (state.trades.length === 0) {
-        showToast('エクスポートするデータがありません', 'error');
-        return;
-      }
-
+      if (state.trades.length === 0) { showToast('出力するトレードデータがありません', 'error'); return; }
       const sorted = [...state.trades].sort((a, b) => a.date.localeCompare(b.date));
-      const header = ['日付', '損益(円)', '獲得pips', 'タグ', 'メモ'];
-      const escapeCSV = (val) => {
-        const s = val === null || val === undefined ? '' : String(val);
+      const header = ['日付', '損益(円)', 'ロット数', '獲得pips', 'タグ', 'メモ'];
+      const esc = (v) => {
+        const s = v === null || v === undefined ? '' : String(v);
         return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s.replace(/"/g, '""')}"` : s;
       };
-
-      const rows = sorted.map(t => [
-        t.date,
-        t.amount,
-        t.pips !== null && t.pips !== '' ? t.pips : '',
-        (t.tags || []).join(' / '),
-        t.memo || ''
-      ].map(escapeCSV).join(','));
-
-      const csvContent = '\uFEFF' + [header.join(','), ...rows].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `fx_trades_${todayStr}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
+      const rows = sorted.map(t => [t.date, t.amount, t.lot ?? '', t.pips ?? '', (t.tags || []).join(' / '), t.memo || ''].map(esc).join(','));
+      downloadFile('\uFEFF' + [header.join(','), ...rows].join('\n'), `fx_trades_${todayStr}.csv`, 'text/csv;charset=utf-8;');
       showToast('CSVファイルをダウンロードしました');
     }
 
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
     function confirmLoadSample() {
-      openConfirmModal(
-        'サンプルデータの再読み込み',
-        '現在のトレード記録をサンプルデータ（先月〜今月の12件）に置き換えますか？',
-        () => {
-          state.trades = generateSampleTrades();
-          state.tags = [...DEFAULT_TAGS];
-          state.chartTagFilter = 'ALL';
-          saveData();
-          goToCurrentMonth();
-          renderSettings();
-          showToast('サンプルデータを読み込みました');
-        }
-      );
+      openConfirmModal('サンプルデータの再読み込み', '現在のデータを0.35〜0.40Lotの10件＋85,000円ウォレット隔離のデモデータに置き換えますか？', () => {
+        loadSampleDataInternal();
+        saveData();
+        goToCurrentMonth();
+        refreshActiveView();
+        showToast('サンプルデータを読み込みました');
+      });
     }
 
     function confirmClearAll() {
-      openConfirmModal(
-        '全データのリセット',
-        'すべてのトレード記録を削除して空の状態にしますか？この操作は取り消せません。',
-        () => {
-          state.trades = [];
-          saveData();
-          refreshActiveView();
-          showToast('すべてのトレード記録を削除しました');
-        }
-      );
+      openConfirmModal('全データリセット', 'すべてのトレード記録と資金移動データを削除します。よろしいですか？', () => {
+        state.trades = [];
+        state.transfers = [];
+        saveData();
+        refreshActiveView();
+        showToast('すべてのデータを削除しました');
+      });
     }
 
-    // ==========================================
-    // 10. 汎用確認ダイアログ
-    // ==========================================
     function openConfirmModal(title, message, onConfirm) {
       document.getElementById('confirm-title').textContent = title;
       document.getElementById('confirm-message').textContent = message;
       state.confirmCallback = onConfirm;
-
-      const okBtn = document.getElementById('confirm-ok-btn');
-      okBtn.onclick = () => {
+      document.getElementById('confirm-ok-btn').onclick = () => {
         closeConfirmModal();
         if (typeof state.confirmCallback === 'function') state.confirmCallback();
       };
-
       document.getElementById('confirm-modal').classList.remove('hidden');
     }
 
@@ -1920,21 +2469,13 @@
       document.getElementById('confirm-modal').classList.add('hidden');
     }
 
-    // Enterキーでのタグ追加
     document.getElementById('settings-new-tag-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addTagFromSettings();
-      }
+      if (e.key === 'Enter') { e.preventDefault(); addTagFromSettings(); }
     });
     document.getElementById('modal-new-tag-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addTagFromModal();
-      }
+      if (e.key === 'Enter') { e.preventDefault(); addTagFromModal(); }
     });
 
-    // アプリ起動
     window.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
