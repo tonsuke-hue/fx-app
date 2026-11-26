@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- PWA / ホーム画面追加用メタタグ -->
+  <!-- PWA / iPhoneホーム画面追加用メタタグ -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="FX Calendar v7">
+  <meta name="apple-mobile-web-app-title" content="FX Calendar v8">
   <meta name="mobile-web-app-capable" content="yes">
   <meta id="meta-theme-color" name="theme-color" content="#0f172a">
-  <title>FX損益カレンダー＆分析アプリ v7</title>
+  <title>FX損益カレンダー＆分析アプリ v8</title>
 
-  <!-- Tailwind CSS (CDN) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS (MT5 Excel .xlsx / .xls 直接解析用 CDN) -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.full.min.js"></script>
-  <!-- Chart.js (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- SheetJS (MT5 .xlsx / .xls 直接解析用) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Google Fonts: Inter & Noto Sans JP -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,7 @@
   </script>
 
   <style>
-    /* 動的テーマ変数（背景色の相対輝度に応じて自動調整） */
+    /* 相対輝度に応じて自動最適化されるテーマトークン */
     :root {
       --bg: #0f172a;
       --card-bg: rgba(30, 41, 59, 0.94);
@@ -48,10 +48,10 @@
       --text-sub: #94a3b8;
       --text-muted: #64748b;
       --profit-color: #4ade80;
-      --profit-bg: rgba(74, 222, 128, 0.15);
+      --profit-bg: rgba(74, 222, 128, 0.14);
       --profit-border: rgba(74, 222, 128, 0.35);
       --loss-color: #f87171;
-      --loss-bg: rgba(248, 113, 113, 0.15);
+      --loss-bg: rgba(248, 113, 113, 0.14);
       --loss-border: rgba(248, 113, 113, 0.35);
       --accent: #10b981;
       --accent-fg: #020617;
@@ -73,7 +73,7 @@
     }
 
     .t-header { background-color: var(--header-bg); border-color: var(--card-border); }
-    .t-card   { background-color: var(--card-bg); border-color: var(--card-border); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06); }
+    .t-card   { background-color: var(--card-bg); border-color: var(--card-border); box-shadow: 0 2px 14px rgba(0, 0, 0, 0.06); }
     .t-sub    { background-color: var(--card-sub); border-color: var(--card-border); }
     .t-input  { background-color: var(--input-bg); border-color: var(--card-border); color: var(--text-main); }
     .t-border { border-color: var(--card-border); }
@@ -92,7 +92,7 @@
     .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
     .animate-slide-up { animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
@@ -113,7 +113,7 @@
   <!-- ==================== 上部固定ヘッダー ==================== -->
   <header class="sticky top-0 z-30 t-header backdrop-blur-md border-b">
     <div class="max-w-4xl mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-2">
-      <!-- 左上: タイトル & クラウド同期バッジ -->
+      <!-- 左上: アプリアイコン・タイトル・リアルタイムクラウド同期バッジ -->
       <div class="flex items-center gap-2 min-w-0">
         <div class="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm shrink-0 t-accent">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
@@ -123,7 +123,7 @@
         <div class="min-w-0">
           <div class="flex items-center gap-1.5">
             <h1 class="text-sm sm:text-base font-extrabold tracking-tight t-text truncate">FX Calendar</h1>
-            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md border shrink-0" style="background-color: var(--profit-bg); color: var(--profit-color); border-color: var(--profit-border);">v7</span>
+            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md border shrink-0" style="background-color: var(--profit-bg); color: var(--profit-color); border-color: var(--profit-border);">v8</span>
           </div>
           <button onclick="handleHeaderSyncClick()" id="header-sync-badge" class="flex items-center gap-1 text-[10px] font-bold t-subtxt hover:opacity-80 transition-opacity truncate" title="タップで今すぐクラウド同期 / 設定を開く">
             <span id="header-sync-dot" class="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
@@ -162,22 +162,30 @@
 
     <!-- ########## タブ1: カレンダー ########## -->
     <section id="view-calendar" class="space-y-3.5">
-      <!-- 月移動バー -->
-      <div class="flex items-center justify-between t-card px-3.5 py-2.5 rounded-2xl border">
-        <button onclick="changeMonth(-1)" class="p-2 -ml-1 rounded-xl t-hover t-subtxt transition-colors" aria-label="前月">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-        </button>
-        <div class="flex items-center gap-2.5">
-          <h2 id="calendar-month-label" class="text-base sm:text-lg font-extrabold t-text tracking-tight">2026年 11月</h2>
+      <!-- 月移動バー ＆ EA・タグ絞り込み -->
+      <div class="t-card px-3.5 py-2.5 rounded-2xl border flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-1.5">
+          <button onclick="changeMonth(-1)" class="p-2 -ml-1 rounded-xl t-hover t-subtxt transition-colors" aria-label="前月">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <h2 id="calendar-month-label" class="text-base sm:text-lg font-extrabold t-text tracking-tight min-w-[104px] text-center">2026年 11月</h2>
+          <button onclick="changeMonth(1)" class="p-2 rounded-xl t-hover t-subtxt transition-colors" aria-label="翌月">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
           <button onclick="goToCurrentMonth()" class="text-[11px] font-bold px-2.5 py-1 rounded-lg t-sub border t-subtxt t-hover transition-colors">今月</button>
         </div>
-        <button onclick="changeMonth(1)" class="p-2 -mr-1 rounded-xl t-hover t-subtxt transition-colors" aria-label="翌月">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </button>
+
+        <!-- カレンダー上のEA・タグ絞り込みドロップダウン -->
+        <div class="flex items-center gap-1.5 ml-auto">
+          <span class="text-[11px] font-bold t-subtxt hidden sm:inline">EA絞り込み:</span>
+          <select id="calendar-tag-select" onchange="setCalendarTagFilter(this.value)" class="t-input border text-xs font-bold rounded-xl px-2.5 py-1.5 outline-none cursor-pointer max-w-[165px]">
+            <option value="ALL">すべてのEA・タグ</option>
+          </select>
+        </div>
       </div>
 
       <!-- 月間サマリーカード -->
@@ -191,15 +199,15 @@
             </div>
           </div>
           <span id="summary-record-badge" class="inline-flex items-center text-xs font-bold t-sub t-text px-3 py-1.5 rounded-xl border self-start sm:self-auto">
-            0勝 0敗（計0回）
+            勝ち日 0勝0敗 / 取引 0戦
           </span>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 text-center">
           <div class="t-sub border rounded-xl p-2.5">
-            <p class="text-[10px] font-semibold t-subtxt mb-0.5">勝率（取引 / 勝ち日）</p>
-            <p id="summary-win-rate" class="text-sm sm:text-base font-extrabold t-text">0.0%</p>
-            <p id="summary-day-win-sub" class="text-[10px] t-muted mt-0.5">勝ち日 0/0日</p>
+            <p class="text-[10px] font-semibold t-subtxt mb-0.5">日次勝率（勝ち日 ÷ 取引日）</p>
+            <p id="summary-daily-win-rate" class="text-sm sm:text-base font-extrabold t-text">0.0%</p>
+            <p id="summary-trade-win-sub" class="text-[10px] t-muted mt-0.5">取引勝率 0.0% (0/0)</p>
           </div>
           <div class="t-sub border rounded-xl p-2.5">
             <p class="text-[10px] font-semibold t-subtxt mb-0.5">月間PF / 平均損益</p>
@@ -219,7 +227,7 @@
         </div>
       </div>
 
-      <!-- 7列カレンダー -->
+      <!-- MAXBET風 7列カレンダーグリッド -->
       <div class="t-card rounded-2xl border overflow-hidden">
         <div class="grid grid-cols-7 border-b t-border t-sub text-center py-2 text-[11px] font-bold">
           <div style="color: var(--sunday-color);">日</div>
@@ -231,11 +239,11 @@
           <div style="color: var(--saturday-color);">土</div>
         </div>
         <div id="calendar-grid" class="grid grid-cols-7"></div>
-        <div class="px-3.5 py-2 t-sub border-t t-border flex items-center justify-between text-[10px] t-subtxt">
-          <span class="truncate">日付タップで下の明細を表示・編集</span>
+        <div class="px-3.5 py-2 t-sub border-t t-border flex flex-wrap items-center justify-between gap-2 text-[10px] t-subtxt">
+          <span>日付タップで明細の確認・編集・個別削除ができます</span>
           <div class="flex items-center gap-3 shrink-0">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background-color: var(--profit-color);"></span>利益</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background-color: var(--loss-color);"></span>損失</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background-color: var(--profit-color);"></span>利益日</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background-color: var(--loss-color);"></span>損失日</span>
             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background-color: var(--transfer-color);"></span>資金移動</span>
           </div>
         </div>
@@ -243,7 +251,7 @@
 
       <!-- 選択日の明細カード -->
       <div class="t-card rounded-2xl border overflow-hidden">
-        <div class="px-4 py-3 border-b t-border flex items-center justify-between gap-2 t-sub">
+        <div class="px-4 py-3 border-b t-border flex flex-wrap items-center justify-between gap-2 t-sub">
           <div class="min-w-0">
             <h3 id="selected-day-title" class="text-sm font-extrabold t-text">-</h3>
             <p id="selected-day-summary" class="text-xs font-semibold t-subtxt mt-0.5">損益: ¥0（0件）</p>
@@ -257,19 +265,19 @@
             </button>
           </div>
         </div>
-        <div id="selected-day-list" class="p-3.5 space-y-2.5"></div>
+        <div id="selected-day-list" class="p-3.5 space-y-2"></div>
       </div>
     </section>
 
     <!-- ########## タブ2: グラフ ########## -->
     <section id="view-chart" class="hidden space-y-3.5">
       <div class="t-card rounded-2xl border p-4 space-y-3">
-        <!-- 金額(円) vs 利益率(%) 切替 -->
+        <!-- 金額(円) vs 利益率(%) ワンタップ切替 -->
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-bold t-subtxt">表示指標</span>
           <div class="inline-flex t-sub border p-1 rounded-xl">
             <button onclick="setChartMode('yen')" id="chart-mode-yen" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all">金額（円）</button>
-            <button onclick="setChartMode('roi')" id="chart-mode-roi" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all">利益率（%）</button>
+            <button onclick="setChartMode('roi')" id="chart-mode-roi" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all">口座残高比 利益率（%）</button>
           </div>
         </div>
 
@@ -300,19 +308,19 @@
         <div class="flex items-center justify-between">
           <div>
             <h3 id="cumulative-chart-title" class="text-sm font-extrabold t-text">累計損益（資産曲線）</h3>
-            <p id="cumulative-chart-sub" class="text-[11px] t-subtxt">選択期間の累積収支推移</p>
+            <p class="text-[11px] t-subtxt">選択期間の累積収支推移</p>
           </div>
           <span id="cumulative-chart-badge" class="text-sm font-extrabold t-profit">+¥0</span>
         </div>
         <div class="relative w-full h-56 sm:h-64">
           <canvas id="cumulative-chart-canvas"></canvas>
-          <div id="cumulative-empty-state" class="hidden absolute inset-0 flex items-center justify-center t-card">
+          <div id="cumulative-empty-state" class="hidden absolute inset-0 flex items-center justify-center t-card rounded-xl">
             <p class="text-xs font-bold t-subtxt">表示できるトレードデータがありません</p>
           </div>
         </div>
       </div>
 
-      <!-- 日別棒グラフ -->
+      <!-- 日別損益棒グラフ -->
       <div class="t-card rounded-2xl border p-4 space-y-2">
         <div>
           <h3 id="daily-chart-title" class="text-sm font-extrabold t-text">日別損益（棒グラフ）</h3>
@@ -320,7 +328,7 @@
         </div>
         <div class="relative w-full h-48 sm:h-56">
           <canvas id="daily-chart-canvas"></canvas>
-          <div id="daily-empty-state" class="hidden absolute inset-0 flex items-center justify-center t-card">
+          <div id="daily-empty-state" class="hidden absolute inset-0 flex items-center justify-center t-card rounded-xl">
             <p class="text-xs font-bold t-subtxt">表示できるトレードデータがありません</p>
           </div>
         </div>
@@ -331,7 +339,7 @@
         <div class="t-card rounded-2xl border p-3.5">
           <p class="text-[11px] font-bold t-subtxt mb-1">累計損益</p>
           <p id="kpi-total-pnl" class="text-xl sm:text-2xl font-extrabold tracking-tight t-text">¥0</p>
-          <p id="kpi-win-rate" class="text-[11px] font-semibold t-subtxt mt-1">勝率 0.0% / 利益率 0.0%</p>
+          <p id="kpi-win-rate" class="text-[11px] font-semibold t-subtxt mt-1">日次勝率 0.0% / 取引勝率 0.0%</p>
         </div>
         <div class="t-card rounded-2xl border p-3.5">
           <p class="text-[11px] font-bold t-subtxt mb-1">PF（プロフィットファクター）</p>
@@ -346,16 +354,15 @@
         <div class="t-card rounded-2xl border p-3.5">
           <p class="text-[11px] font-bold t-subtxt mb-1">最大連勝数</p>
           <p id="kpi-max-streak" class="text-xl sm:text-2xl font-extrabold tracking-tight t-profit">0連勝</p>
-          <p id="kpi-trade-count-sub" class="text-[11px] font-medium t-muted mt-1">対象 0戦</p>
+          <p id="kpi-trade-count-sub" class="text-[11px] font-medium t-muted mt-1">有効取引 0戦</p>
         </div>
       </div>
     </section>
 
-    <!-- ########## タブ3: 分析（市場別・24時間別・曜日別・EAタグ別） ########## -->
+    <!-- ########## タブ3: 分析（曜日別・4大市場セッション別・24時間別・EAランキング） ########## -->
     <section id="view-analytics" class="hidden space-y-3.5">
       <!-- フィルターカード -->
       <div class="t-card rounded-2xl border p-4 space-y-3">
-        <!-- 期間切替 -->
         <div class="flex flex-wrap items-center justify-between gap-2">
           <span class="text-xs font-bold t-subtxt">対象期間</span>
           <div class="inline-flex t-sub border p-1 rounded-xl gap-0.5">
@@ -377,36 +384,47 @@
         </div>
       </div>
 
-      <!-- 1. 市場セッション別分析 -->
+      <!-- 1. 曜日別（月〜金）自動集計 -->
+      <div class="t-card rounded-2xl border p-4 space-y-3">
+        <div>
+          <h3 class="text-sm font-extrabold t-text">📅 曜日別（月〜金）自動集計</h3>
+          <p class="text-[11px] t-subtxt">合計損益・勝率バー・平均損益・平均利率(%)を自動算出（「得意」「要注意」バッジ付）</p>
+        </div>
+        <div class="relative w-full h-44">
+          <canvas id="weekday-chart-canvas"></canvas>
+        </div>
+        <div id="weekday-cards-list" class="space-y-2"></div>
+      </div>
+
+      <!-- 2. 4大市場セッション別分析 (JST自動換算・日付変更なし) -->
       <div class="t-card rounded-2xl border p-4 space-y-3">
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <h3 class="text-sm font-extrabold t-text">🌍 市場セッション別 勝率・損益</h3>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md t-sub border t-sky">JST 日本時間基準</span>
+            <h3 class="text-sm font-extrabold t-text">🌍 4大市場セッション別 勝率・損益</h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md t-sub border t-sky">裏側でJST日本時間へ自動換算</span>
           </div>
-          <p class="text-[11px] t-subtxt mt-0.5">オセアニア(05-08) / 東京(09-15) / ロンドン(16-20) / NY(21-04) の成績を自動集計</p>
+          <p class="text-[11px] t-subtxt mt-0.5">カレンダー日付はMT5基準を維持したまま、決済時刻のみ日本時間(JST)に変換して市場別成績を集計</p>
         </div>
 
-        <div class="relative w-full h-48">
+        <div class="relative w-full h-44">
           <canvas id="session-chart-canvas"></canvas>
         </div>
 
-        <!-- 4大市場カード -->
         <div id="session-cards-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
 
         <!-- ロンドン・NY重複(21-01時) vs NY後半(02-04時) 比較 -->
         <div class="pt-2 border-t t-border space-y-1.5">
-          <p class="text-[11px] font-bold t-subtxt">⚡ NYセッション詳細比較（重複帯 vs NY後半）</p>
+          <p class="text-[11px] font-bold t-subtxt">⚡ NYセッション詳細比較（重複帯 21-01時 vs NY後半 02-04時）</p>
           <div id="ny-overlap-breakdown" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
         </div>
       </div>
 
-      <!-- 2. 24時間別（0〜23時 JST）チャート -->
+      <!-- 3. 24時間別（0〜23時 JST）損益・勝率チャート -->
       <div class="t-card rounded-2xl border p-4 space-y-2">
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <div>
-            <h3 class="text-sm font-extrabold t-text">⏰ 24時間別（0時〜23時 JST）損益＆勝率</h3>
-            <p class="text-[11px] t-subtxt">棒＝純損益 ／ 線＝勝率(%)。EAの得意・苦手な時間帯を特定</p>
+            <h3 class="text-sm font-extrabold t-text">⏰ 時間帯別（0時〜23時 JST）損益＆勝率チャート</h3>
+            <p class="text-[11px] t-subtxt">棒＝純損益(円) ／ 折れ線＝トレード勝率(%)</p>
           </div>
           <span id="hourly-chart-count" class="text-[11px] font-bold t-muted">時刻あり: 0件</span>
         </div>
@@ -414,24 +432,12 @@
           <canvas id="hourly-chart-canvas"></canvas>
           <div id="hourly-empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center t-card rounded-xl">
             <p class="text-xs font-bold t-subtxt">時刻付きトレードデータがまだありません</p>
-            <p class="text-[11px] t-muted mt-0.5">MT5ファイルを取り込むか、記録時に時刻を入力すると表示されます</p>
+            <p class="text-[11px] t-muted mt-0.5">MT5ファイルを取り込むか、記録時に時刻を入力すると自動集計されます</p>
           </div>
         </div>
       </div>
 
-      <!-- 3. 曜日別（月〜金）自動集計 -->
-      <div class="t-card rounded-2xl border p-4 space-y-3">
-        <div>
-          <h3 class="text-sm font-extrabold t-text">📅 曜日別（月〜金）自動集計</h3>
-          <p class="text-[11px] t-subtxt">最も成績が良い曜日に「得意」、悪い曜日に「要注意」バッジを自動表示</p>
-        </div>
-        <div class="relative w-full h-48">
-          <canvas id="weekday-chart-canvas"></canvas>
-        </div>
-        <div id="weekday-cards-list" class="space-y-2"></div>
-      </div>
-
-      <!-- 4. タグ・EA別 成績ランキングテーブル -->
+      <!-- 4. EA・タグ別 成績ランキング表 -->
       <div class="t-card rounded-2xl border overflow-hidden">
         <div class="px-4 py-3 border-b t-border t-sub flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -446,14 +452,14 @@
           </select>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse min-w-[520px]">
+          <table class="w-full text-left border-collapse min-w-[560px]">
             <thead>
               <tr class="border-b t-border text-[11px] font-bold t-subtxt t-sub">
                 <th class="py-2.5 px-3">EA / タグ</th>
-                <th class="py-2.5 px-2 text-right">回数</th>
+                <th class="py-2.5 px-2 text-right">件数</th>
                 <th class="py-2.5 px-2 text-right">勝率</th>
                 <th class="py-2.5 px-2 text-right">PF</th>
-                <th class="py-2.5 px-2 text-right">平均損益</th>
+                <th class="py-2.5 px-2 text-right">平均Lot</th>
                 <th class="py-2.5 px-3 text-right">合計損益</th>
               </tr>
             </thead>
@@ -507,12 +513,12 @@
           <span class="text-[10px] t-subtxt">横スクロール可</span>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse min-w-[600px]">
+          <table class="w-full text-left border-collapse min-w-[620px]">
             <thead>
               <tr class="border-b t-border text-[11px] font-bold t-subtxt t-sub">
                 <th class="py-2.5 px-3">月</th>
-                <th class="py-2.5 px-2 text-right">取引回数</th>
-                <th class="py-2.5 px-2 text-right">勝率</th>
+                <th class="py-2.5 px-2 text-right">取引数</th>
+                <th class="py-2.5 px-2 text-right">日次/取引勝率</th>
                 <th class="py-2.5 px-2 text-right">トレード損益</th>
                 <th class="py-2.5 px-2 text-right t-profit">月利%</th>
                 <th class="py-2.5 px-2 text-right t-sky">平均Lot</th>
@@ -529,20 +535,20 @@
     <!-- ########## タブ5: 設定 ########## -->
     <section id="view-settings" class="hidden space-y-3.5">
 
-      <!-- 1. MT5 履歴直接インポート (Excel / HTML / CSV) -->
+      <!-- 1. MT5履歴インポート (.xlsx / .html / .csv) ＆ トレード履歴クリーン消去 -->
       <div class="t-card rounded-2xl border-2 p-4 space-y-3.5" style="border-color: var(--sky-color);">
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <h2 class="text-sm sm:text-base font-extrabold t-text">📥 MT5取引履歴 直接インポート</h2>
-            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md t-sub border t-sky">Excel(.xlsx) / HTML / CSV対応</span>
+            <h2 class="text-sm sm:text-base font-extrabold t-text">📥 MT5取引履歴インポート（v8 日付ズレ完全修正版）</h2>
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md t-sub border t-sky">.xlsx / .html / .csv 直接対応</span>
           </div>
           <p class="text-xs t-subtxt mt-1 leading-relaxed">
-            MT5のレポート（<strong>.xlsx / .xls / .html / .csv</strong>）をそのまま読み込めます。<br>
-            「ポジション / Positions」表のみを厳密抽出し、注文・約定・残高行の誤計上を防ぎます。約定表からEAコメントも自動補完します。
+            <strong>MT5サーバーの決済日付（YYYY-MM-DD）をそのまま日次集計</strong>するため、金曜深夜の決済が土曜日にズレず、MAXBET等の標準カレンダーと1円単位で一致します。<br>
+            「ポジション / Positions」表のみを厳密抽出し、0円のエントリー行や注文・残高行を完全除外します。
           </p>
         </div>
 
-        <!-- ドロップゾーン -->
+        <!-- ファイルドロップゾーン -->
         <div id="mt5-dropzone"
              onclick="triggerMT5FilePicker()"
              ondragover="handleDropzoneDragOver(event)"
@@ -555,30 +561,33 @@
             </svg>
           </div>
           <p class="text-xs sm:text-sm font-extrabold t-text">MT5の <span class="t-sky">.xlsx / .html / .csv</span> をドロップ または タップして選択</p>
-          <p class="text-[11px] t-muted">取り込み前に抽出件数・合計損益・重複チェック・EAタグをプレビュー確認できます</p>
+          <p class="text-[11px] t-muted">取り込み前に合計金額（例: ¥116,491）を確認し、「クリーン取込」または「差分追加」を選べます</p>
         </div>
 
-        <!-- 直前のインポート取り消しエリア -->
-        <div id="undo-import-box" class="hidden t-sub border rounded-xl p-3 flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <p class="text-xs font-extrabold t-text truncate">直前のインポート: <span id="undo-import-info">-</span></p>
-            <p class="text-[10px] t-subtxt">誤って取り込んだ場合、この回の履歴だけをワンクリックで元に戻せます</p>
-          </div>
-          <button onclick="confirmUndoLastImport()" class="px-3 py-1.5 rounded-xl border text-xs font-extrabold shrink-0 transition-all active:scale-95" style="background-color: var(--loss-bg); color: var(--loss-color); border-color: var(--loss-border);">
-            直前の取込を取消
+        <!-- クリーン消去クイックボタン -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <button type="button" onclick="confirmClearTradesOnly()" class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border text-xs font-extrabold transition-all active:scale-95" style="background-color: var(--loss-bg); color: var(--loss-color); border-color: var(--loss-border);">
+            🧹 トレード履歴だけ全消去（GAS設定・テーマ・資金移動は維持）
           </button>
+
+          <div id="undo-import-box" class="hidden flex items-center gap-2">
+            <span class="text-[11px] font-bold t-subtxt truncate max-w-[180px]" id="undo-import-info">直前: -</span>
+            <button type="button" onclick="confirmUndoLastImport()" class="px-3 py-2 rounded-xl t-sub border text-xs font-extrabold t-amber t-hover shrink-0">
+              ↩ 直前の取込を取消
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- 2. Googleスプレッドシート自動同期 -->
+      <!-- 2. Googleスプレッドシート自動同期 (GAS) -->
       <div class="t-card rounded-2xl border-2 p-4 space-y-3.5" style="border-color: var(--profit-border);">
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h2 class="text-sm sm:text-base font-extrabold t-text">☁️ Googleスプレッドシート自動同期</h2>
-            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md" style="background-color: var(--profit-bg); color: var(--profit-color);">起動・タブ復帰時に自動Pull</span>
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md" style="background-color: var(--profit-bg); color: var(--profit-color);">PC・iPhone・ウィジェット完全連動</span>
           </div>
           <p class="text-xs t-subtxt mt-1 leading-relaxed">
-            PC・iPhone・Scriptableウィジェット間でデータを自動同期します。
+            インポート・記録・削除・テーマ変更のたびに自動でクラウドへ送信（Push）され、別端末で開いた際にも自動取得（Pull）します。
           </p>
         </div>
 
@@ -622,7 +631,7 @@
       <div class="t-card rounded-2xl border p-4 space-y-3.5">
         <div>
           <h2 class="text-sm font-extrabold t-text">🎨 背景テーマカラー設定</h2>
-          <p class="text-xs t-subtxt mt-1">背景の明るさに合わせて損益文字・グラフ・ウィジェット配色を自動で最適化します。</p>
+          <p class="text-xs t-subtxt mt-1">くすみカラー・パステルカラーを選ぶと、損益文字・グラフ・Scriptableウィジェットの配色も自動で見やすく同期されます。</p>
         </div>
         <div id="theme-presets-grid" class="grid grid-cols-3 gap-2"></div>
         <div class="pt-2 border-t t-border flex items-center justify-between gap-3">
@@ -637,36 +646,37 @@
         </div>
       </div>
 
-      <!-- 4. 初期口座資金設定 -->
-      <div class="t-card rounded-2xl border p-4 space-y-3">
-        <div>
-          <h2 class="text-sm font-extrabold t-text">💰 初期口座資金設定（利益率%の基準）</h2>
-          <p class="text-xs t-subtxt mt-1">開始時の口座資金（円）を設定すると、日々の利益率(%)と推定口座残高を計算します。</p>
-        </div>
-        <div class="flex gap-2">
-          <div class="relative flex-1">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold t-subtxt">¥</span>
-            <input type="number" id="settings-initial-capital" inputmode="numeric" placeholder="100000" class="w-full t-input border rounded-xl pl-8 pr-3.5 py-2.5 text-sm font-extrabold outline-none">
+      <!-- 4. 初期口座資金設定 ＆ EAタグ管理 -->
+      <div class="t-card rounded-2xl border p-4 space-y-4">
+        <div class="space-y-2.5">
+          <div>
+            <h2 class="text-sm font-extrabold t-text">💰 初期口座資金設定（利益率%の基準）</h2>
+            <p class="text-xs t-subtxt mt-0.5">開始時の口座資金（円）を設定すると、月利(%)・日次利益率(%)・推定口座残高を計算します。</p>
           </div>
-          <button onclick="saveInitialCapital()" class="px-5 py-2.5 rounded-xl t-accent text-xs font-extrabold shrink-0">保存</button>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold t-subtxt">¥</span>
+              <input type="number" id="settings-initial-capital" inputmode="numeric" placeholder="100000" class="w-full t-input border rounded-xl pl-8 pr-3.5 py-2.5 text-sm font-extrabold outline-none">
+            </div>
+            <button onclick="saveInitialCapital()" class="px-5 py-2.5 rounded-xl t-accent text-xs font-extrabold shrink-0">保存</button>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t t-border space-y-2.5">
+          <div>
+            <h2 class="text-sm font-extrabold t-text">🏷️ クイック選択 EA・タグ管理</h2>
+            <p class="text-xs t-subtxt mt-0.5">MT5インポート時に検出されたEA名も自動でここに追加されます。</p>
+          </div>
+          <div class="flex gap-2">
+            <input type="text" id="settings-new-tag-input" placeholder="新しいEA名・タグ（例: GoldRush_EA）" class="flex-1 t-input border rounded-xl px-3.5 py-2.5 text-sm outline-none">
+            <button onclick="addTagFromSettings()" class="t-sub border t-text text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 t-hover">追加</button>
+          </div>
+          <div id="settings-tag-list" class="flex flex-wrap gap-2 pt-1"></div>
         </div>
       </div>
 
-      <!-- 5. EA・タグ管理 -->
+      <!-- 5. データ管理（JSONバックアップ・復元・リセット・デモ読込） -->
       <div class="t-card rounded-2xl border p-4 space-y-3">
-        <div>
-          <h2 class="text-sm font-extrabold t-text">🏷️ クイック選択 EA・タグ管理</h2>
-          <p class="text-xs t-subtxt mt-0.5">MT5インポート時に検出されたEA名も自動でここに追加されます。</p>
-        </div>
-        <div class="flex gap-2">
-          <input type="text" id="settings-new-tag-input" placeholder="新しいEA名・タグ（例: GoldRush_EA）" class="flex-1 t-input border rounded-xl px-3.5 py-2.5 text-sm outline-none">
-          <button onclick="addTagFromSettings()" class="t-sub border t-text text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 t-hover">追加</button>
-        </div>
-        <div id="settings-tag-list" class="flex flex-wrap gap-2 pt-1"></div>
-      </div>
-
-      <!-- 6. JSONバックアップ・復元・全データリセット -->
-      <div class="t-card rounded-2xl border p-4 space-y-2.5">
         <h2 class="text-sm font-extrabold t-text">💾 バックアップ ＆ データ管理</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button onclick="exportJSONBackup()" class="py-3 px-4 rounded-xl t-sub border t-profit text-xs font-extrabold t-hover">
@@ -677,10 +687,18 @@
             <input type="file" id="json-import-input" accept=".json,application/json" onchange="handleJSONImportFile(event)" class="hidden">
           </label>
         </div>
-        <div class="pt-2 border-t t-border flex justify-end">
-          <button onclick="confirmResetAllData()" class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition-all active:scale-95" style="background-color: var(--loss-bg); color: var(--loss-color); border-color: var(--loss-border);">
-            全データをリセット（初期化）
+        <div class="pt-2 border-t t-border flex flex-wrap items-center justify-between gap-2">
+          <button onclick="confirmLoadDemoData()" class="px-3 py-2 rounded-xl t-sub border text-xs font-bold t-subtxt t-hover">
+            デモデータ読込（動作確認用）
           </button>
+          <div class="flex items-center gap-2">
+            <button onclick="confirmClearTradesOnly()" class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition-all active:scale-95" style="background-color: var(--transfer-bg); color: var(--transfer-color); border-color: var(--transfer-border);">
+              トレード履歴のみ消去
+            </button>
+            <button onclick="confirmResetAllData()" class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition-all active:scale-95" style="background-color: var(--loss-bg); color: var(--loss-color); border-color: var(--loss-border);">
+              全データ初期化
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -760,7 +778,6 @@
             </div>
           </div>
 
-          <!-- タグ・EA選択 -->
           <div class="space-y-1.5">
             <label class="block text-[11px] font-bold t-subtxt">EA名・タグ（複数選択可）</label>
             <div id="rec-tag-chips" class="flex flex-wrap gap-1.5"></div>
@@ -804,9 +821,9 @@
 
   <!-- ==================== MT5インポート プレビューモーダル ==================== -->
   <div id="mt5-preview-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-fade-in">
-    <div class="t-card w-full max-w-4xl rounded-3xl border max-h-[92vh] flex flex-col overflow-hidden animate-slide-up">
+    <div class="t-card w-full max-w-4xl rounded-3xl border max-h-[94vh] flex flex-col overflow-hidden animate-slide-up">
       <!-- モーダルヘッダー -->
-      <div class="px-4 py-3.5 border-b t-border flex items-center justify-between gap-2 t-sub shrink-0">
+      <div class="px-4 py-3 border-b t-border flex items-center justify-between gap-2 t-sub shrink-0">
         <div class="min-w-0">
           <h3 class="text-sm sm:text-base font-extrabold t-text truncate">📥 MT5インポート 取り込み前プレビュー</h3>
           <p id="mt5-prev-detect-info" class="text-[11px] font-bold t-sky truncate">検出形式: -</p>
@@ -814,66 +831,68 @@
         <button onclick="closeMT5PreviewModal()" class="p-1.5 rounded-xl t-hover t-subtxt shrink-0">✕</button>
       </div>
 
-      <!-- サマリー ＆ オプションバー -->
-      <div class="p-3.5 border-b t-border space-y-3 shrink-0">
+      <!-- サマリー ＆ 設定バー -->
+      <div class="p-3.5 border-b t-border space-y-2.5 shrink-0">
         <!-- 4つの大型サマリー指標 -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div class="t-sub border rounded-xl p-2.5">
             <p class="text-[10px] font-bold t-subtxt">取り込み対象件数</p>
             <p id="mt5-prev-count" class="text-base sm:text-lg font-extrabold t-text">0 / 0件</p>
           </div>
-          <div class="t-sub border rounded-xl p-2.5">
-            <p class="text-[10px] font-bold t-subtxt">選択中の合計損益</p>
+          <div class="t-sub border rounded-xl p-2.5" style="border-color: var(--profit-border);">
+            <p class="text-[10px] font-bold t-subtxt">プレビュー合計純損益</p>
             <p id="mt5-prev-total-pnl" class="text-base sm:text-lg font-extrabold t-profit">¥0</p>
           </div>
           <div class="t-sub border rounded-xl p-2.5">
-            <p class="text-[10px] font-bold t-subtxt">重複自動スキップ</p>
-            <p id="mt5-prev-dup-count" class="text-base sm:text-lg font-extrabold t-amber">0件</p>
+            <p class="text-[10px] font-bold t-subtxt">日次勝率 / 取引勝率</p>
+            <p id="mt5-prev-winrate" class="text-sm sm:text-base font-extrabold t-text">- / -</p>
           </div>
           <div class="t-sub border rounded-xl p-2.5">
-            <p class="text-[10px] font-bold t-subtxt">検出EAタグ数</p>
-            <p id="mt5-prev-ea-count" class="text-base sm:text-lg font-extrabold t-sky">0個</p>
+            <p class="text-[10px] font-bold t-subtxt">検出EAタグ / 重複</p>
+            <p id="mt5-prev-ea-dup" class="text-sm sm:text-base font-extrabold t-sky">0個 / 重複0件</p>
           </div>
         </div>
 
         <!-- 検出されたEAタグ一覧 -->
         <div id="mt5-prev-ea-tags" class="flex flex-wrap items-center gap-1.5 text-[11px]"></div>
 
-        <!-- 計算・時差オプション -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
-          <label class="inline-flex items-center gap-2 cursor-pointer font-bold t-text">
-            <input type="checkbox" id="mt5-opt-include-fees" checked onchange="recalcMT5Preview()" class="w-4 h-4 rounded accent-emerald-500">
-            <span>手数料＋スワップ＋損益を合算（実質損益）</span>
-          </label>
-
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] font-bold t-subtxt">時差補正:</span>
-            <select id="mt5-opt-tz" onchange="recalcMT5Preview()" class="t-input border rounded-lg px-2.5 py-1 text-[11px] font-bold outline-none">
-              <option value="auto">自動判定 (MT5 GMT+2/+3 → JST)</option>
-              <option value="0">補正なし (すでにJST)</option>
-              <option value="6">+6時間 (夏時間 GMT+3 → JST)</option>
-              <option value="7">+7時間 (冬時間 GMT+2 → JST)</option>
-              <option value="9">+9時間 (UTC → JST)</option>
+        <!-- 重要設定: 日付の基準切替 ＆ 手数料スワップ合算 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+          <div class="t-sub border rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+            <span class="text-[11px] font-extrabold t-text shrink-0">📅 日付の基準:</span>
+            <select id="mt5-opt-date-mode" onchange="recalcMT5Preview(false)" class="t-input border rounded-lg px-2 py-1 text-[11px] font-extrabold outline-none w-full max-w-[260px]">
+              <option value="mt5" selected>MT5サーバー日付のまま集計（標準・土曜ズレ防止）</option>
+              <option value="jst">日本時間(JST)へ日付ごと変換</option>
             </select>
+          </div>
+
+          <div class="t-sub border rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+            <label class="inline-flex items-center gap-2 cursor-pointer font-extrabold t-text text-[11px]">
+              <input type="checkbox" id="mt5-opt-include-fees" checked onchange="recalcMT5Preview(false)" class="w-4 h-4 rounded accent-emerald-500">
+              <span>損益＋手数料＋スワップを合算（実質純損益）</span>
+            </label>
           </div>
         </div>
 
         <!-- 一括チェック操作 -->
-        <div class="flex flex-wrap items-center gap-2 pt-1">
-          <button type="button" onclick="mt5SelectPreset('nondup')" class="px-2.5 py-1 rounded-lg t-sub border text-[11px] font-bold t-text t-hover">重複以外を選択</button>
-          <button type="button" onclick="mt5SelectPreset('all')" class="px-2.5 py-1 rounded-lg t-sub border text-[11px] font-bold t-text t-hover">すべて選択</button>
-          <button type="button" onclick="mt5SelectPreset('none')" class="px-2.5 py-1 rounded-lg t-sub border text-[11px] font-bold t-text t-hover">すべて解除</button>
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="mt5SelectPreset('all')" class="px-2.5 py-1 rounded-lg t-sub border text-[11px] font-bold t-text t-hover">すべて選択 (クリーン取込用)</button>
+            <button type="button" onclick="mt5SelectPreset('nondup')" class="px-2.5 py-1 rounded-lg t-sub border text-[11px] font-bold t-text t-hover">未登録のみ選択 (差分追加用)</button>
+            <button type="button" onclick="mt5SelectPreset('none')" class="px-2.5 py-1 rounded-lg t-sub border text-[11px] font-bold t-text t-hover">全解除</button>
+          </div>
+          <span class="text-[10px] t-muted">※市場分析用時刻は裏側で自動的にJSTへ変換されます</span>
         </div>
       </div>
 
       <!-- プレビュー一覧テーブル -->
       <div class="flex-1 overflow-auto">
-        <table class="w-full text-left border-collapse min-w-[680px]">
+        <table class="w-full text-left border-collapse min-w-[700px]">
           <thead class="sticky top-0 t-card border-b t-border z-10">
             <tr class="text-[11px] font-bold t-subtxt">
               <th class="py-2 px-3 w-9 text-center">取込</th>
-              <th class="py-2 px-2">決済日時 (JST)</th>
-              <th class="py-2 px-2">市場</th>
+              <th class="py-2 px-2">計上日</th>
+              <th class="py-2 px-2">MT5決済時刻 (JST市場)</th>
               <th class="py-2 px-2">通貨</th>
               <th class="py-2 px-2 text-right">Lot</th>
               <th class="py-2 px-2 text-right">実質損益</th>
@@ -885,22 +904,29 @@
         </table>
       </div>
 
-      <!-- フッターボタン -->
-      <div class="px-4 py-3 border-t t-border t-sub flex items-center justify-end gap-2 shrink-0">
-        <button type="button" onclick="closeMT5PreviewModal()" class="px-4 py-2.5 rounded-xl t-card border text-xs font-bold t-text t-hover">キャンセル</button>
-        <button type="button" id="mt5-exec-import-btn" onclick="executeMT5Import()" class="px-5 py-2.5 rounded-xl t-accent text-xs font-extrabold shadow-sm active:scale-95 transition-all">
-          選択した件数を取り込む
+      <!-- フッターボタン（クリーン取込 vs 差分追加取込） -->
+      <div class="px-4 py-3 border-t t-border t-sub flex flex-wrap items-center justify-between gap-2 shrink-0">
+        <button type="button" onclick="closeMT5PreviewModal()" class="px-3.5 py-2.5 rounded-xl t-card border text-xs font-bold t-text t-hover">
+          キャンセル
         </button>
+        <div class="flex flex-wrap items-center gap-2 ml-auto">
+          <button type="button" id="mt5-append-import-btn" onclick="executeMT5Import('append')" class="px-3.5 py-2.5 rounded-xl border text-xs font-extrabold transition-all active:scale-95" style="background-color: var(--sky-bg); color: var(--sky-color); border-color: var(--card-border);">
+            ➕ 差分追加取込（重複スキップ）
+          </button>
+          <button type="button" id="mt5-clean-import-btn" onclick="confirmCleanMT5Import()" class="px-4 py-2.5 rounded-xl t-accent text-xs font-extrabold shadow-sm transition-all active:scale-95">
+            ✨ クリーン取込（既存トレードを消去して完全一致させる）
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 汎用確認モーダル (alert/confirm禁止対策) ==================== -->
+  <!-- ==================== 汎用確認モーダル ==================== -->
   <div id="confirm-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
     <div class="t-card w-full max-w-sm rounded-3xl border p-5 space-y-4 animate-slide-up">
       <div class="space-y-1.5">
         <h3 id="confirm-modal-title" class="text-base font-extrabold t-text">確認</h3>
-        <p id="confirm-modal-msg" class="text-xs t-subtxt leading-relaxed"></p>
+        <p id="confirm-modal-msg" class="text-xs t-subtxt leading-relaxed whitespace-pre-line"></p>
       </div>
       <div class="flex items-center justify-end gap-2">
         <button type="button" onclick="closeConfirmModal()" class="px-4 py-2.5 rounded-xl t-sub border text-xs font-bold t-text t-hover">キャンセル</button>
@@ -915,25 +941,25 @@
   <!-- ==================== JavaScript メインロジック ==================== -->
   <script>
     // =========================================================================
-    // 1. 定数・テーマプリセット・アプリケーション状態
+    // 1. 定数・9種プリセットカラー・アプリケーション状態
     // =========================================================================
-    const STORAGE_KEY_CURRENT = 'fx_calendar_v7';
+    const STORAGE_KEY_CURRENT = 'fx_calendar_v8';
     const LEGACY_STORAGE_KEYS = [
-      'fx_calendar_v6', 'fx_calendar_v5', 'fx_calendar_v4',
+      'fx_calendar_v7', 'fx_calendar_v6', 'fx_calendar_v5', 'fx_calendar_v4',
       'fx_calendar_v3', 'fx_calendar_v2', 'fx_trade_calendar_v2', 'fx_calendar_data'
     ];
     const GAS_CONFIG_KEY = 'fx_calendar_gas_config';
 
     const THEME_PRESETS = [
-      { id: 'dark', name: 'ダーク（標準）', hex: '#0f172a' },
-      { id: 'dull-blue', name: 'くすみブルー', hex: '#cbd5e1' },
-      { id: 'dull-pink', name: 'くすみピンク', hex: '#e7d5d8' },
-      { id: 'dull-sage', name: 'くすみセージ', hex: '#d3ded6' },
-      { id: 'dull-mocha', name: 'くすみモカ', hex: '#ddd3c9' },
-      { id: 'pastel-lavender', name: 'パステルラベンダー', hex: '#ece6f8' },
-      { id: 'pastel-mint', name: 'パステルミント', hex: '#e2f5ec' },
-      { id: 'pastel-peach', name: 'パステルピーチ', hex: '#fcece4' },
-      { id: 'pastel-cream', name: 'パステルクリーム', hex: '#fdfbf7' }
+      { id: 'dark',            name: '標準ダーク',       hex: '#0f172a' },
+      { id: 'dull-blue',       name: 'くすみブルー',     hex: '#475569' },
+      { id: 'dull-pink',       name: 'くすみピンク',     hex: '#f4dce0' },
+      { id: 'dull-sage',       name: 'くすみセージ',     hex: '#dce8e0' },
+      { id: 'dull-mocha',      name: 'くすみモカ',       hex: '#e8dfd8' },
+      { id: 'pastel-lavender', name: 'パステルラベンダー', hex: '#ede9fe' },
+      { id: 'pastel-mint',     name: 'パステルミント',   hex: '#dcfce7' },
+      { id: 'pastel-peach',    name: 'パステルピーチ',   hex: '#ffedd5' },
+      { id: 'pastel-cream',    name: 'パステルクリーム', hex: '#fdfbf7' }
     ];
 
     const DEFAULT_TAGS = ['EA_A', 'EA_B', '裁量', 'XAUUSD', 'USDJPY'];
@@ -941,17 +967,19 @@
     const todayObj = new Date();
     const todayStr = formatDateYMD(todayObj);
 
+    // クリーンな初期状態（サンプルデータの勝手な混入を防止）
     let state = {
       currentTab: 'calendar',
       viewYear: todayObj.getFullYear(),
-      viewMonth: todayObj.getMonth(), // 0-11
+      viewMonth: todayObj.getMonth(),
       selectedDateStr: todayStr,
+      calendarTag: 'ALL',
       chartMode: 'yen',       // 'yen' | 'roi'
       chartPeriod: 'month',   // 'month' | '30d' | 'all'
       chartTag: 'ALL',
       analyticsPeriod: 'all', // 'all' | 'month' | 'year'
       analyticsTag: 'ALL',
-      // 永続化データ本体（GAS AppState互換）
+      // 永続化データ本体（GAS AppState & Scriptable 100%互換）
       trades: [],
       transfers: [],
       tags: [...DEFAULT_TAGS],
@@ -959,51 +987,45 @@
         initialCapital: 100000,
         themeBg: '#0f172a'
       },
-      lastImportBatch: null, // { id, count, fileName, importedAt }
+      lastImportBatch: null, // { id, count, fileName, importedAt, previousTrades }
       updatedAt: null
     };
 
-    // クラウド同期設定（端末ローカル保存）
     let gasConfig = {
       url: '',
       key: '',
       lastSyncedAt: null
     };
 
-    // 同期状態管理
     let syncInProgress = false;
     let lastPushTimestamp = 0;
 
-    // 記録モーダルの一時状態
     let modalState = {
-      mode: 'trade', // 'trade' | 'transfer'
+      mode: 'trade',
       editingId: null,
       selectedTags: []
     };
 
-    // MT5インポートプレビューの一時状態
     let mt5PreviewState = {
       fileName: '',
       detectLabel: '',
-      rawItems: [], // { ticketId, rawDateTime, serverDateObj, symbol, type, lot, profit, commission, swap, comment, eaTag, isDuplicate, checked }
-      tzMode: 'auto',
+      rawItems: [],
+      dateMode: 'mt5',   // 'mt5' (標準: 土曜ズレ防止) | 'jst'
       includeFees: true
     };
 
-    // Chart.js インスタンス保持
     const charts = {
       cumulative: null,
       daily: null,
+      weekday: null,
       session: null,
-      hourly: null,
-      weekday: null
+      hourly: null
     };
 
-    // 汎用確認モーダルのコールバック
     let confirmCallback = null;
 
     // =========================================================================
-    // 2. ユーティリティ関数
+    // 2. ユーティリティ関数 ＆ 勝率計算ヘルパー（0円除外対応）
     // =========================================================================
     function formatDateYMD(d) {
       const y = d.getFullYear();
@@ -1043,6 +1065,31 @@
       return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     }
 
+    // トレード勝率（amount !== 0 の有効決済のみで計算し、0円行で勝率が33%に落ちる不具合を防止）
+    function calcTradeWinStats(trades) {
+      const nonZero = trades.filter(t => Math.round(Number(t.amount || 0)) !== 0);
+      const wins = nonZero.filter(t => Number(t.amount) > 0).length;
+      const losses = nonZero.filter(t => Number(t.amount) < 0).length;
+      const total = nonZero.length;
+      const rate = total > 0 ? (wins / total) * 100 : 0;
+      return { wins, losses, total, rate };
+    }
+
+    // 日次勝率（日別合計損益 !== 0 の取引日のうち、プラスで終えた日数の割合）
+    function calcDailyWinStats(trades) {
+      const dailyMap = {};
+      trades.forEach(t => {
+        if (!t.date) return;
+        dailyMap[t.date] = (dailyMap[t.date] || 0) + Number(t.amount || 0);
+      });
+      const nonZeroDays = Object.values(dailyMap).filter(v => Math.round(v) !== 0);
+      const winDays = nonZeroDays.filter(v => v > 0).length;
+      const lossDays = nonZeroDays.filter(v => v < 0).length;
+      const totalDays = nonZeroDays.length;
+      const rate = totalDays > 0 ? (winDays / totalDays) * 100 : 0;
+      return { winDays, lossDays, totalDays, rate, dailyMap };
+    }
+
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const el = document.createElement('div');
@@ -1059,7 +1106,7 @@
         el.style.opacity = '0';
         el.style.transition = 'opacity 0.25s ease';
         setTimeout(() => el.remove(), 260);
-      }, 2800);
+      }, 2900);
     }
 
     function openConfirmModal(title, message, okLabel, isDanger, onOk) {
@@ -1067,11 +1114,9 @@
       document.getElementById('confirm-modal-msg').textContent = message;
       const okBtn = document.getElementById('confirm-modal-ok');
       okBtn.textContent = okLabel || '実行する';
-      if (isDanger) {
-        okBtn.style.cssText = 'background-color: var(--loss-color); color: #ffffff;';
-      } else {
-        okBtn.style.cssText = 'background-color: var(--accent); color: var(--accent-fg);';
-      }
+      okBtn.style.cssText = isDanger
+        ? 'background-color: var(--loss-color); color: #ffffff;'
+        : 'background-color: var(--accent); color: var(--accent-fg);';
       confirmCallback = onOk;
       okBtn.onclick = () => {
         const fn = confirmCallback;
@@ -1086,15 +1131,30 @@
       confirmCallback = null;
     }
 
-    // 市場セッション判定（JST時刻 "HH:MM" -> 'oceania' | 'tokyo' | 'london' | 'ny' | null）
-    function getMarketSession(timeStr) {
-      if (!timeStr || !/^\d{1,2}:\d{2}/.test(timeStr)) return null;
-      const h = parseInt(timeStr.split(':')[0], 10);
-      if (isNaN(h)) return null;
+    // JSTの時間(0-23)から4大市場セッションを判定
+    function getSessionFromHour(jstHour) {
+      if (jstHour === null || jstHour === undefined || jstHour === '' || isNaN(Number(jstHour))) return null;
+      const h = Number(jstHour);
       if (h >= 5 && h <= 8) return 'oceania';
       if (h >= 9 && h <= 15) return 'tokyo';
       if (h >= 16 && h <= 20) return 'london';
       return 'ny'; // 21-23, 0-4
+    }
+
+    // トレードレコードからJST時間(0-23)を取得（jstHour優先、なければtime列から取得）
+    function resolveTradeJstHour(t) {
+      if (t.jstHour !== undefined && t.jstHour !== null && t.jstHour !== '' && !isNaN(Number(t.jstHour))) {
+        return Number(t.jstHour);
+      }
+      if (t.time && /^\d{1,2}:\d{2}/.test(t.time)) {
+        return parseInt(t.time.split(':')[0], 10);
+      }
+      return null;
+    }
+
+    function resolveTradeSession(t) {
+      if (t.session && ['oceania', 'tokyo', 'london', 'ny'].includes(t.session)) return t.session;
+      return getSessionFromHour(resolveTradeJstHour(t));
     }
 
     function getSessionLabel(key) {
@@ -1102,43 +1162,47 @@
         oceania: { name: 'オセアニア', range: '05:00-08:59', emoji: '🌏' },
         tokyo:   { name: '東京',       range: '09:00-15:59', emoji: '🗼' },
         london:  { name: 'ロンドン',   range: '16:00-20:59', emoji: '🇬🇧' },
-        ny:      { name: 'NY',         range: '21:00-04:59', emoji: '🗽' }
+        ny:      { name: 'ニューヨーク', range: '21:00-04:59', emoji: '🗽' }
       };
       return map[key] || { name: '時刻なし', range: '-', emoji: '⏱️' };
     }
 
     // =========================================================================
-    // 3. テーマ＆自動コントラストエンジン
+    // 3. テーマ＆自動コントラスト計算エンジン (getPalette)
     // =========================================================================
-    function applyTheme(hex) {
+    function getPalette(hex) {
       const validHex = /^#[0-9A-Fa-f]{6}$/.test(hex) ? hex : '#0f172a';
-      state.settings.themeBg = validHex;
-
       const r = parseInt(validHex.slice(1, 3), 16);
       const g = parseInt(validHex.slice(3, 5), 16);
       const b = parseInt(validHex.slice(5, 7), 16);
       const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-      const isLight = lum > 0.55;
+      const isLight = lum > 0.52;
+      return { validHex, isLight };
+    }
+
+    function applyTheme(hex) {
+      const { validHex, isLight } = getPalette(hex);
+      state.settings.themeBg = validHex;
 
       const root = document.documentElement.style;
       root.setProperty('--bg', validHex);
       document.getElementById('meta-theme-color').setAttribute('content', validHex);
 
       if (isLight) {
-        root.setProperty('--card-bg', 'rgba(255, 255, 255, 0.82)');
+        root.setProperty('--card-bg', 'rgba(255, 255, 255, 0.85)');
         root.setProperty('--card-sub', 'rgba(15, 23, 42, 0.045)');
         root.setProperty('--card-border', 'rgba(15, 23, 42, 0.10)');
-        root.setProperty('--header-bg', 'rgba(255, 255, 255, 0.82)');
-        root.setProperty('--input-bg', 'rgba(255, 255, 255, 0.90)');
+        root.setProperty('--header-bg', 'rgba(255, 255, 255, 0.85)');
+        root.setProperty('--input-bg', 'rgba(255, 255, 255, 0.92)');
         root.setProperty('--hover-bg', 'rgba(15, 23, 42, 0.06)');
         root.setProperty('--text-main', '#0f172a');
         root.setProperty('--text-sub', '#475569');
         root.setProperty('--text-muted', '#64748b');
         root.setProperty('--profit-color', '#047857');
-        root.setProperty('--profit-bg', 'rgba(16, 185, 129, 0.14)');
+        root.setProperty('--profit-bg', 'rgba(16, 185, 129, 0.13)');
         root.setProperty('--profit-border', 'rgba(16, 185, 129, 0.35)');
         root.setProperty('--loss-color', '#be123c');
-        root.setProperty('--loss-bg', 'rgba(244, 63, 94, 0.13)');
+        root.setProperty('--loss-bg', 'rgba(244, 63, 94, 0.12)');
         root.setProperty('--loss-border', 'rgba(244, 63, 94, 0.35)');
         root.setProperty('--accent', '#059669');
         root.setProperty('--accent-fg', '#ffffff');
@@ -1151,14 +1215,14 @@
         root.setProperty('--saturday-color', '#0284c7');
       } else {
         root.setProperty('--card-bg', 'rgba(30, 41, 59, 0.92)');
-        root.setProperty('--card-sub', 'rgba(255, 255, 255, 0.045)');
-        root.setProperty('--card-border', 'rgba(255, 255, 255, 0.10)');
+        root.setProperty('--card-sub', 'rgba(255, 255, 255, 0.05)');
+        root.setProperty('--card-border', 'rgba(255, 255, 255, 0.11)');
         root.setProperty('--header-bg', 'rgba(15, 23, 42, 0.90)');
-        root.setProperty('--input-bg', 'rgba(0, 0, 0, 0.34)');
+        root.setProperty('--input-bg', 'rgba(0, 0, 0, 0.32)');
         root.setProperty('--hover-bg', 'rgba(255, 255, 255, 0.06)');
         root.setProperty('--text-main', '#f8fafc');
-        root.setProperty('--text-sub', '#94a3b8');
-        root.setProperty('--text-muted', '#64748b');
+        root.setProperty('--text-sub', '#cbd5e1');
+        root.setProperty('--text-muted', '#94a3b8');
         root.setProperty('--profit-color', '#4ade80');
         root.setProperty('--profit-bg', 'rgba(74, 222, 128, 0.15)');
         root.setProperty('--profit-border', 'rgba(74, 222, 128, 0.35)');
@@ -1217,7 +1281,7 @@
         return `
           <button type="button" onclick="selectThemePreset('${p.hex}')"
                   class="flex items-center gap-2 p-2 rounded-xl border text-left transition-all active:scale-95 ${active ? 'ring-2 ring-emerald-500' : 't-border'} t-sub">
-            <span class="w-5 h-5 rounded-full border border-black/15 shrink-0" style="background-color: ${p.hex};"></span>
+            <span class="w-5 h-5 rounded-full border border-black/20 shrink-0" style="background-color: ${p.hex};"></span>
             <span class="text-[11px] font-bold t-text truncate">${p.name}</span>
           </button>
         `;
@@ -1225,7 +1289,7 @@
     }
 
     // =========================================================================
-    // 4. 永続化・旧バージョン自動引き継ぎ・Googleスプレッドシート(GAS)同期
+    // 4. ローカル保存・v2〜v7シームレス移行・GASクラウド自動同期
     // =========================================================================
     function getSerializablePayload() {
       return {
@@ -1233,8 +1297,31 @@
         transfers: state.transfers,
         tags: state.tags,
         settings: state.settings,
-        lastImportBatch: state.lastImportBatch,
         updatedAt: state.updatedAt || new Date().toISOString()
+      };
+    }
+
+    function normalizeTrade(t) {
+      const timeStr = t.time || '';
+      const jstHour = (t.jstHour !== undefined && t.jstHour !== null && t.jstHour !== '')
+        ? Number(t.jstHour)
+        : (timeStr && /^\d{1,2}:\d{2}/.test(timeStr) ? parseInt(timeStr.split(':')[0], 10) : null);
+      const session = t.session || getSessionFromHour(jstHour);
+
+      return {
+        id: t.id || generateId('tr'),
+        date: t.date || todayStr,
+        time: timeStr,
+        jstHour: jstHour !== null && !isNaN(jstHour) ? jstHour : null,
+        session: session || null,
+        amount: Math.round(Number(t.amount || 0)),
+        lot: t.lot !== '' && t.lot !== undefined && t.lot !== null ? Number(t.lot) : '',
+        pips: t.pips !== '' && t.pips !== undefined && t.pips !== null ? Number(t.pips) : '',
+        symbol: t.symbol || '',
+        tags: Array.isArray(t.tags) ? t.tags.filter(Boolean) : [],
+        memo: t.memo || '',
+        ticketId: t.ticketId ? String(t.ticketId) : '',
+        importBatchId: t.importBatchId || ''
       };
     }
 
@@ -1250,28 +1337,11 @@
         initialCapital: Number(s.initialCapital ?? data.initialCapital ?? 100000) || 100000,
         themeBg: s.themeBg || data.themeBg || '#0f172a'
       };
-      state.lastImportBatch = data.lastImportBatch || null;
       state.updatedAt = data.updatedAt || new Date().toISOString();
     }
 
-    function normalizeTrade(t) {
-      return {
-        id: t.id || generateId('tr'),
-        date: t.date || todayStr,
-        time: t.time || '',
-        amount: Number(t.amount || 0),
-        lot: t.lot !== '' && t.lot !== undefined && t.lot !== null ? Number(t.lot) : '',
-        pips: t.pips !== '' && t.pips !== undefined && t.pips !== null ? Number(t.pips) : '',
-        symbol: t.symbol || '',
-        tags: Array.isArray(t.tags) ? t.tags.filter(Boolean) : [],
-        memo: t.memo || '',
-        ticketId: t.ticketId || '',
-        importBatchId: t.importBatchId || ''
-      };
-    }
-
     function loadLocalData() {
-      // GAS設定の読み込み（旧キー互換も確認）
+      // GAS設定の引き継ぎ
       try {
         const rawGas = localStorage.getItem(GAS_CONFIG_KEY)
           || localStorage.getItem('fx_gas_config')
@@ -1284,12 +1354,12 @@
         }
       } catch (e) {}
 
-      // アプリ本体データ読み込み（v7優先 → 旧v6〜v2から自動移行）
+      // v8優先 → 旧v7〜v2キーから自動移行（初回はクリーンな空配列で開始）
       let loaded = null;
       try {
-        const rawV7 = localStorage.getItem(STORAGE_KEY_CURRENT);
-        if (rawV7) {
-          loaded = JSON.parse(rawV7);
+        const rawV8 = localStorage.getItem(STORAGE_KEY_CURRENT);
+        if (rawV8) {
+          loaded = JSON.parse(rawV8);
         } else {
           for (const key of LEGACY_STORAGE_KEYS) {
             const raw = localStorage.getItem(key);
@@ -1304,7 +1374,6 @@
       if (loaded) {
         hydrateFromPayload(loaded);
       } else {
-        // 初回起動時のみ空ではなく初期設定
         state.updatedAt = new Date().toISOString();
       }
       localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(getSerializablePayload()));
@@ -1315,7 +1384,7 @@
       try {
         localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(getSerializablePayload()));
       } catch (e) {
-        showToast('ローカル保存に失敗しました（容量上限など）', 'error');
+        showToast('ブラウザ保存に失敗しました（容量上限など）', 'error');
       }
       if (triggerCloudPush && gasConfig.url) {
         pushToCloud(true);
@@ -1352,7 +1421,7 @@
     async function pullFromCloud(silent = false) {
       if (!gasConfig.url || syncInProgress) return;
       syncInProgress = true;
-      updateSyncUI('syncing', '同期中 (読込)...');
+      updateSyncUI('syncing', '同期中...');
       try {
         const sep = gasConfig.url.includes('?') ? '&' : '?';
         const url = `${gasConfig.url}${sep}key=${encodeURIComponent(gasConfig.key || '')}&t=${Date.now()}`;
@@ -1383,7 +1452,7 @@
       if (!gasConfig.url) return;
       syncInProgress = true;
       lastPushTimestamp = Date.now();
-      updateSyncUI('syncing', '同期中 (保存)...');
+      updateSyncUI('syncing', '同期中...');
       try {
         const payload = {
           key: gasConfig.key || '',
@@ -1401,7 +1470,7 @@
         gasConfig.lastSyncedAt = new Date().toISOString();
         saveGasConfig();
         updateSyncUI('synced', '☁️ 同期済');
-        if (!silent) showToast('クラウドへデータを保存しました', 'success');
+        if (!silent) showToast('クラウドへデータを上書き保存しました', 'success');
       } catch (err) {
         updateSyncUI('error', '保存エラー');
         if (!silent) showToast(`クラウド保存エラー: ${err.message}`, 'error');
@@ -1440,17 +1509,14 @@
     }
 
     function handleHeaderSyncClick() {
-      if (!gasConfig.url) {
-        switchTab('settings');
-      } else {
-        pullFromCloud(false);
-      }
+      if (!gasConfig.url) switchTab('settings');
+      else pullFromCloud(false);
     }
 
     function disconnectCloudSync() {
       openConfirmModal(
         'クラウド連携を解除',
-        'この端末のGAS URL設定を削除します（スプレッドシート側のデータは消えません）。',
+        'この端末のGAS URL設定を削除します（スプレッドシート側のデータは残ります）。',
         '解除する',
         true,
         () => {
@@ -1464,14 +1530,16 @@
       );
     }
 
-    // タブ復帰時に自動Pull（直近Pushから5秒以上経過している場合のみ）
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && gasConfig.url && !syncInProgress) {
-        if (Date.now() - lastPushTimestamp > 5000) {
-          pullFromCloud(true);
-        }
+    // ウィンドウ復帰・タブ表示復帰時に自動でクラウドからPull（直近Pushから6秒以上経過時）
+    function autoPullOnFocus() {
+      if (gasConfig.url && !syncInProgress && Date.now() - lastPushTimestamp > 6000) {
+        pullFromCloud(true);
       }
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') autoPullOnFocus();
     });
+    window.addEventListener('focus', autoPullOnFocus);
 
     // =========================================================================
     // 5. 口座残高・利益率(%) 計算エンジン
@@ -1496,7 +1564,7 @@
     }
 
     // =========================================================================
-    // 6. MT5履歴 厳密マルチセクションパーサー（Excel / HTML / CSV完全対応）
+    // 6. MT5履歴 厳密パーサー v8（土曜ズレ完全防止・Positions表優先・0円in行除外）
     // =========================================================================
     function triggerMT5FilePicker() {
       const input = document.getElementById('global-mt5-file-input');
@@ -1526,7 +1594,6 @@
       if (file) processMT5File(file);
     }
 
-    // バイト列からUTF-16LE / UTF-8 / Shift-JISを自動判定デコード
     function decodeArrayBufferAuto(buffer) {
       const bytes = new Uint8Array(buffer);
       if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
@@ -1538,7 +1605,6 @@
       if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
         return new TextDecoder('utf-8').decode(bytes.subarray(3));
       }
-      // ヌルバイトが多ければUTF-16LEと判定
       let zeroCount = 0;
       const sampleLen = Math.min(bytes.length, 200);
       for (let i = 1; i < sampleLen; i += 2) {
@@ -1549,34 +1615,47 @@
       }
       const utf8Text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
       if (utf8Text.includes('\uFFFD')) {
-        try {
-          return new TextDecoder('shift_jis').decode(bytes);
-        } catch (e) {}
+        try { return new TextDecoder('shift_jis').decode(bytes); } catch (e) {}
       }
       return utf8Text;
     }
 
-    // MT5特有のスペース桁区切り（半角・NBSP・全角）やカンマを除去して数値化
+    // スペース区切り ("10 120" -> 10120)、カンマ、全角マイナス等を厳密正規化
     function parseMT5Number(val) {
       if (typeof val === 'number') return isNaN(val) ? 0 : val;
       if (val === null || val === undefined) return 0;
       let s = String(val).trim();
       if (!s) return 0;
-      // "0.10 / 0.10" のような表記は先頭を取る
       if (s.includes('/')) s = s.split('/')[0].trim();
-      // スペース桁区切り・NBSP・全角スペース・通貨記号・カンマを除去
       s = s.replace(/[\s\u00a0\u3000,¥$€£]/g, '');
-      // マイナス記号の正規化（全角・ダッシュ等）
       s = s.replace(/[−ー–—]/g, '-');
       const num = parseFloat(s);
       return isNaN(num) ? 0 : num;
     }
 
-    // 日時文字列をパースして { y, mo, d, h, mi, s } オブジェクトを返す
+    function isBlankCell(val) {
+      return val === null || val === undefined || String(val).trim() === '';
+    }
+
+    // MT5日時文字列またはExcelシリアル値をパース
     function parseMT5DateTime(val) {
-      if (!val) return null;
+      if (val === null || val === undefined || val === '') return null;
+      if (typeof val === 'number' && val > 25000 && val < 80000) {
+        // Excel日付シリアル値フォールバック
+        const utcDays = Math.floor(val - 25569);
+        const frac = val - Math.floor(val);
+        const totalSec = Math.round(frac * 86400);
+        const dObj = new Date(utcDays * 86400 * 1000);
+        return {
+          y: dObj.getUTCFullYear(),
+          mo: dObj.getUTCMonth() + 1,
+          d: dObj.getUTCDate(),
+          h: Math.floor(totalSec / 3600) % 24,
+          mi: Math.floor((totalSec % 3600) / 60),
+          s: totalSec % 60
+        };
+      }
       const str = String(val).trim();
-      // YYYY.MM.DD HH:MM:SS or YYYY/MM/DD HH:MM or YYYY-MM-DD HH:MM:SS
       const m = str.match(/^(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})(?:[\sT]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
       if (!m) return null;
       return {
@@ -1589,7 +1668,7 @@
       };
     }
 
-    // 米国夏時間判定（3月第2日曜〜11月第1日曜）によるMT5→JST時差自動計算
+    // 米国夏時間判定（3月第2日曜〜11月第1日曜）: 夏GMT+3(+6h=JST) / 冬GMT+2(+7h=JST)
     function isUSDaylightSaving(y, mo, d) {
       if (mo < 3 || mo > 11) return false;
       if (mo > 3 && mo < 11) return true;
@@ -1598,69 +1677,76 @@
         const secondSunday = 1 + ((7 - firstDay) % 7) + 7;
         return d >= secondSunday;
       }
-      // mo === 11
       const firstDay = new Date(Date.UTC(y, 10, 1)).getUTCDay();
       const firstSunday = 1 + ((7 - firstDay) % 7);
       return d < firstSunday;
     }
 
-    function convertMT5DateTimeToJST(dt, tzMode) {
-      if (!dt) return { date: todayStr, time: '' };
+    // 【v8最重要修正】MT5決済日時から「MT5そのままの日付」と「裏側のJST時間・市場セッション」を分離算出
+    function computeDatesAndSession(dt, dateMode) {
+      if (!dt) return { tradeDate: todayStr, displayTime: '', jstHour: null, session: null };
+
+      const mt5DateStr = `${dt.y}-${String(dt.mo).padStart(2, '0')}-${String(dt.d).padStart(2, '0')}`;
       if (dt.h === null) {
-        return {
-          date: `${dt.y}-${String(dt.mo).padStart(2, '0')}-${String(dt.d).padStart(2, '0')}`,
-          time: ''
-        };
+        return { tradeDate: mt5DateStr, displayTime: '', jstHour: null, session: null };
       }
-      let offsetHours = 0;
-      if (tzMode === 'auto') {
-        offsetHours = isUSDaylightSaving(dt.y, dt.mo, dt.d) ? 6 : 7;
-      } else {
-        offsetHours = parseInt(tzMode, 10) || 0;
+
+      const mt5TimeStr = `${String(dt.h).padStart(2, '0')}:${String(dt.mi).padStart(2, '0')}`;
+      const offsetHours = isUSDaylightSaving(dt.y, dt.mo, dt.d) ? 6 : 7;
+      const jstUtcMs = Date.UTC(dt.y, dt.mo - 1, dt.d, dt.h + offsetHours, dt.mi, dt.s);
+      const jstObj = new Date(jstUtcMs);
+
+      const jstDateStr = `${jstObj.getUTCFullYear()}-${String(jstObj.getUTCMonth() + 1).padStart(2, '0')}-${String(jstObj.getUTCDate()).padStart(2, '0')}`;
+      const jstHour = jstObj.getUTCHours();
+      const jstTimeStr = `${String(jstHour).padStart(2, '0')}:${String(jstObj.getUTCMinutes()).padStart(2, '0')}`;
+      const session = getSessionFromHour(jstHour);
+
+      // デフォルト ('mt5') はMT5サーバー日付を厳守（土曜への押し出しゼロ！）
+      if (dateMode === 'jst') {
+        return { tradeDate: jstDateStr, displayTime: jstTimeStr, jstHour, session };
       }
-      const utcMs = Date.UTC(dt.y, dt.mo - 1, dt.d, dt.h + offsetHours, dt.mi, dt.s);
-      const jst = new Date(utcMs);
-      const date = `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}-${String(jst.getUTCDate()).padStart(2, '0')}`;
-      const time = `${String(jst.getUTCHours()).padStart(2, '0')}:${String(jst.getUTCMinutes()).padStart(2, '0')}`;
-      return { date, time };
+      return { tradeDate: mt5DateStr, displayTime: mt5TimeStr, jstHour, session };
     }
 
-    // コメント欄からEA名を正規化抽出（[tp...], [sl...], [so...] 等の決済サフィックスを除去）
+    // コメント欄からEA名を正規化抽出（[tp], [sl 2650.00], [so ...], 末尾価格を除去）
     function normalizeEAComment(rawComment) {
       if (!rawComment) return '';
       let s = String(rawComment).trim();
       if (!s) return '';
-      // [tp 2650.00], [sl 150.20], [so 20%], [tp], [sl] 等を除去
       s = s.replace(/\s*\[(tp|sl|so|stop\s*out)[^\]]*\]/gi, '').trim();
-      // 末尾の "tp 123.45" / "sl 123.45" 形式も除去
       s = s.replace(/\s+(tp|sl|so)\s*[\d.\-%]*$/i, '').trim();
-      // 決済記号のみ・ノイズ文字列を除外
-      if (/^(tp|sl|so|close|closed|manual|balance|deposit|withdrawal|credit|bonus)$/i.test(s)) return '';
-      if (/^#\d+$/.test(s)) return '';
+      s = s.replace(/^#/, '').trim();
+      if (/^(tp|sl|so|close|closed|manual|balance|deposit|withdrawal|credit|bonus|initial|transfer)$/i.test(s)) return '';
+      if (/^\d+(\.\d+)?$/.test(s)) return '';
       return s;
     }
 
-    // HTML文字列をDOMParserで2次元配列へ変換
+    // HTMLテーブル解析（hidden属性のパディングセルは除外し、colspanも考慮）
     function htmlToGrid(htmlText) {
       const doc = new DOMParser().parseFromString(htmlText, 'text/html');
       const rows = [];
-      const trList = doc.querySelectorAll('tr');
-      trList.forEach(tr => {
+      doc.querySelectorAll('tr').forEach(tr => {
+        if (tr.classList.contains('hidden') || tr.getAttribute('hidden') !== null) return;
         const cells = [];
         tr.querySelectorAll('th, td').forEach(td => {
+          const cls = (td.getAttribute('class') || '').toLowerCase();
+          const style = (td.getAttribute('style') || '').toLowerCase();
+          if (cls.includes('hidden') || style.includes('display:none') || style.includes('display: none')) {
+            return;
+          }
           const text = (td.textContent || '').replace(/\u00a0/g, ' ').trim();
+          const colspan = parseInt(td.getAttribute('colspan') || '1', 10) || 1;
           cells.push(text);
+          for (let k = 1; k < colspan; k++) cells.push('');
         });
         if (cells.some(c => c !== '')) rows.push(cells);
       });
       return rows;
     }
 
-    // CSV/TSVテキストを2次元配列へ変換（クォート対応）
     function csvToGrid(text) {
       const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim() !== '');
       if (lines.length === 0) return [];
-      // 区切り文字自動判定（タブ / セミコロン / カンマ）
       const sample = lines.slice(0, 15).join('\n');
       const tabCnt = (sample.match(/\t/g) || []).length;
       const semiCnt = (sample.match(/;/g) || []).length;
@@ -1688,7 +1774,6 @@
       });
     }
 
-    // セクション見出し行を判別
     function detectSectionName(row) {
       const nonEmpty = row.map(c => String(c || '').trim()).filter(Boolean);
       if (nonEmpty.length === 0 || nonEmpty.length > 2) return null;
@@ -1696,11 +1781,10 @@
       if (/^(ポジション|positions)$/.test(joined)) return 'positions';
       if (/^(注文|orders)$/.test(joined)) return 'orders';
       if (/^(約定|deals)$/.test(joined)) return 'deals';
-      if (/^(オープンポジション|open\s*positions|アクティブな注文|working\s*orders|結果|results|概要|summary|残高|balance)$/.test(joined)) return 'other';
+      if (/^(オープンポジション|open\s*positions|アクティブな注文|working\s*orders|結果|results|概要|summary|残高|balance|銘柄別)/.test(joined)) return 'other';
       return null;
     }
 
-    // 列ヘッダー行かどうかを判別し、列マップを作成
     function mapHeaderColumns(row) {
       const cols = row.map(c => String(c || '').trim().toLowerCase());
       const map = {
@@ -1720,7 +1804,7 @@
 
       cols.forEach((c, idx) => {
         if (!c) return;
-        if (c === '時間' || c === 'time' || c === '日時' || c === 'date' || c === 'close time' || c === 'open time' || c === '決済時間') {
+        if (c === '時間' || c === 'time' || c === '日時' || c === 'date' || c === 'close time' || c === 'open time' || c === '決済時間' || c === '約定時間') {
           map.timeIndices.push(idx);
         } else if (c === 'ポジション' || c === 'position' || c === 'position id') {
           map.positionIdx = idx;
@@ -1751,7 +1835,6 @@
       return isValidHeader ? map : null;
     }
 
-    // メインの厳密MT5グリッド解析エンジン
     function parseMT5Grid(rows, formatTag) {
       const sections = {
         positions: { header: null, rows: [] },
@@ -1777,9 +1860,8 @@
               continue;
             }
           } else {
-            // 新しいヘッダーや合計行チェック
             const firstNonEmpty = String(row.find(c => String(c || '').trim() !== '') || '').trim().toLowerCase();
-            if (/^(total|合計|総計|balance|残高|credit|クレジット)/.test(firstNonEmpty)) {
+            if (/^(total|合計|総計|balance|残高|credit|クレジット|summary|結果)/.test(firstNonEmpty)) {
               continue;
             }
             sections[currentSec].rows.push(row);
@@ -1787,7 +1869,7 @@
         }
       }
 
-      // 1. Deals / Orders セクションから「Position ID / Order ID -> 正規化EAコメント」マップを作成
+      // 事前に Deals / Orders テーブルをスキャンして「Position ID / Order ID -> EA名コメント」辞書を構築
       const commentById = {};
       const registerComment = (idVal, rawComment) => {
         const idKey = String(idVal || '').trim();
@@ -1801,41 +1883,49 @@
         const h = sections.deals.header;
         sections.deals.rows.forEach(r => {
           const cmt = h.commentIdx !== -1 ? r[h.commentIdx] : '';
+          if (h.positionIdx !== -1) registerComment(r[h.positionIdx], cmt);
           if (h.orderIdx !== -1) registerComment(r[h.orderIdx], cmt);
           if (h.ticketIdx !== -1) registerComment(r[h.ticketIdx], cmt);
-          if (h.positionIdx !== -1) registerComment(r[h.positionIdx], cmt);
         });
       }
       if (sections.orders.header) {
         const h = sections.orders.header;
         sections.orders.rows.forEach(r => {
           const cmt = h.commentIdx !== -1 ? r[h.commentIdx] : '';
+          if (h.positionIdx !== -1) registerComment(r[h.positionIdx], cmt);
           if (h.orderIdx !== -1) registerComment(r[h.orderIdx], cmt);
           if (h.ticketIdx !== -1) registerComment(r[h.ticketIdx], cmt);
-          if (h.positionIdx !== -1) registerComment(r[h.positionIdx], cmt);
         });
       }
 
       const extracted = [];
-      let detectLabel = `${formatTag}`;
-
+      let detectLabel = formatTag;
       const EXCLUDED_TYPES = /^(balance|deposit|withdrawal|credit|bonus|charge|correction|commission|tax|dividend|残高|入金|出金|クレジット|ボーナス)$/i;
 
-      // 2. 【最優先】Positionsセクションが存在する場合は【Positions表のみ】を厳密抽出
+      // 1. 【最優先】Positions（ポジション）表がある場合 → Positions表のみを解析し、Orders/Dealsは完全無視
       if (sections.positions.header && sections.positions.rows.length > 0) {
-        detectLabel = `MT5 ${formatTag} / Positions（ポジション）表のみ厳密抽出`;
+        detectLabel = `MT5 ${formatTag} / ポジション(Positions)表のみ厳密抽出`;
         const h = sections.positions.header;
-        // 時間列が2つある場合は後ろの列（決済時間）を採用
-        const closeTimeIdx = h.timeIndices.length >= 2 ? h.timeIndices[h.timeIndices.length - 1] : h.timeIndices[0];
+        const hasTwoTimeCols = h.timeIndices.length >= 2;
+        const openTimeIdx = h.timeIndices[0];
+        const closeTimeIdx = hasTwoTimeCols ? h.timeIndices[1] : h.timeIndices[0];
 
         sections.positions.rows.forEach(r => {
-          const rawTime = r[closeTimeIdx];
-          const dt = parseMT5DateTime(rawTime);
-          if (!dt) return; // 日時でない行（合計行・空行）を完全除外
+          // 2つ目の時間列（Close Time）を使用。2列あるのにClose Timeが空＆損益も空なら未決済ポジションなのでスキップ
+          let targetTimeRaw = r[closeTimeIdx];
+          if (hasTwoTimeCols && isBlankCell(targetTimeRaw)) {
+            if (h.profitIdx === -1 || isBlankCell(r[h.profitIdx])) return;
+            targetTimeRaw = r[openTimeIdx];
+          }
+          const dt = parseMT5DateTime(targetTimeRaw);
+          if (!dt) return;
 
           const typeStr = h.typeIdx !== -1 ? String(r[h.typeIdx] || '').trim().toLowerCase() : '';
           if (typeStr && EXCLUDED_TYPES.test(typeStr)) return;
           if (typeStr && !/^(buy|sell|買い|売り)/.test(typeStr)) return;
+
+          // 損益セル自体が完全に空欄の未決済行を除外
+          if (h.profitIdx !== -1 && isBlankCell(r[h.profitIdx])) return;
 
           const ticketId = String((h.positionIdx !== -1 ? r[h.positionIdx] : (h.ticketIdx !== -1 ? r[h.ticketIdx] : '')) || '').trim();
           const symbol = h.symbolIdx !== -1 ? String(r[h.symbolIdx] || '').trim() : '';
@@ -1845,7 +1935,6 @@
           const profit = h.profitIdx !== -1 ? parseMT5Number(r[h.profitIdx]) : 0;
           const rawComment = h.commentIdx !== -1 ? String(r[h.commentIdx] || '').trim() : '';
 
-          // コメントが空またはサフィックスのみの場合、Deals/Ordersの同一IDから補完
           let eaTag = normalizeEAComment(rawComment);
           if (!eaTag && ticketId && commentById[ticketId]) {
             eaTag = commentById[ticketId];
@@ -1853,7 +1942,6 @@
 
           extracted.push({
             ticketId,
-            rawTimeStr: String(rawTime || ''),
             dt,
             symbol,
             type: typeStr,
@@ -1866,15 +1954,14 @@
           });
         });
       }
-      // 3. 【フォールバック1】Positions表がなくDeals（約定）表のみの場合 → 方向が out / in/out の決済行のみ抽出
+      // 2. 【Dealsのみの場合】方向(Direction)が out または in/out の決済行のみ抽出し、in行(0円エントリー)を完全除外
       else if (sections.deals.header && sections.deals.rows.length > 0) {
-        detectLabel = `MT5 ${formatTag} / Deals（約定）表から決済行(out)のみ抽出`;
+        detectLabel = `MT5 ${formatTag} / 約定(Deals)表から決済(out)行のみ厳密抽出`;
         const h = sections.deals.header;
         const timeIdx = h.timeIndices[h.timeIndices.length - 1];
 
         sections.deals.rows.forEach(r => {
-          const rawTime = r[timeIdx];
-          const dt = parseMT5DateTime(rawTime);
+          const dt = parseMT5DateTime(r[timeIdx]);
           if (!dt) return;
 
           const typeStr = h.typeIdx !== -1 ? String(r[h.typeIdx] || '').trim().toLowerCase() : '';
@@ -1882,14 +1969,20 @@
           if (typeStr && !/^(buy|sell|買い|売り)/.test(typeStr)) return;
 
           const dirStr = h.directionIdx !== -1 ? String(r[h.directionIdx] || '').trim().toLowerCase() : '';
-          if (dirStr && !/(out|決済)/.test(dirStr)) return; // "in" (エントリー行)を完全除外
+          if (h.directionIdx !== -1) {
+            if (!/(out|決済)/.test(dirStr)) return; // "in" エントリー行を100%遮断
+          }
 
-          const posId = String((h.positionIdx !== -1 ? r[h.positionIdx] : (h.orderIdx !== -1 ? r[h.orderIdx] : (h.ticketIdx !== -1 ? r[h.ticketIdx] : ''))) || '').trim();
-          const symbol = h.symbolIdx !== -1 ? String(r[h.symbolIdx] || '').trim() : '';
-          const lot = h.volumeIdx !== -1 ? parseMT5Number(r[h.volumeIdx]) : '';
           const commission = h.commissionIdx !== -1 ? parseMT5Number(r[h.commissionIdx]) : 0;
           const swap = h.swapIdx !== -1 ? parseMT5Number(r[h.swapIdx]) : 0;
           const profit = h.profitIdx !== -1 ? parseMT5Number(r[h.profitIdx]) : 0;
+
+          if (!dirStr && profit === 0 && swap === 0 && commission === 0) return;
+
+          const posId = String((h.positionIdx !== -1 ? r[h.positionIdx] : (h.orderIdx !== -1 ? r[h.orderIdx] : (h.ticketIdx !== -1 ? r[h.ticketIdx] : ''))) || '').trim();
+          const dealTicket = String((h.ticketIdx !== -1 ? r[h.ticketIdx] : posId) || '').trim();
+          const symbol = h.symbolIdx !== -1 ? String(r[h.symbolIdx] || '').trim() : '';
+          const lot = h.volumeIdx !== -1 ? parseMT5Number(r[h.volumeIdx]) : '';
           const rawComment = h.commentIdx !== -1 ? String(r[h.commentIdx] || '').trim() : '';
 
           let eaTag = normalizeEAComment(rawComment);
@@ -1898,8 +1991,7 @@
           }
 
           extracted.push({
-            ticketId: posId,
-            rawTimeStr: String(rawTime || ''),
+            ticketId: dealTicket,
             dt,
             symbol,
             type: typeStr,
@@ -1912,7 +2004,7 @@
           });
         });
       }
-      // 4. 【フォールバック2】セクション見出しがない単純CSV / 単一テーブル
+      // 3. セクション見出しを持たない単一CSVテーブル
       else {
         detectLabel = `${formatTag} / 単一テーブル自動検出`;
         let h = null;
@@ -1926,27 +2018,39 @@
           }
         }
         if (h) {
-          const timeIdx = h.timeIndices[h.timeIndices.length - 1];
+          const hasTwoTime = h.timeIndices.length >= 2;
+          const timeIdx = hasTwoTime ? h.timeIndices[1] : h.timeIndices[0];
+
           for (let i = headerRowIdx + 1; i < rows.length; i++) {
             const r = rows[i];
+            const firstCell = String(r.find(c => String(c || '').trim() !== '') || '').trim().toLowerCase();
+            if (/^(total|合計|総計|balance|残高)/.test(firstCell)) continue;
+
             const dt = parseMT5DateTime(r[timeIdx]);
             if (!dt) continue;
+
             const typeStr = h.typeIdx !== -1 ? String(r[h.typeIdx] || '').trim().toLowerCase() : '';
             if (typeStr && EXCLUDED_TYPES.test(typeStr)) continue;
+            if (typeStr && !/^(buy|sell|買い|売り)/.test(typeStr) && h.symbolIdx !== -1 && isBlankCell(r[h.symbolIdx])) continue;
+
             const dirStr = h.directionIdx !== -1 ? String(r[h.directionIdx] || '').trim().toLowerCase() : '';
-            if (dirStr && dirStr === 'in') continue;
+            if (h.directionIdx !== -1 && dirStr && !/(out|決済)/.test(dirStr)) continue;
+
+            if (isBlankCell(r[h.profitIdx])) continue;
+
+            const commission = h.commissionIdx !== -1 ? parseMT5Number(r[h.commissionIdx]) : 0;
+            const swap = h.swapIdx !== -1 ? parseMT5Number(r[h.swapIdx]) : 0;
+            const profit = parseMT5Number(r[h.profitIdx]);
+
+            if ((dirStr === 'in' || (!dirStr && h.directionIdx !== -1)) && profit === 0 && swap === 0 && commission === 0) continue;
 
             const ticketId = String((h.positionIdx !== -1 ? r[h.positionIdx] : (h.ticketIdx !== -1 ? r[h.ticketIdx] : '')) || '').trim();
             const symbol = h.symbolIdx !== -1 ? String(r[h.symbolIdx] || '').trim() : '';
             const lot = h.volumeIdx !== -1 ? parseMT5Number(r[h.volumeIdx]) : '';
-            const commission = h.commissionIdx !== -1 ? parseMT5Number(r[h.commissionIdx]) : 0;
-            const swap = h.swapIdx !== -1 ? parseMT5Number(r[h.swapIdx]) : 0;
-            const profit = parseMT5Number(r[h.profitIdx]);
             const rawComment = h.commentIdx !== -1 ? String(r[h.commentIdx] || '').trim() : '';
 
             extracted.push({
               ticketId,
-              rawTimeStr: String(r[timeIdx] || ''),
               dt,
               symbol,
               type: typeStr,
@@ -1974,12 +2078,11 @@
 
         if (ext === 'xlsx' || ext === 'xls') {
           if (typeof XLSX === 'undefined') {
-            showToast('Excel解析ライブラリ(SheetJS)の読み込みに失敗しました', 'error');
+            showToast('Excel解析ライブラリの読み込みに失敗しました。通信環境を確認してください', 'error');
             return;
           }
           const wb = XLSX.read(buffer, { type: 'array', raw: false });
-          const firstSheetName = wb.SheetNames[0];
-          const sheet = wb.Sheets[firstSheetName];
+          const sheet = wb.Sheets[wb.SheetNames[0]];
           grid = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
           formatTag = 'Excel (.xlsx)';
         } else if (ext === 'html' || ext === 'htm') {
@@ -1988,7 +2091,6 @@
           formatTag = 'HTMLレポート';
         } else {
           const text = decodeArrayBufferAuto(buffer);
-          // 中身がHTMLタグを含む場合はHTMLとして解析
           if (/<table[\s>]/i.test(text) && /<tr[\s>]/i.test(text)) {
             grid = htmlToGrid(text);
             formatTag = 'HTMLレポート';
@@ -2000,7 +2102,7 @@
 
         const result = parseMT5Grid(grid, formatTag);
         if (!result.items || result.items.length === 0) {
-          showToast('取り込み可能なトレード履歴が見つかりませんでした', 'error');
+          showToast('取り込み可能な決済トレードが見つかりませんでした', 'error');
           return;
         }
 
@@ -2008,14 +2110,15 @@
           fileName: name,
           detectLabel: result.detectLabel,
           rawItems: result.items.map(item => ({ ...item, checked: true, isDuplicate: false })),
-          tzMode: 'auto',
+          dateMode: 'mt5',
           includeFees: true
         };
 
+        document.getElementById('mt5-opt-date-mode').value = 'mt5';
         document.getElementById('mt5-opt-include-fees').checked = true;
-        document.getElementById('mt5-opt-tz').value = 'auto';
         document.getElementById('mt5-prev-detect-info').textContent = `検出形式: ${result.detectLabel}（${name}）`;
 
+        // 初期状態は全件選択（クリーン取込時にファイル全体の正確な合計金額 ¥116,491 等がすぐ確認できるようにする）
         recalcMT5Preview(true);
         document.getElementById('mt5-preview-modal').classList.remove('hidden');
       } catch (err) {
@@ -2024,37 +2127,38 @@
       }
     }
 
-    function checkIsDuplicateItem(item, jstDate, jstTime, netAmount) {
+    function checkIsDuplicateItem(item, tradeDate, displayTime, netAmount) {
       return state.trades.some(existing => {
         if (item.ticketId && existing.ticketId && String(existing.ticketId) === String(item.ticketId)) {
           return true;
         }
         return (
-          existing.date === jstDate &&
-          (existing.time || '') === (jstTime || '') &&
+          existing.date === tradeDate &&
+          (existing.time || '') === (displayTime || '') &&
           (existing.symbol || '').toUpperCase() === (item.symbol || '').toUpperCase() &&
           Math.round(Number(existing.amount || 0)) === Math.round(netAmount)
         );
       });
     }
 
-    function recalcMT5Preview(resetChecksForDuplicates = false) {
+    function recalcMT5Preview(selectAllInitially = false) {
+      const dateMode = document.getElementById('mt5-opt-date-mode').value;
       const includeFees = document.getElementById('mt5-opt-include-fees').checked;
-      const tzMode = document.getElementById('mt5-opt-tz').value;
+      mt5PreviewState.dateMode = dateMode;
       mt5PreviewState.includeFees = includeFees;
-      mt5PreviewState.tzMode = tzMode;
 
       mt5PreviewState.rawItems.forEach(item => {
-        const conv = convertMT5DateTimeToJST(item.dt, tzMode);
-        item.jstDate = conv.date;
-        item.jstTime = conv.time;
-        item.session = getMarketSession(conv.time);
+        const conv = computeDatesAndSession(item.dt, dateMode);
+        item.tradeDate = conv.tradeDate;
+        item.displayTime = conv.displayTime;
+        item.jstHour = conv.jstHour;
+        item.session = conv.session;
         item.netAmount = Math.round(
           includeFees ? (item.profit + item.commission + item.swap) : item.profit
         );
-        item.isDuplicate = checkIsDuplicateItem(item, conv.date, conv.time, item.netAmount);
-        if (resetChecksForDuplicates) {
-          item.checked = !item.isDuplicate;
+        item.isDuplicate = checkIsDuplicateItem(item, conv.tradeDate, conv.displayTime, item.netAmount);
+        if (selectAllInitially) {
+          item.checked = true;
         }
       });
 
@@ -2068,36 +2172,51 @@
       const totalPnl = selected.reduce((s, i) => s + i.netAmount, 0);
       const eaSet = [...new Set(items.map(i => i.eaTag).filter(Boolean))];
 
+      // プレビュー時点での日次勝率＆取引勝率を算出
+      const mockTrades = selected.map(i => ({ date: i.tradeDate, amount: i.netAmount }));
+      const dWin = calcDailyWinStats(mockTrades);
+      const tWin = calcTradeWinStats(mockTrades);
+
       document.getElementById('mt5-prev-count').textContent = `${selected.length} / ${items.length}件`;
       const pnlEl = document.getElementById('mt5-prev-total-pnl');
       pnlEl.textContent = formatYen(totalPnl);
       pnlEl.className = `text-base sm:text-lg font-extrabold ${totalPnl >= 0 ? 't-profit' : 't-loss'}`;
-      document.getElementById('mt5-prev-dup-count').textContent = `${dupCount}件`;
-      document.getElementById('mt5-prev-ea-count').textContent = `${eaSet.length}個`;
-      document.getElementById('mt5-exec-import-btn').textContent = `選択した ${selected.length}件 を取り込む`;
 
-      // EAタグ一覧表示
+      document.getElementById('mt5-prev-winrate').textContent =
+        `${dWin.rate.toFixed(1)}% / ${tWin.rate.toFixed(1)}%`;
+      document.getElementById('mt5-prev-ea-dup').textContent =
+        `EA ${eaSet.length}種 / 重複 ${dupCount}件`;
+
+      const nonDupSelected = selected.filter(i => !i.isDuplicate).length;
+      document.getElementById('mt5-append-import-btn').textContent =
+        `➕ 差分追加取込（未登録 ${nonDupSelected}件を追加）`;
+      document.getElementById('mt5-clean-import-btn').textContent =
+        `✨ クリーン取込（選択 ${selected.length}件で完全一致）`;
+
       const eaWrap = document.getElementById('mt5-prev-ea-tags');
       if (eaSet.length > 0) {
-        eaWrap.innerHTML = `<span class="font-bold t-subtxt">検出EAタグ:</span>` + eaSet.map(tag =>
+        eaWrap.innerHTML = `<span class="font-bold t-subtxt">自動抽出EAタグ:</span>` + eaSet.map(tag =>
           `<span class="px-2 py-0.5 rounded-lg font-bold border" style="background-color: var(--sky-bg); color: var(--sky-color); border-color: var(--card-border);">#${escapeHtml(tag)}</span>`
         ).join('');
       } else {
-        eaWrap.innerHTML = `<span class="t-muted">コメント欄からのEAタグ検出なし</span>`;
+        eaWrap.innerHTML = `<span class="t-muted">コメント欄からのEAタグ検出なし（タグなしで取り込まれます）</span>`;
       }
 
-      // テーブル描画
       const tbody = document.getElementById('mt5-preview-tbody');
       tbody.innerHTML = items.map((item, idx) => {
         const sess = getSessionLabel(item.session);
-        const pnlClass = item.netAmount >= 0 ? 't-profit' : 't-loss';
+        const pnlClass = item.netAmount > 0 ? 't-profit' : item.netAmount < 0 ? 't-loss' : 't-muted';
+        const jstHint = item.jstHour !== null ? `(JST ${String(item.jstHour).padStart(2, '0')}時 ${sess.name})` : '';
         return `
-          <tr class="${item.checked ? '' : 'opacity-45'} t-hover">
+          <tr class="${item.checked ? '' : 'opacity-40'} t-hover">
             <td class="py-2 px-3 text-center">
               <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleMT5PreviewRow(${idx}, this.checked)" class="w-4 h-4 accent-emerald-500 cursor-pointer">
             </td>
-            <td class="py-2 px-2 font-mono whitespace-nowrap t-text">${item.jstDate} <span class="t-subtxt">${item.jstTime}</span></td>
-            <td class="py-2 px-2 whitespace-nowrap"><span class="text-[11px] font-bold t-subtxt">${sess.emoji} ${sess.name}</span></td>
+            <td class="py-2 px-2 font-mono font-bold whitespace-nowrap t-text">${item.tradeDate}</td>
+            <td class="py-2 px-2 whitespace-nowrap">
+              <span class="font-mono t-text">${item.displayTime || '-'}</span>
+              <span class="text-[10px] t-subtxt ml-1">${sess.emoji} ${jstHint}</span>
+            </td>
             <td class="py-2 px-2 font-bold t-text">${escapeHtml(item.symbol || '-')}</td>
             <td class="py-2 px-2 text-right font-mono t-subtxt">${item.lot !== '' ? item.lot : '-'}</td>
             <td class="py-2 px-2 text-right font-extrabold whitespace-nowrap ${pnlClass}">${formatYen(item.netAmount)}</td>
@@ -2108,7 +2227,7 @@
             </td>
             <td class="py-2 px-3 whitespace-nowrap">
               ${item.isDuplicate
-                ? `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold mr-1" style="background-color: var(--transfer-bg); color: var(--transfer-color);">重複</span>`
+                ? `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold mr-1" style="background-color: var(--transfer-bg); color: var(--transfer-color);">既存重複</span>`
                 : ''}
               <span class="text-[10px] font-mono t-muted">${escapeHtml(item.ticketId || '-')}</span>
             </td>
@@ -2137,15 +2256,41 @@
       document.getElementById('mt5-preview-modal').classList.add('hidden');
     }
 
-    function executeMT5Import() {
+    function confirmCleanMT5Import() {
       const selected = mt5PreviewState.rawItems.filter(i => i.checked);
       if (selected.length === 0) {
         showToast('取り込む行を1件以上選択してください', 'error');
         return;
       }
+      const totalPnl = selected.reduce((s, i) => s + i.netAmount, 0);
+      openConfirmModal(
+        '✨ クリーン取込を実行しますか？',
+        `既存のトレード履歴（${state.trades.length}件）をすべて消去し、今回選択した ${selected.length}件（合計 ${formatYen(totalPnl)}）でクリーンに置き換えます。\n※GASクラウド設定・テーマ色・初期資金・資金移動（ウォレット隔離）はそのまま維持されます。`,
+        'クリーン取込を実行',
+        false,
+        () => executeMT5Import('clean')
+      );
+    }
+
+    function executeMT5Import(mode) {
+      let targetItems = mt5PreviewState.rawItems.filter(i => i.checked);
+      if (mode === 'append') {
+        targetItems = targetItems.filter(i => !i.isDuplicate);
+        if (targetItems.length === 0) {
+          showToast('追加できる新規（未重複）データがありません。「クリーン取込」をお試しください', 'info');
+          return;
+        }
+      } else {
+        if (targetItems.length === 0) {
+          showToast('取り込む行を1件以上選択してください', 'error');
+          return;
+        }
+      }
 
       const batchId = generateId('imp');
-      const newTrades = selected.map(item => {
+      const previousBackup = [...state.trades];
+
+      const newTrades = targetItems.map(item => {
         const tags = [];
         if (item.eaTag) {
           tags.push(item.eaTag);
@@ -2153,8 +2298,10 @@
         }
         return normalizeTrade({
           id: generateId('tr'),
-          date: item.jstDate,
-          time: item.jstTime,
+          date: item.tradeDate,
+          time: item.displayTime,
+          jstHour: item.jstHour,
+          session: item.session,
           amount: item.netAmount,
           lot: item.lot,
           pips: '',
@@ -2166,16 +2313,22 @@
         });
       });
 
-      state.trades.push(...newTrades);
+      if (mode === 'clean') {
+        state.trades = newTrades;
+      } else {
+        state.trades.push(...newTrades);
+      }
+
       state.lastImportBatch = {
         id: batchId,
+        mode,
         count: newTrades.length,
         fileName: mt5PreviewState.fileName,
-        importedAt: new Date().toISOString()
+        importedAt: new Date().toISOString(),
+        previousTrades: previousBackup
       };
 
-      // 最新の取り込み月に移動してすぐ確認できるようにする
-      const latestDate = selected.map(s => s.jstDate).sort().pop();
+      const latestDate = targetItems.map(s => s.tradeDate).sort().pop();
       if (latestDate) {
         const [y, m] = latestDate.split('-').map(Number);
         state.viewYear = y;
@@ -2185,8 +2338,14 @@
 
       saveLocalData(true);
       closeMT5PreviewModal();
+      switchTab('calendar');
       renderAllViews();
-      showToast(`${newTrades.length}件のMT5履歴を取り込みました！`, 'success');
+      showToast(
+        mode === 'clean'
+          ? `クリーン取込完了！${newTrades.length}件（MT5完全一致）を反映しました`
+          : `差分追加完了！新規 ${newTrades.length}件を取り込みました`,
+        'success'
+      );
     }
 
     function confirmUndoLastImport() {
@@ -2194,23 +2353,25 @@
       const b = state.lastImportBatch;
       openConfirmModal(
         '直前のインポートを取り消す',
-        `「${b.fileName}」から取り込んだ ${b.count}件 のトレード履歴をすべて削除して元に戻しますか？`,
-        '取り消す',
+        `「${b.fileName}」のインポート（${b.count}件）を取り消し、取り込み前の状態に戻しますか？`,
+        '元に戻す',
         true,
         () => {
-          const before = state.trades.length;
-          state.trades = state.trades.filter(t => t.importBatchId !== b.id);
-          const removed = before - state.trades.length;
+          if (Array.isArray(b.previousTrades)) {
+            state.trades = b.previousTrades;
+          } else {
+            state.trades = state.trades.filter(t => t.importBatchId !== b.id);
+          }
           state.lastImportBatch = null;
           saveLocalData(true);
           renderAllViews();
-          showToast(`直前のインポート（${removed}件）を取り消しました`, 'success');
+          showToast('インポート前の状態に復元しました', 'success');
         }
       );
     }
 
     // =========================================================================
-    // 7. タブ切替 & カレンダー描画
+    // 7. タブ切替 ＆ カレンダー描画（日次勝率＋取引勝率両対応・EAフィルタ対応）
     // =========================================================================
     function switchTab(tab) {
       state.currentTab = tab;
@@ -2221,11 +2382,9 @@
 
         const pcBtn = document.getElementById(`nav-pc-${t}`);
         if (pcBtn) {
-          if (t === tab) {
-            pcBtn.style.cssText = 'background-color: var(--accent); color: var(--accent-fg);';
-          } else {
-            pcBtn.style.cssText = 'background-color: transparent; color: var(--text-sub);';
-          }
+          pcBtn.style.cssText = t === tab
+            ? 'background-color: var(--accent); color: var(--accent-fg);'
+            : 'background-color: transparent; color: var(--text-sub);';
         }
 
         const spBtn = document.getElementById(`nav-sp-${t}`);
@@ -2256,24 +2415,54 @@
       renderCalendar();
     }
 
+    function setCalendarTagFilter(tag) {
+      state.calendarTag = tag;
+      renderCalendar();
+    }
+
+    function populateAllTagDropdowns() {
+      const allTags = [...new Set([
+        ...state.tags,
+        ...state.trades.flatMap(t => t.tags || [])
+      ])];
+
+      const calSel = document.getElementById('calendar-tag-select');
+      if (calSel) {
+        if (state.calendarTag !== 'ALL' && !allTags.includes(state.calendarTag)) state.calendarTag = 'ALL';
+        calSel.innerHTML = `<option value="ALL">すべてのEA・タグ</option>` +
+          allTags.map(t => `<option value="${escapeHtml(t)}" ${state.calendarTag === t ? 'selected' : ''}>#${escapeHtml(t)}</option>`).join('');
+      }
+
+      const chartSel = document.getElementById('chart-tag-select');
+      if (chartSel) {
+        if (state.chartTag !== 'ALL' && !allTags.includes(state.chartTag)) state.chartTag = 'ALL';
+        chartSel.innerHTML = `<option value="ALL">すべてのEA・タグ</option>` +
+          allTags.map(t => `<option value="${escapeHtml(t)}" ${state.chartTag === t ? 'selected' : ''}>#${escapeHtml(t)}</option>`).join('');
+      }
+    }
+
     function renderCalendar() {
+      populateAllTagDropdowns();
       const y = state.viewYear;
       const m = state.viewMonth;
       const monthPrefix = `${y}-${String(m + 1).padStart(2, '0')}`;
       document.getElementById('calendar-month-label').textContent = `${y}年 ${m + 1}月`;
 
-      const monthTrades = state.trades.filter(t => (t.date || '').startsWith(monthPrefix));
+      const monthTrades = state.trades.filter(t => {
+        if (!(t.date || '').startsWith(monthPrefix)) return false;
+        if (state.calendarTag !== 'ALL' && !(t.tags || []).includes(state.calendarTag)) return false;
+        return true;
+      });
       const monthTransfers = state.transfers.filter(tr => (tr.date || '').startsWith(monthPrefix));
 
       const totalPnl = monthTrades.reduce((s, t) => s + Number(t.amount || 0), 0);
-      const wins = monthTrades.filter(t => Number(t.amount || 0) > 0).length;
-      const losses = monthTrades.filter(t => Number(t.amount || 0) < 0).length;
-      const winRate = monthTrades.length > 0 ? (wins / monthTrades.length) * 100 : 0;
+      const dWin = calcDailyWinStats(monthTrades);
+      const tWin = calcTradeWinStats(monthTrades);
 
       const grossProfit = monthTrades.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
       const grossLoss = Math.abs(monthTrades.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0));
       const pf = grossLoss > 0 ? (grossProfit / grossLoss).toFixed(2) : (grossProfit > 0 ? '∞' : '-');
-      const avgPnl = monthTrades.length > 0 ? totalPnl / monthTrades.length : 0;
+      const avgPnl = tWin.total > 0 ? totalPnl / tWin.total : 0;
 
       const lotTrades = monthTrades.filter(t => t.lot !== '' && Number(t.lot) > 0);
       const avgLot = lotTrades.length > 0
@@ -2283,21 +2472,14 @@
       const startBal = getBalanceBeforeDate(`${monthPrefix}-01`);
       const monthlyRoi = startBal > 0 ? (totalPnl / startBal) * 100 : null;
 
-      // 日別集計
-      const dailyMap = {};
-      monthTrades.forEach(t => {
-        dailyMap[t.date] = (dailyMap[t.date] || 0) + Number(t.amount || 0);
-      });
+      const dailyMap = dWin.dailyMap;
       const transferDays = new Set(monthTransfers.map(tr => tr.date));
-      const activeDays = Object.keys(dailyMap);
-      const winDays = activeDays.filter(d => dailyMap[d] > 0).length;
 
-      // 累計ウォレット隔離
       const totalIsolation = state.transfers
         .filter(tr => tr.type === 'isolation')
         .reduce((s, tr) => s + Math.abs(Number(tr.amount || 0)), 0);
 
-      // サマリー表示更新
+      // 月間サマリーUI反映
       const pnlEl = document.getElementById('summary-total-pnl');
       pnlEl.textContent = formatYen(totalPnl);
       pnlEl.className = `text-3xl sm:text-4xl font-extrabold tracking-tight ${totalPnl > 0 ? 't-profit' : totalPnl < 0 ? 't-loss' : 't-text'}`;
@@ -2314,50 +2496,55 @@
         roiEl.style.cssText = '';
       }
 
-      document.getElementById('summary-record-badge').textContent = `${wins}勝 ${losses}敗（計${monthTrades.length}回）`;
-      document.getElementById('summary-win-rate').textContent = `${winRate.toFixed(1)}%`;
-      document.getElementById('summary-day-win-sub').textContent = `勝ち日 ${winDays}/${activeDays.length}日`;
+      document.getElementById('summary-record-badge').textContent =
+        `勝ち日 ${dWin.winDays}勝${dWin.lossDays}敗 / 有効取引 ${tWin.total}戦`;
+      document.getElementById('summary-daily-win-rate').textContent =
+        `${dWin.rate.toFixed(1)}% (${dWin.winDays}/${dWin.totalDays}日)`;
+      document.getElementById('summary-trade-win-sub').textContent =
+        `取引勝率 ${tWin.rate.toFixed(1)}% (${tWin.wins}/${tWin.total})`;
       document.getElementById('summary-pf-val').textContent = pf;
-      document.getElementById('summary-avg-pnl').textContent = `平均 ${formatYen(avgPnl)}`;
+      document.getElementById('summary-avg-pnl').textContent = `1戦平均 ${formatYen(avgPnl)}`;
       document.getElementById('summary-avg-lot').textContent = avgLot !== '-' ? `${avgLot} Lot` : '-';
       document.getElementById('summary-est-balance').textContent = formatYen(getCurrentEstimatedBalance(), false);
       document.getElementById('summary-wallet-sub').textContent = `隔離計 ${formatYen(totalIsolation, false)}`;
 
-      // 7列カレンダーグリッド生成
+      // カレンダー7列グリッド生成（日別合計が0円の日は空欄または控えめ表示）
       const firstDay = new Date(y, m, 1).getDay();
       const daysInMonth = new Date(y, m + 1, 0).getDate();
       const grid = document.getElementById('calendar-grid');
       let html = '';
 
       for (let i = 0; i < firstDay; i++) {
-        html += `<div class="min-h-[58px] sm:min-h-[70px] border-b border-r t-border opacity-30"></div>`;
+        html += `<div class="min-h-[60px] sm:min-h-[72px] border-b border-r t-border opacity-25"></div>`;
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
         const dStr = `${monthPrefix}-${String(day).padStart(2, '0')}`;
-        const hasTrade = dailyMap[dStr] !== undefined;
-        const pnl = dailyMap[dStr] || 0;
+        const rawPnl = dailyMap[dStr];
+        const pnl = rawPnl !== undefined ? Math.round(rawPnl) : 0;
+        const hasNonZeroPnl = rawPnl !== undefined && pnl !== 0;
+        const hasZeroOnly = rawPnl !== undefined && pnl === 0;
         const hasTransfer = transferDays.has(dStr);
         const isSelected = state.selectedDateStr === dStr;
         const isToday = dStr === todayStr;
 
-        const cellBg = hasTrade
-          ? (pnl >= 0 ? 'background-color: var(--profit-bg);' : 'background-color: var(--loss-bg);')
+        const cellBg = hasNonZeroPnl
+          ? (pnl > 0 ? 'background-color: var(--profit-bg);' : 'background-color: var(--loss-bg);')
           : '';
         const ringClass = isSelected ? 'ring-2 ring-inset ring-emerald-500 z-10' : '';
 
         html += `
           <button type="button" onclick="selectCalendarDate('${dStr}')"
-                  class="min-h-[58px] sm:min-h-[70px] p-1 sm:p-1.5 border-b border-r t-border flex flex-col justify-between text-left transition-all t-hover relative ${ringClass}"
+                  class="min-h-[60px] sm:min-h-[72px] p-1.5 border-b border-r t-border flex flex-col justify-between text-left transition-all t-hover relative ${ringClass}"
                   style="${cellBg}">
             <div class="flex items-center justify-between w-full">
               <span class="text-[11px] sm:text-xs font-bold ${isToday ? 'px-1.5 py-0.2 rounded-full t-accent' : 't-text'}">${day}</span>
               ${hasTransfer ? `<span class="w-2 h-2 rounded-full" style="background-color: var(--transfer-color);" title="資金移動あり"></span>` : ''}
             </div>
             <div class="w-full text-right overflow-hidden">
-              ${hasTrade
-                ? `<span class="block text-[10px] sm:text-xs font-extrabold leading-tight truncate ${pnl >= 0 ? 't-profit' : 't-loss'}">${formatShortYen(pnl)}</span>`
-                : ''}
+              ${hasNonZeroPnl
+                ? `<span class="block text-[10px] sm:text-xs font-extrabold leading-tight truncate ${pnl > 0 ? 't-profit' : 't-loss'}">${formatShortYen(pnl)}</span>`
+                : (hasZeroOnly ? `<span class="block text-[10px] font-bold t-muted">±0</span>` : '')}
             </div>
           </button>
         `;
@@ -2376,16 +2563,16 @@
       const dStr = state.selectedDateStr;
       const [y, m, d] = dStr.split('-').map(Number);
       const dow = ['日', '月', '火', '水', '木', '金', '土'][new Date(y, m - 1, d).getDay()];
-      document.getElementById('selected-day-title').textContent = `${y}年${m}月${d}日 (${dow})`;
+      document.getElementById('selected-day-title').textContent = `${y}年${m}月${d}日 (${dow}) の明細`;
 
       const dayTrades = state.trades
-        .filter(t => t.date === dStr)
+        .filter(t => t.date === dStr && (state.calendarTag === 'ALL' || (t.tags || []).includes(state.calendarTag)))
         .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
       const dayTransfers = state.transfers.filter(tr => tr.date === dStr);
 
       const dayPnl = dayTrades.reduce((s, t) => s + Number(t.amount || 0), 0);
       const sumEl = document.getElementById('selected-day-summary');
-      sumEl.innerHTML = `トレード損益: <span class="font-extrabold ${dayPnl > 0 ? 't-profit' : dayPnl < 0 ? 't-loss' : 't-text'}">${formatYen(dayPnl)}</span>（${dayTrades.length}件${dayTransfers.length > 0 ? ` / 資金移動 ${dayTransfers.length}件` : ''}）`;
+      sumEl.innerHTML = `トレード合計: <span class="font-extrabold ${dayPnl > 0 ? 't-profit' : dayPnl < 0 ? 't-loss' : 't-text'}">${formatYen(dayPnl)}</span>（${dayTrades.length}件${dayTransfers.length > 0 ? ` / 資金移動 ${dayTransfers.length}件` : ''}）`;
 
       const listEl = document.getElementById('selected-day-list');
       if (dayTrades.length === 0 && dayTransfers.length === 0) {
@@ -2397,38 +2584,55 @@
       dayTransfers.forEach(tr => {
         const label = tr.type === 'isolation' ? 'ウォレット隔離' : tr.type === 'deposit' ? '入金' : '出金';
         html += `
-          <div onclick="openRecordModal('transfer', '${tr.id}')" class="cursor-pointer p-3 rounded-2xl border flex items-center justify-between gap-2 transition-all t-hover" style="background-color: var(--transfer-bg); border-color: var(--transfer-border);">
-            <div class="min-w-0">
+          <div class="p-3 rounded-2xl border flex items-center justify-between gap-2 transition-all t-hover" style="background-color: var(--transfer-bg); border-color: var(--transfer-border);">
+            <div onclick="openRecordModal('transfer', '${tr.id}')" class="cursor-pointer flex-1 min-w-0">
               <div class="flex items-center gap-1.5">
                 <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md t-card t-amber">${label}</span>
                 <span class="text-xs font-bold t-text truncate">${escapeHtml(tr.memo || '資金移動')}</span>
               </div>
             </div>
-            <span class="text-sm font-extrabold t-amber shrink-0">${formatYen(tr.amount, false)}</span>
+            <div class="flex items-center gap-2 shrink-0">
+              <span onclick="openRecordModal('transfer', '${tr.id}')" class="cursor-pointer text-sm font-extrabold t-amber">${formatYen(tr.amount, false)}</span>
+              <button type="button" onclick="quickDeleteRecord('transfer', '${tr.id}')" class="p-1.5 rounded-lg t-card border t-muted hover:text-rose-500 text-xs" title="削除">🗑️</button>
+            </div>
           </div>
         `;
       });
 
       dayTrades.forEach(t => {
-        const sess = getSessionLabel(getMarketSession(t.time));
-        const pnlClass = t.amount >= 0 ? 't-profit' : 't-loss';
+        const sess = getSessionLabel(resolveTradeSession(t));
+        const pnlClass = t.amount > 0 ? 't-profit' : t.amount < 0 ? 't-loss' : 't-muted';
         html += `
-          <div onclick="openRecordModal('trade', '${t.id}')" class="cursor-pointer p-3 rounded-2xl t-sub border flex items-center justify-between gap-2 transition-all t-hover">
-            <div class="min-w-0 space-y-1">
+          <div class="p-3 rounded-2xl t-sub border flex items-center justify-between gap-2 transition-all t-hover">
+            <div onclick="openRecordModal('trade', '${t.id}')" class="cursor-pointer flex-1 min-w-0 space-y-1">
               <div class="flex items-center gap-1.5 flex-wrap">
                 ${t.time ? `<span class="text-[10px] font-mono font-bold t-subtxt">${t.time} ${sess.emoji}</span>` : ''}
                 ${t.symbol ? `<span class="text-xs font-extrabold t-text">${escapeHtml(t.symbol)}</span>` : ''}
                 ${t.lot !== '' ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md t-card t-sky">${t.lot} Lot</span>` : ''}
                 ${(t.tags || []).map(tag => `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md t-card t-subtxt">#${escapeHtml(tag)}</span>`).join('')}
+                ${t.ticketId ? `<span class="text-[10px] font-mono t-muted">#${escapeHtml(t.ticketId)}</span>` : ''}
               </div>
               ${t.memo ? `<p class="text-[11px] t-subtxt truncate">${escapeHtml(t.memo)}</p>` : ''}
             </div>
-            <span class="text-sm sm:text-base font-extrabold shrink-0 ${pnlClass}">${formatYen(t.amount)}</span>
+            <div class="flex items-center gap-2 shrink-0">
+              <span onclick="openRecordModal('trade', '${t.id}')" class="cursor-pointer text-sm sm:text-base font-extrabold ${pnlClass}">${formatYen(t.amount)}</span>
+              <button type="button" onclick="quickDeleteRecord('trade', '${t.id}')" class="p-1.5 rounded-lg t-card border t-muted hover:text-rose-500 text-xs" title="この明細を削除">🗑️</button>
+            </div>
           </div>
         `;
       });
 
       listEl.innerHTML = html;
+    }
+
+    function quickDeleteRecord(type, id) {
+      openConfirmModal('明細を削除', 'この記録を削除してクラウドにも反映しますか？', '削除する', true, () => {
+        if (type === 'trade') state.trades = state.trades.filter(t => t.id !== id);
+        else state.transfers = state.transfers.filter(x => x.id !== id);
+        saveLocalData(true);
+        renderAllViews();
+        showToast('明細を削除しました');
+      });
     }
 
     // =========================================================================
@@ -2540,10 +2744,15 @@
       if (modalState.mode === 'trade') {
         const amount = parseFloat(document.getElementById('rec-amount').value);
         if (isNaN(amount)) { showToast('損益金額を入力してください', 'error'); return; }
+        const timeVal = document.getElementById('rec-time').value || '';
+        const manualJstHour = timeVal && /^\d{1,2}:\d{2}/.test(timeVal) ? parseInt(timeVal.split(':')[0], 10) : null;
+
         const rec = normalizeTrade({
           id: modalState.editingId || generateId('tr'),
           date,
-          time: document.getElementById('rec-time').value || '',
+          time: timeVal,
+          jstHour: manualJstHour,
+          session: getSessionFromHour(manualJstHour),
           amount: Math.round(amount),
           symbol: document.getElementById('rec-symbol').value.trim().toUpperCase(),
           lot: document.getElementById('rec-lot').value !== '' ? parseFloat(document.getElementById('rec-lot').value) : '',
@@ -2603,27 +2812,14 @@
     }
 
     // =========================================================================
-    // 9. グラフタブ（金額円 / 利益率% 切替）
+    // 9. グラフタブ（金額円 / 口座残高比 利益率% 切替）
     // =========================================================================
     function setChartMode(mode) { state.chartMode = mode; renderCharts(); }
     function setChartPeriod(period) { state.chartPeriod = period; renderCharts(); }
     function setChartTagFilter(tag) { state.chartTag = tag; renderCharts(); }
 
-    function populateTagSelects() {
-      const allTags = [...new Set([
-        ...state.tags,
-        ...state.trades.flatMap(t => t.tags || [])
-      ])];
-      const sel = document.getElementById('chart-tag-select');
-      if (sel) {
-        sel.innerHTML = `<option value="ALL">すべてのEA・タグ</option>` +
-          allTags.map(t => `<option value="${escapeHtml(t)}" ${state.chartTag === t ? 'selected' : ''}>#${escapeHtml(t)}</option>`).join('');
-      }
-    }
-
     function renderCharts() {
-      populateTagSelects();
-      // ボタンアクティブ装飾
+      populateAllTagDropdowns();
       ['yen', 'roi'].forEach(m => {
         const b = document.getElementById(`chart-mode-${m}`);
         b.style.cssText = state.chartMode === m
@@ -2640,19 +2836,18 @@
       const monthPrefix = `${state.viewYear}-${String(state.viewMonth + 1).padStart(2, '0')}`;
       const cutoff30 = formatDateYMD(new Date(Date.now() - 30 * 86400000));
 
-      let filtered = state.trades.filter(t => {
+      const filtered = state.trades.filter(t => {
         if (state.chartPeriod === 'month' && !(t.date || '').startsWith(monthPrefix)) return false;
         if (state.chartPeriod === '30d' && (t.date || '') < cutoff30) return false;
         if (state.chartTag !== 'ALL' && !(t.tags || []).includes(state.chartTag)) return false;
         return true;
-      }).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+      }).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 
       document.getElementById('chart-filter-count').textContent = `(${filtered.length}件)`;
 
-      // KPI計算
       const totalPnl = filtered.reduce((s, t) => s + t.amount, 0);
-      const wins = filtered.filter(t => t.amount > 0).length;
-      const winRate = filtered.length > 0 ? (wins / filtered.length) * 100 : 0;
+      const dWin = calcDailyWinStats(filtered);
+      const tWin = calcTradeWinStats(filtered);
       const gp = filtered.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
       const gl = Math.abs(filtered.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0));
       const pf = gl > 0 ? (gp / gl).toFixed(2) : (gp > 0 ? '∞' : '-');
@@ -2672,16 +2867,16 @@
       const kpiPnl = document.getElementById('kpi-total-pnl');
       kpiPnl.textContent = formatYen(totalPnl);
       kpiPnl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${totalPnl >= 0 ? 't-profit' : 't-loss'}`;
-      document.getElementById('kpi-win-rate').textContent = `勝率 ${winRate.toFixed(1)}% / 利益率 ${totalRoi >= 0 ? '+' : ''}${totalRoi.toFixed(1)}%`;
+      document.getElementById('kpi-win-rate').textContent =
+        `日次勝率 ${dWin.rate.toFixed(1)}% / 取引勝率 ${tWin.rate.toFixed(1)}%`;
       document.getElementById('kpi-pf').textContent = pf;
       document.getElementById('kpi-max-dd').textContent = maxDD > 0 ? `-${formatYen(maxDD, false)}` : '¥0';
       document.getElementById('kpi-max-streak').textContent = `${maxStreak}連勝`;
-      document.getElementById('kpi-trade-count-sub').textContent = `対象 ${filtered.length}戦`;
+      document.getElementById('kpi-trade-count-sub').textContent = `有効取引 ${tWin.total}戦`;
 
-      // 日別集計
       const dailyMap = {};
       filtered.forEach(t => { dailyMap[t.date] = (dailyMap[t.date] || 0) + t.amount; });
-      const dates = Object.keys(dailyMap).sort();
+      const dates = Object.keys(dailyMap).filter(d => Math.round(dailyMap[d]) !== 0).sort();
 
       const isRoi = state.chartMode === 'roi';
       document.getElementById('cumulative-chart-title').textContent = isRoi ? '累計利益率推移（%）' : '累計損益（資産曲線）';
@@ -2765,16 +2960,16 @@
     }
 
     // =========================================================================
-    // 10. 分析タブ（市場別・24時間別・曜日別・EAタグ別）
+    // 10. 分析タブ（曜日別・4大市場セッション別・24時間別JST・EAランキング）
     // =========================================================================
     function setAnalyticsPeriod(p) { state.analyticsPeriod = p; renderAnalytics(); }
     function setAnalyticsTag(tag) { state.analyticsTag = tag; renderAnalytics(); }
 
     function calcGroupStats(list) {
-      const count = list.length;
-      const pnl = list.reduce((s, t) => s + t.amount, 0);
-      const wins = list.filter(t => t.amount > 0).length;
-      const winRate = count > 0 ? (wins / count) * 100 : 0;
+      const tWin = calcTradeWinStats(list);
+      const count = tWin.total;
+      const pnl = list.reduce((s, t) => s + Number(t.amount || 0), 0);
+      const winRate = tWin.rate;
       const gp = list.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
       const gl = Math.abs(list.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0));
       const pf = gl > 0 ? gp / gl : (gp > 0 ? 99 : 0);
@@ -2782,7 +2977,13 @@
       const avgPnl = count > 0 ? pnl / count : 0;
       const initCap = Number(state.settings.initialCapital) || 100000;
       const avgRoi = count > 0 ? (avgPnl / initCap) * 100 : 0;
-      return { count, pnl, wins, winRate, pf, pfStr, avgPnl, avgRoi };
+
+      const lotList = list.filter(t => t.lot !== '' && Number(t.lot) > 0);
+      const avgLot = lotList.length > 0
+        ? (lotList.reduce((s, t) => s + Number(t.lot), 0) / lotList.length).toFixed(2)
+        : '-';
+
+      return { count, pnl, wins: tWin.wins, winRate, pf, pfStr, avgPnl, avgRoi, avgLot };
     }
 
     function renderAnalytics() {
@@ -2797,7 +2998,6 @@
           : 'background-color: transparent; color: var(--text-sub);';
       });
 
-      // EA・タグチップ描画
       const allTags = [...new Set([...state.tags, ...state.trades.flatMap(t => t.tags || [])])];
       const chipsWrap = document.getElementById('analytics-tag-chips');
       chipsWrap.innerHTML = ['ALL', ...allTags].map(tag => {
@@ -2812,7 +3012,6 @@
         `;
       }).join('');
 
-      // 対象トレード抽出
       const periodTrades = state.trades.filter(t => {
         if (state.analyticsPeriod === 'month' && !(t.date || '').startsWith(monthPrefix)) return false;
         if (state.analyticsPeriod === 'year' && !(t.date || '').startsWith(yearPrefix)) return false;
@@ -2828,10 +3027,76 @@
 
       const c = getThemeChartColors();
 
-      // --- 1. 市場セッション別分析 ---
+      // --- 1. 曜日別（月〜金）自動集計（勝率バー・平均損益・平均利率%付） ---
+      const dowNames = ['月', '火', '水', '木', '金'];
+      const dowStats = [1, 2, 3, 4, 5].map((dowIdx, i) => {
+        const list = filtered.filter(t => {
+          if (!t.date) return false;
+          const [y, m, d] = t.date.split('-').map(Number);
+          return new Date(y, m - 1, d).getDay() === dowIdx;
+        });
+        return { name: `${dowNames[i]}曜日`, short: dowNames[i], ...calcGroupStats(list) };
+      });
+
+      const activeDow = dowStats.filter(d => d.count > 0);
+      const bestDow = activeDow.length > 0 ? [...activeDow].sort((a, b) => b.pnl - a.pnl)[0].name : null;
+      const worstDow = activeDow.length > 1 ? [...activeDow].sort((a, b) => a.pnl - b.pnl)[0].name : null;
+
+      if (charts.weekday) { charts.weekday.destroy(); charts.weekday = null; }
+      charts.weekday = new Chart(document.getElementById('weekday-chart-canvas'), {
+        type: 'bar',
+        data: {
+          labels: dowStats.map(d => d.short),
+          datasets: [{
+            label: '合計損益(円)',
+            data: dowStats.map(d => Math.round(d.pnl)),
+            backgroundColor: dowStats.map(d => d.pnl >= 0 ? c.profit : c.loss),
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: c.text, font: { size: 12, weight: 'bold' } }, grid: { display: false } },
+            y: { ticks: { color: c.text, font: { size: 10 }, callback: v => formatShortYen(v) }, grid: { color: c.grid } }
+          }
+        }
+      });
+
+      document.getElementById('weekday-cards-list').innerHTML = dowStats.map(d => {
+        let badge = '';
+        if (d.name === bestDow && d.pnl > 0) {
+          badge = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md" style="background-color: var(--profit-bg); color: var(--profit-color);">得意</span>`;
+        } else if (d.name === worstDow && d.pnl < 0) {
+          badge = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md" style="background-color: var(--loss-bg); color: var(--loss-color);">要注意</span>`;
+        }
+        return `
+          <div class="t-sub border rounded-xl p-3 space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-extrabold t-text">${d.name}</span>
+                ${badge}
+                <span class="text-[11px] t-subtxt">勝率 ${d.winRate.toFixed(1)}% (${d.count}戦)</span>
+              </div>
+              <span class="text-xs sm:text-sm font-extrabold ${d.pnl >= 0 ? 't-profit' : 't-loss'}">${formatYen(d.pnl)}</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full overflow-hidden t-card">
+              <div class="h-full rounded-full transition-all" style="width: ${Math.min(100, d.winRate)}%; background-color: var(--profit-color);"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] t-muted">
+              <span>平均損益: ${formatYen(d.avgPnl)}</span>
+              <span>平均利率: ${d.avgRoi >= 0 ? '+' : ''}${d.avgRoi.toFixed(2)}%</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // --- 2. 4大市場セッション別分析（裏側JST時刻を使用・日付は不変） ---
       const sessionKeys = ['oceania', 'tokyo', 'london', 'ny'];
       const sessStats = sessionKeys.map(k => {
-        const list = filtered.filter(t => getMarketSession(t.time) === k);
+        const list = filtered.filter(t => resolveTradeSession(t) === k);
         return { key: k, meta: getSessionLabel(k), ...calcGroupStats(list) };
       });
 
@@ -2891,23 +3156,21 @@
         `;
       }).join('');
 
-      // ロンドン・NY重複 (21-01時) vs NY後半 (02-04時)
+      // ロンドン・NY重複 (21-01時 JST) vs NY後半 (02-04時 JST)
       const overlapList = filtered.filter(t => {
-        if (!t.time) return false;
-        const h = parseInt(t.time.split(':')[0], 10);
-        return h >= 21 || h <= 1;
+        const h = resolveTradeJstHour(t);
+        return h !== null && (h >= 21 || h <= 1);
       });
       const lateNyList = filtered.filter(t => {
-        if (!t.time) return false;
-        const h = parseInt(t.time.split(':')[0], 10);
-        return h >= 2 && h <= 4;
+        const h = resolveTradeJstHour(t);
+        return h !== null && (h >= 2 && h <= 4);
       });
       const ov = calcGroupStats(overlapList);
       const ln = calcGroupStats(lateNyList);
 
       document.getElementById('ny-overlap-breakdown').innerHTML = [
-        { title: 'ロンドン・NY重複 (21:00-01:59)', st: ov },
-        { title: 'NY後半 (02:00-04:59)', st: ln }
+        { title: 'ロンドン・NY重複 (21:00-01:59 JST)', st: ov },
+        { title: 'NY後半 (02:00-04:59 JST)', st: ln }
       ].map(b => `
         <div class="t-sub border rounded-xl p-2.5 flex items-center justify-between gap-2">
           <div>
@@ -2918,8 +3181,8 @@
         </div>
       `).join('');
 
-      // --- 2. 24時間別（0〜23時 JST）チャート ---
-      const timedTrades = filtered.filter(t => t.time && /^\d{1,2}:\d{2}/.test(t.time));
+      // --- 3. 24時間別（0〜23時 JST）損益・勝率チャート ---
+      const timedTrades = filtered.filter(t => resolveTradeJstHour(t) !== null);
       document.getElementById('hourly-chart-count').textContent = `時刻あり: ${timedTrades.length}件`;
       document.getElementById('hourly-empty-state').classList.toggle('hidden', timedTrades.length > 0);
 
@@ -2929,11 +3192,13 @@
         const hourWin = Array(24).fill(0);
         const hourCnt = Array(24).fill(0);
         timedTrades.forEach(t => {
-          const h = parseInt(t.time.split(':')[0], 10);
-          if (h >= 0 && h <= 23) {
+          const h = resolveTradeJstHour(t);
+          if (h !== null && h >= 0 && h <= 23) {
             hourPnl[h] += t.amount;
-            hourCnt[h]++;
-            if (t.amount > 0) hourWin[h]++;
+            if (Math.round(t.amount) !== 0) {
+              hourCnt[h]++;
+              if (t.amount > 0) hourWin[h]++;
+            }
           }
         });
         const hourWr = hourCnt.map((cnt, i) => cnt > 0 ? Math.round((hourWin[i] / cnt) * 100) : null);
@@ -2976,64 +3241,7 @@
         });
       }
 
-      // --- 3. 曜日別（月〜金）自動集計 ---
-      const dowNames = ['月', '火', '水', '木', '金'];
-      const dowStats = [1, 2, 3, 4, 5].map((dowIdx, i) => {
-        const list = filtered.filter(t => {
-          if (!t.date) return false;
-          const [y, m, d] = t.date.split('-').map(Number);
-          return new Date(y, m - 1, d).getDay() === dowIdx;
-        });
-        return { name: `${dowNames[i]}曜日`, short: dowNames[i], ...calcGroupStats(list) };
-      });
-
-      const activeDow = dowStats.filter(d => d.count > 0);
-      const bestDow = activeDow.length > 0 ? [...activeDow].sort((a, b) => b.pnl - a.pnl)[0].name : null;
-      const worstDow = activeDow.length > 1 ? [...activeDow].sort((a, b) => a.pnl - b.pnl)[0].name : null;
-
-      if (charts.weekday) { charts.weekday.destroy(); charts.weekday = null; }
-      charts.weekday = new Chart(document.getElementById('weekday-chart-canvas'), {
-        type: 'bar',
-        data: {
-          labels: dowStats.map(d => d.short),
-          datasets: [{
-            label: '合計損益(円)',
-            data: dowStats.map(d => Math.round(d.pnl)),
-            backgroundColor: dowStats.map(d => d.pnl >= 0 ? c.profit : c.loss),
-            borderRadius: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: c.text, font: { size: 12, weight: 'bold' } }, grid: { display: false } },
-            y: { ticks: { color: c.text, font: { size: 10 }, callback: v => formatShortYen(v) }, grid: { color: c.grid } }
-          }
-        }
-      });
-
-      document.getElementById('weekday-cards-list').innerHTML = dowStats.map(d => {
-        let badge = '';
-        if (d.name === bestDow && d.pnl > 0) {
-          badge = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md" style="background-color: var(--profit-bg); color: var(--profit-color);">得意</span>`;
-        } else if (d.name === worstDow && d.pnl < 0) {
-          badge = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md" style="background-color: var(--loss-bg); color: var(--loss-color);">要注意</span>`;
-        }
-        return `
-          <div class="t-sub border rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-extrabold t-text">${d.name}</span>
-              ${badge}
-              <span class="text-[11px] t-subtxt">勝率 ${d.winRate.toFixed(1)}% (${d.count}戦)</span>
-            </div>
-            <span class="text-xs sm:text-sm font-extrabold ${d.pnl >= 0 ? 't-profit' : 't-loss'}">${formatYen(d.pnl)}</span>
-          </div>
-        `;
-      }).join('');
-
-      // --- 4. タグ・EA別 成績ランキングテーブル ---
+      // --- 4. EA・タグ別 成績ランキング表 (件数, 勝率, PF, 平均Lot, 合計損益) ---
       const tagMap = {};
       periodTrades.forEach(t => {
         const tags = (t.tags && t.tags.length > 0) ? t.tags : ['タグなし'];
@@ -3057,7 +3265,7 @@
             <td class="py-2.5 px-2 text-right t-subtxt">${r.count}戦</td>
             <td class="py-2.5 px-2 text-right font-bold t-text">${r.winRate.toFixed(1)}%</td>
             <td class="py-2.5 px-2 text-right font-bold t-sky">${r.pfStr}</td>
-            <td class="py-2.5 px-2 text-right ${r.avgPnl >= 0 ? 't-profit' : 't-loss'}">${formatYen(r.avgPnl)}</td>
+            <td class="py-2.5 px-2 text-right font-mono t-subtxt">${r.avgLot !== '-' ? `${r.avgLot}` : '-'}</td>
             <td class="py-2.5 px-3 text-right font-extrabold ${r.pnl >= 0 ? 't-profit' : 't-loss'}">${formatYen(r.pnl)}</td>
           </tr>
         `).join('');
@@ -3065,7 +3273,7 @@
     }
 
     // =========================================================================
-    // 11. 年間・税務タブ
+    // 11. 年間・税務タブ（確定申告サマリー ＆ 年間CSV出力）
     // =========================================================================
     function renderAnnualTab() {
       const years = new Set([todayObj.getFullYear(), state.viewYear]);
@@ -3082,8 +3290,8 @@
       const yTransfers = state.transfers.filter(tr => (tr.date || '').startsWith(`${targetYear}-`));
 
       const netPnl = yTrades.reduce((s, t) => s + t.amount, 0);
-      const wins = yTrades.filter(t => t.amount > 0).length;
-      const winRate = yTrades.length > 0 ? (wins / yTrades.length) * 100 : 0;
+      const dWin = calcDailyWinStats(yTrades);
+      const tWin = calcTradeWinStats(yTrades);
 
       const startBal = getBalanceBeforeDate(`${targetYear}-01-01`);
       const annualRoi = startBal > 0 ? (netPnl / startBal) * 100 : 0;
@@ -3097,10 +3305,11 @@
       const pnlEl = document.getElementById('annual-net-pnl');
       pnlEl.textContent = formatYen(netPnl);
       pnlEl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${netPnl >= 0 ? 't-profit' : 't-loss'}`;
-      document.getElementById('annual-trade-count').textContent = `年間 ${yTrades.length}戦（勝率 ${winRate.toFixed(1)}%）`;
+      document.getElementById('annual-trade-count').textContent =
+        `年間 ${tWin.total}戦（日次勝率 ${dWin.rate.toFixed(1)}% / 取引勝率 ${tWin.rate.toFixed(1)}%）`;
 
       const roiEl = document.getElementById('annual-roi-val');
-      roiEl.textContent = yTrades.length > 0 ? `${annualRoi >= 0 ? '+' : ''}${annualRoi.toFixed(1)}%` : '-';
+      roiEl.textContent = tWin.total > 0 ? `${annualRoi >= 0 ? '+' : ''}${annualRoi.toFixed(1)}%` : '-';
       roiEl.className = `text-xl sm:text-2xl font-extrabold tracking-tight ${annualRoi >= 0 ? 't-profit' : 't-loss'}`;
       document.getElementById('annual-start-bal-hint').textContent = `年初残高 ${formatYen(startBal, false)}比`;
 
@@ -3108,7 +3317,6 @@
       document.getElementById('annual-deposit-detail').textContent = `純入出金: ${formatYen(netDep)}`;
       document.getElementById('annual-est-balance').textContent = formatYen(endBal, false);
 
-      // 1〜12月テーブル
       const tbody = document.getElementById('annual-monthly-tbody');
       let html = '';
       for (let m = 1; m <= 12; m++) {
@@ -3117,10 +3325,11 @@
         const mTransfers = yTransfers.filter(tr => tr.date.startsWith(prefix));
 
         const mPnl = mTrades.reduce((s, t) => s + t.amount, 0);
-        const mWins = mTrades.filter(t => t.amount > 0).length;
-        const mWr = mTrades.length > 0 ? `${((mWins / mTrades.length) * 100).toFixed(1)}%` : '-';
+        const mdWin = calcDailyWinStats(mTrades);
+        const mtWin = calcTradeWinStats(mTrades);
+        const mWr = mtWin.total > 0 ? `${mdWin.rate.toFixed(0)}% / ${mtWin.rate.toFixed(0)}%` : '-';
         const mStart = getBalanceBeforeDate(`${prefix}-01`);
-        const mRoi = mTrades.length > 0 && mStart > 0 ? `${(mPnl / mStart * 100) >= 0 ? '+' : ''}${((mPnl / mStart) * 100).toFixed(1)}%` : '-';
+        const mRoi = mtWin.total > 0 && mStart > 0 ? `${(mPnl / mStart * 100) >= 0 ? '+' : ''}${((mPnl / mStart) * 100).toFixed(1)}%` : '-';
 
         const lotList = mTrades.filter(t => t.lot !== '' && Number(t.lot) > 0);
         const mLot = lotList.length > 0 ? (lotList.reduce((s, t) => s + Number(t.lot), 0) / lotList.length).toFixed(2) : '-';
@@ -3132,9 +3341,9 @@
         html += `
           <tr class="t-hover">
             <td class="py-2.5 px-3 font-bold t-text">${m}月</td>
-            <td class="py-2.5 px-2 text-right t-subtxt">${mTrades.length}回</td>
-            <td class="py-2.5 px-2 text-right t-text">${mWr}</td>
-            <td class="py-2.5 px-2 text-right font-extrabold ${mPnl > 0 ? 't-profit' : mPnl < 0 ? 't-loss' : 't-muted'}">${mTrades.length > 0 ? formatYen(mPnl) : '-'}</td>
+            <td class="py-2.5 px-2 text-right t-subtxt">${mtWin.total}回</td>
+            <td class="py-2.5 px-2 text-right t-text font-mono text-[11px]">${mWr}</td>
+            <td class="py-2.5 px-2 text-right font-extrabold ${mPnl > 0 ? 't-profit' : mPnl < 0 ? 't-loss' : 't-muted'}">${mtWin.total > 0 ? formatYen(mPnl) : '-'}</td>
             <td class="py-2.5 px-2 text-right font-bold ${mPnl >= 0 ? 't-profit' : 't-loss'}">${mRoi}</td>
             <td class="py-2.5 px-2 text-right t-sky">${mLot}</td>
             <td class="py-2.5 px-2 text-right t-amber">${mIso > 0 ? formatYen(mIso, false) : '-'}</td>
@@ -3149,9 +3358,9 @@
       const targetYear = document.getElementById('annual-year-select').value;
       const list = state.trades
         .filter(t => (t.date || '').startsWith(`${targetYear}-`))
-        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+        .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 
-      const header = ['日付', '決済時刻(JST)', '通貨ペア', 'ロット', '損益(円)', 'EA・タグ', 'チケットID', 'メモ'];
+      const header = ['計上日', '決済時刻', '通貨ペア', 'ロット', '純損益(円)', 'EA・タグ', 'チケットID', 'メモ'];
       const lines = [header.join(',')];
       list.forEach(t => {
         const row = [
@@ -3173,11 +3382,11 @@
       a.download = `FX確定申告_${targetYear}年.csv`;
       a.click();
       URL.revokeObjectURL(a.href);
-      showToast(`${targetYear}年の確定申告用CSVを書き出しました`, 'success');
+      showToast(`${targetYear}年の確定申告用CSVを出力しました`, 'success');
     }
 
     // =========================================================================
-    // 12. 設定タブ（初期資金・タグ管理・JSONバックアップ・初期化）
+    // 12. 設定タブ（トレードのみ消去・初期資金・タグ・JSONバックアップ・デモデータ）
     // =========================================================================
     function renderSettingsTab() {
       document.getElementById('gas-url-input').value = gasConfig.url || '';
@@ -3185,17 +3394,15 @@
       document.getElementById('settings-initial-capital').value = state.settings.initialCapital || 100000;
       renderThemePresets();
 
-      // 直前のインポート取消ボタン表示制御
       const undoBox = document.getElementById('undo-import-box');
       if (state.lastImportBatch) {
         undoBox.classList.remove('hidden');
         document.getElementById('undo-import-info').textContent =
-          `${state.lastImportBatch.fileName}（${state.lastImportBatch.count}件）`;
+          `直前: ${state.lastImportBatch.fileName} (${state.lastImportBatch.count}件)`;
       } else {
         undoBox.classList.add('hidden');
       }
 
-      // タグ一覧
       const tagList = document.getElementById('settings-tag-list');
       tagList.innerHTML = state.tags.map(tag => `
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl t-sub border text-xs font-bold t-text">
@@ -3238,10 +3445,10 @@
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `fx_calendar_backup_${todayStr}.json`;
+      a.download = `fx_calendar_v8_backup_${todayStr}.json`;
       a.click();
       URL.revokeObjectURL(a.href);
-      showToast('JSONバックアップを保存しました', 'success');
+      showToast('JSONバックアップを書き出しました', 'success');
     }
 
     function handleJSONImportFile(e) {
@@ -3272,10 +3479,27 @@
       e.target.value = '';
     }
 
+    // トレード履歴だけ全消去（GAS設定・テーマ・初期資金・資金移動は維持）
+    function confirmClearTradesOnly() {
+      openConfirmModal(
+        '🧹 トレード履歴だけ全消去',
+        `現在登録されているトレード履歴（${state.trades.length}件）をすべて消去します。\n※Googleスプレッドシート連携設定、背景テーマ色、初期資金、資金移動（ウォレット隔離）はそのまま維持されます。`,
+        'トレード履歴のみ消去',
+        true,
+        () => {
+          state.trades = [];
+          state.lastImportBatch = null;
+          saveLocalData(true);
+          renderAllViews();
+          showToast('トレード履歴をクリーン消去しました（設定・資金移動は維持）', 'success');
+        }
+      );
+    }
+
     function confirmResetAllData() {
       openConfirmModal(
         '全データを初期化',
-        'すべてのトレード履歴と資金移動データを削除します。よろしいですか？（クラウド連携中の場合はクラウド側も空データで更新されます）',
+        'トレード履歴と資金移動データをすべて削除します。よろしいですか？（GAS接続設定自体は残ります）',
         'すべて削除する',
         true,
         () => {
@@ -3289,10 +3513,36 @@
       );
     }
 
+    function confirmLoadDemoData() {
+      openConfirmModal(
+        'デモデータ読込',
+        '動作確認用のサンプルトレードとウォレット隔離データを追加しますか？（本番のMT5ファイルを取り込む前には「クリーン取込」で消去できます）',
+        'デモを読込',
+        false,
+        () => {
+          const ym = `${state.viewYear}-${String(state.viewMonth + 1).padStart(2, '0')}`;
+          const demo = [
+            { date: `${ym}-09`, time: '10:30', jstHour: 17, session: 'london', amount: 4702, symbol: 'XAUUSD', lot: 0.35, tags: ['GoldRush_EA'] },
+            { date: `${ym}-10`, time: '04:15', jstHour: 11, session: 'tokyo',  amount: 6639, symbol: 'USDJPY', lot: 0.35, tags: ['TokyoScalp_EA'] },
+            { date: `${ym}-11`, time: '15:20', jstHour: 22, session: 'ny',     amount: 10120, symbol: 'XAUUSD', lot: 0.35, tags: ['GoldRush_EA'] },
+            { date: `${ym}-12`, time: '16:40', jstHour: 23, session: 'ny',     amount: -15904, symbol: 'XAUUSD', lot: 0.35, tags: ['GoldRush_EA'] },
+            { date: `${ym}-20`, time: '18:10', jstHour: 1,  session: 'ny',     amount: 64010, symbol: 'XAUUSD', lot: 0.40, tags: ['GoldRush_EA'] }
+          ].map(normalizeTrade);
+          state.trades.push(...demo);
+          if (!state.tags.includes('GoldRush_EA')) state.tags.push('GoldRush_EA');
+          if (!state.tags.includes('TokyoScalp_EA')) state.tags.push('TokyoScalp_EA');
+          saveLocalData(true);
+          renderAllViews();
+          showToast('デモデータを読み込みました', 'success');
+        }
+      );
+    }
+
     // =========================================================================
-    // 13. 全体再描画 ＆ 初期化
+    // 13. 全体再描画 ＆ アプリ起動処理
     // =========================================================================
     function renderAllViews() {
+      populateAllTagDropdowns();
       renderCalendar();
       if (state.currentTab === 'chart') renderCharts();
       if (state.currentTab === 'analytics') renderAnalytics();
